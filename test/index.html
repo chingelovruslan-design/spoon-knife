@@ -2,607 +2,375 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>КИНОЦЕХ | App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>КИНОЦЕХ | Примерочная</title>
+    
+    <!-- TELEGRAM API -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- ШРИФТЫ (Добавил вариативности для примерочной) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Подключаем Montserrat для стиля как на РИС 3 -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&family=Roboto+Mono:wght@400;500&family=Unbounded:wght@400;600&display=block" rel="stylesheet">
+    
     <style>
-        /* --- НАСТРОЙКИ ТЕМ (ПЕРЕМЕННЫЕ) --- */
+        /* --- БАЗОВЫЕ ПЕРЕМЕННЫЕ (DEFAULT) --- */
         :root {
-            /* DARK THEME (DEFAULT) */
+            --font-display: 'Montserrat', sans-serif; 
+            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
+            --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1); 
+            
             --bg-color: #0F0F11;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-active: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-active-bg: rgba(255, 255, 255, 0.08);
             --border-color: rgba(255, 255, 255, 0.08);
             
             --text-primary: #F2F2F2;
             --text-secondary: #9CA3AF;
+            --accent-color: #D4AF37; 
+            --nav-bg: rgba(15, 15, 17, 0.75); 
             
-            /* Золото для темной темы (яркое) */
-            --gold-primary: #D4AF37;
-            --gold-dim: rgba(212, 175, 55, 0.1);
-            
-            --nav-bg: rgba(15, 15, 17, 0.95);
-            
-            /* Alerts Dark */
             --warn-bg: rgba(245, 158, 11, 0.08);
             --warn-border: rgba(245, 158, 11, 0.3);
             --warn-text: #F59E0B;
             --danger-bg: rgba(220, 38, 38, 0.08);
             --danger-border: rgba(220, 38, 38, 0.3);
             --danger-text: #EF4444;
-        }
-
-        /* LIGHT THEME (ИСПРАВЛЕН КОНТРАСТ) */
-        [data-theme="light"] {
-            --bg-color: #F2F2F7;
-            --card-bg: #FFFFFF;
-            --card-active: #E5E5EA;
-            --border-color: rgba(0, 0, 0, 0.06);
             
-            /* Текст - Глубокий Черный (для контраста) */
-            --text-primary: #111111;
-            --text-secondary: #666666;
-            
-            /* Золото - Темная Бронза (чтобы видно на белом) */
-            --gold-primary: #8B6914; 
-            --gold-dim: rgba(139, 105, 20, 0.08);
-            
-            --nav-bg: rgba(255, 255, 255, 0.95);
-
-            /* Alerts Light */
-            --warn-bg: rgba(255, 149, 0, 0.1);
-            --warn-border: rgba(255, 149, 0, 0.3);
-            --warn-text: #D47600;
-            --danger-bg: rgba(255, 59, 48, 0.1);
-            --danger-border: rgba(255, 59, 48, 0.3);
-            --danger-text: #D70015;
+            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
+            --card-shadow: var(--glass-highlight), 0 12px 40px -12px rgba(212, 175, 55, 0.15);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        /* --- ВАРИАНТЫ ДИЗАЙНА (ПРИМЕРОЧНАЯ) --- */
 
-        body {
-            margin: 0; padding: 0;
-            font-family: 'Montserrat', sans-serif; /* Новый шрифт */
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease;
+        /* 1. Строгий Минимализм (Ч/Б) */
+        body.var-minimal {
+            --bg-color: #000000;
+            --card-bg: #111111;
+            --border-color: #333;
+            --accent-color: #FFFFFF;
+            --text-secondary: #888;
+            --card-shadow: none;
+            --font-display: 'Inter', sans-serif;
         }
+        body.var-minimal .card, body.var-minimal .btn { border-radius: 4px; }
+        body.var-minimal .brand-title { background: #FFF; -webkit-text-fill-color: #FFF; }
 
-        /* --- ДВИЖОК SPA (V1 - Надежный) --- */
-        #app { position: relative; width: 100%; height: 100%; overflow: hidden; }
-
-        .page {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
-            overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding-bottom: 100px;
-            background-color: var(--bg-color);
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            z-index: 10;
+        /* 2. Неоновый Киберпанк */
+        body.var-cyber {
+            --bg-color: #050505;
+            --accent-color: #00ff9d;
+            --card-bg: rgba(0, 255, 157, 0.03);
+            --border-color: rgba(0, 255, 157, 0.2);
+            --text-primary: #e0fff4;
+            --font-display: 'Unbounded', sans-serif;
+            --card-shadow: 0 0 15px rgba(0, 255, 157, 0.1);
         }
+        body.var-cyber .brand-title { background: linear-gradient(90deg, #00ff9d, #00ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        #page-home { z-index: 1; }
-        .sub-page { transform: translateX(100%); }
-        .sub-page.active { transform: translateX(0); }
-
-        /* --- ШАПКА --- */
-        .header {
-            padding: 20px 20px 10px;
-            display: flex; flex-direction: column; align-items: center;
-            position: relative;
+        /* 3. Типографика (Serif / Editorial) */
+        body.var-editorial {
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'Inter', sans-serif;
+            --bg-color: #1a1818;
+            --card-bg: rgba(255,255,255,0.02);
+            --accent-color: #d4a373;
         }
+        body.var-editorial h3 { font-style: italic; letter-spacing: 1px; }
 
-        .theme-toggle {
-            position: absolute; top: 20px; right: 20px;
-            width: 36px; height: 36px;
-            border-radius: 50%;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            transition: 0.2s;
+        /* 4. Технический / Терминал */
+        body.var-terminal {
+            --font-display: 'Roboto Mono', monospace;
+            --font-body: 'Roboto Mono', monospace;
+            --bg-color: #0d1117;
+            --accent-color: #58a6ff;
+            --text-secondary: #8b949e;
+            --card-bg: #161b22;
+            --border-color: #30363d;
         }
-        .theme-toggle:active { transform: scale(0.9); }
+        body.var-terminal .card { border-radius: 0; border: 1px solid var(--border-color); }
 
-        .brand-title {
-            font-size: 30px; font-weight: 800; letter-spacing: 1px;
-            text-transform: uppercase; margin-top: 20px; margin-bottom: 4px;
-            /* Градиент только для темной темы, в светлой - сплошной цвет для читаемости */
-            background: linear-gradient(to right, #bf953f 0%, #fcf6ba 20%, #b38728 40%, #fbf5b7 60%, #aa771c 80%, #bf953f 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text; background-clip: text;
+        /* 5. Мягкое стекло (Glassmorphism Light) */
+        body.var-glass {
+            --bg-color: #2c3e50;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --accent-color: #a8d0e6;
+        }
+        body.var-glass::before { background: radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.4), transparent 60%); }
+
+        /* 6. Высокий контраст (Акцент на текст) */
+        body.var-contrast .content-inner { font-size: 16px; line-height: 1.6; }
+        body.var-contrast h3 { text-decoration: underline; text-decoration-color: var(--accent-color); text-underline-offset: 5px; }
+        body.var-contrast .steps-list li { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+
+        /* 7. Золотой Люкс (Усиленный) */
+        body.var-gold {
+            --bg-color: #0a0a0a;
+            --accent-color: #FFD700;
+            --border-color: #FFD700;
+            --card-bg: linear-gradient(145deg, #111, #0f0f0f);
+        }
+        body.var-gold .card { border: 1px solid rgba(255, 215, 0, 0.2); }
+
+        /* 8. Карточный стиль текста */
+        body.var-cards .content-inner h3 { background: var(--card-active-bg); padding: 10px; border-radius: 8px; margin-top: 20px; }
+        body.var-cards .content-inner p { margin-bottom: 15px; }
+
+        /* 9. Градиентный текст */
+        body.var-gradient h3, body.var-gradient strong {
+            background: linear-gradient(45deg, var(--accent-color), #fff);
+            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: shine 4s linear infinite;
         }
+
+        /* 10. Компактный (Информационный) */
+        body.var-compact .content-inner { font-size: 13px; line-height: 1.4; }
+        body.var-compact .card { height: 100px; }
+        body.var-compact h3 { margin-top: 10px; margin-bottom: 5px; }
+
+        /* --- ОБЩИЕ СТИЛИ --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        html, body { height: 100dvh; overflow: hidden; background-color: var(--bg-color); margin: 0; color: var(--text-primary); font-family: var(--font-body); transition: background-color 0.3s, color 0.3s; }
         
-        /* В светлой теме убираем градиент с текста, делаем его просто золотым/бронзовым */
-        [data-theme="light"] .brand-title {
-            background: none;
-            -webkit-text-fill-color: var(--gold-primary);
-            color: var(--gold-primary);
-        }
+        /* Шум */
+        .noise-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: var(--z-noise); opacity: 0.04; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII="); mix-blend-mode: overlay; }
 
-        @keyframes shine { to { background-position: 200% center; } }
+        #app { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        
+        /* Страницы */
+        .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding-bottom: 100px; background-color: var(--bg-color); transition: transform 0.4s var(--ease-smooth), opacity 0.4s; z-index: 30; }
+        #page-home { z-index: 10; }
+        .page.sub-page { transform: translateX(100%); }
+        .page.sub-page.active { transform: translateX(0); }
+        .page.behind { transform: scale(0.95); opacity: 0.5; pointer-events: none; }
 
-        .brand-subtitle {
-            font-size: 10px; color: var(--gold-primary); opacity: 0.8;
-            text-transform: uppercase; letter-spacing: 3px; font-weight: 600;
-        }
+        /* Шапка */
+        .header { padding: 20px; text-align: center; }
+        .brand-title { font-family: var(--font-display); font-size: 30px; font-weight: 800; text-transform: uppercase; background: linear-gradient(to right, #bf953f, #fcf6ba, #bf953f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
+        .brand-subtitle { font-size: 10px; color: var(--accent-color); text-transform: uppercase; letter-spacing: 3px; }
 
-        /* --- МЕНЮ (WATERMARK STYLE - FIXED) --- */
-        .menu-grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 12px; padding: 20px 16px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
-            padding: 18px;
-            height: 130px;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1); /* Пружинистый эффект */
-        }
-        .card:active { transform: scale(0.96); background: var(--card-active); }
-
+        /* Меню */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; height: 130px; position: relative; cursor: pointer; transition: transform 0.2s; box-shadow: var(--card-shadow); }
+        .card:active { transform: scale(0.97); background: var(--card-active-bg); }
         .card.large { grid-column: span 2; height: 110px; }
+        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+        .card-desc { font-size: 11px; color: var(--text-secondary); }
+        .card-watermark { position: absolute; right: 10px; bottom: 10px; opacity: 0.2; color: var(--accent-color); }
+        .card.locked { opacity: 0.6; cursor: default; }
 
-        .card-content { position: relative; z-index: 2; }
-        .card-title {
-            font-size: 15px; font-weight: 700;
-            color: var(--text-primary);
-            line-height: 1.3; max-width: 85%;
-            text-transform: uppercase; /* Как на РИС 3 */
-            letter-spacing: 0.5px;
-        }
-        .card-desc {
-            font-size: 11px; color: var(--text-secondary);
-            margin-top: 6px; font-weight: 500;
-        }
+        /* Навигация */
+        .nav-bar { display: flex; align-items: center; padding: 15px 16px; position: sticky; top: 0; background: var(--nav-bg); backdrop-filter: blur(20px); z-index: 40; border-bottom: 1px solid var(--border-color); }
+        .btn-back { background: none; border: none; color: var(--text-primary); font-family: var(--font-display); font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 15px; cursor: pointer; }
 
-        /* Фоновая иконка (Исправлена обрезка) */
-        .card-watermark {
-            position: absolute;
-            right: -10px; bottom: -10px; /* Сдвинул, чтобы меньше резалось */
-            width: 70px; height: 70px; /* Чуть меньше размер */
-            color: var(--gold-primary);
-            opacity: 0.08;
-            transform: rotate(-10deg);
-            transition: all 0.3s ease;
-            z-index: 1;
-        }
-        
-        .card:active .card-watermark {
-            transform: rotate(0deg) scale(1.1);
-            opacity: 0.15;
-        }
-
-        .card.locked { opacity: 0.7; }
-        .card.locked .card-watermark { color: var(--text-secondary); }
-        
-        /* Плашка СКОРО (Исправлено наложение) */
-        .badge-soon {
-            position: absolute; top: 12px; right: 12px;
-            background: var(--bg-color); border: 1px solid var(--border-color);
-            padding: 3px 6px; border-radius: 5px;
-            font-size: 9px; font-weight: 700; color: var(--text-secondary);
-            z-index: 3;
-            text-transform: uppercase;
-        }
-
-        /* --- ВНУТРЕННИЕ СТРАНИЦЫ --- */
-        .nav-bar {
-            display: flex; align-items: center;
-            padding: 12px 16px;
-            position: sticky; top: 0;
-            background: var(--nav-bg);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            z-index: 20;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .btn-back {
-            background: none; border: none;
-            color: var(--text-primary);
-            display: flex; align-items: center;
-            font-size: 15px; cursor: pointer; padding: 0;
-            font-family: 'Montserrat', sans-serif; font-weight: 600;
-        }
-        .btn-back svg { width: 20px; height: 20px; margin-right: 6px; }
-
-        .page-intro { padding: 24px 20px; border-bottom: 1px solid var(--border-color); }
-        .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
-        .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
-
-        /* --- АККОРДЕОН --- */
-        .accordion-item { border-bottom: 1px solid var(--border-color); }
-        .accordion-header {
-            width: 100%; background: none; border: none;
-            padding: 20px;
-            display: flex; align-items: center; justify-content: space-between;
-            text-align: left; cursor: pointer;
-        }
-        .accordion-header:active { background: var(--card-active); }
-        
-        .acc-title-group { display: flex; align-items: center; gap: 14px; }
-        .acc-icon { width: 22px; height: 22px; color: var(--gold-primary); flex-shrink: 0; }
-        .acc-title { 
-            font-size: 14px; font-weight: 700; 
-            color: var(--text-primary); 
-            text-transform: uppercase; 
-            letter-spacing: 1px; /* Широкий шрифт */
-        }
-        .acc-chevron { width: 18px; height: 18px; color: var(--text-secondary); transition: transform 0.3s; }
-        
-        .accordion-item.active .acc-chevron { transform: rotate(180deg); }
-        .accordion-item.active .acc-title { color: var(--gold-primary); }
-        
-        .accordion-content {
-            max-height: 0; overflow: hidden;
-            transition: max-height 0.3s ease;
-            background: rgba(0,0,0,0.02);
-        }
+        /* --- КОНТЕНТ (НОВЫЙ ТЕКСТ) --- */
         .content-inner { padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-        .content-inner strong { color: var(--text-primary); }
-        .content-inner ul { padding-left: 18px; margin-bottom: 16px; }
-        .content-inner li { margin-bottom: 6px; }
-
-        /* --- АЛЕРТЫ --- */
-        .custom-alert {
-            border-radius: 10px; padding: 12px 14px; margin: 16px 0;
-            display: flex; gap: 12px; align-items: flex-start;
+        .content-inner p { margin-bottom: 16px; }
+        .content-inner strong { color: var(--text-primary); font-weight: 700; }
+        
+        .section-title { 
+            font-family: var(--font-display); 
+            color: var(--text-primary); 
+            font-size: 16px; 
+            margin: 24px 0 16px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            display: flex; align-items: center; gap: 8px;
         }
-        .alert-icon-box { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
-        .alert-body { flex: 1; }
-        .alert-title { display: block; font-weight: 700; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .alert-text { font-size: 13px; opacity: 0.95; line-height: 1.4; }
 
-        .alert-warning { background: var(--warn-bg); border: 1px solid var(--warn-border); }
-        .alert-warning .alert-title, .alert-warning .alert-icon-box { color: var(--warn-text); }
+        /* Списки */
+        .steps-list { padding-left: 0; list-style: none; counter-reset: step-counter; margin-bottom: 24px; }
+        .steps-list > li { position: relative; padding-left: 36px; margin-bottom: 20px; }
+        .steps-list > li::before {
+            content: counter(step-counter); counter-increment: step-counter;
+            position: absolute; left: 0; top: 0;
+            width: 24px; height: 24px;
+            background: var(--card-active-bg); border: 1px solid var(--border-color);
+            color: var(--accent-color); border-radius: 50%;
+            font-size: 12px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .step-title { display: block; color: var(--text-primary); font-weight: 700; margin-bottom: 6px; font-family: var(--font-display); }
+        
+        .sub-list { list-style: none; padding-left: 0; margin-top: 8px; border-left: 2px solid var(--border-color); padding-left: 12px; }
+        .sub-list li { margin-bottom: 8px; font-size: 13px; }
+        .sub-list li::before { content: '•'; color: var(--accent-color); margin-right: 6px; }
 
+        /* Алерт */
+        .custom-alert { border-radius: 12px; padding: 16px; margin: 20px 0; display: flex; gap: 12px; align-items: flex-start; }
         .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); }
-        .alert-danger .alert-title, .alert-danger .alert-icon-box { color: var(--danger-text); }
+        .alert-danger .alert-title { color: var(--danger-text); font-weight: 800; text-transform: uppercase; font-size: 11px; display: block; margin-bottom: 4px; letter-spacing: 1px; }
+        .alert-text { font-size: 13px; color: var(--text-primary); opacity: 0.9; }
+        .alert-icon { color: var(--danger-text); width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
 
-        /* --- ФУТЕР (СТРОГО V1 - ТОНКИЙ) --- */
-        .sticky-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            padding: 12px 16px 24px;
-            background: var(--nav-bg);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-color);
-            display: flex; gap: 10px; z-index: 100;
+        /* --- ПАНЕЛЬ ПРИМЕРОЧНОЙ --- */
+        .fitting-toggle {
+            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+            background: var(--accent-color); color: #000; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10001; cursor: pointer;
+            transition: transform 0.2s;
         }
-        .btn {
-            flex: 1; 
-            height: 44px; /* СТРОГО 44px */
-            border-radius: 10px; /* Аккуратное скругление */
-            border: none;
-            font-family: 'Montserrat', sans-serif; 
-            font-weight: 500; /* НЕ ЖИРНЫЙ */
-            font-size: 14px;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            cursor: pointer; transition: 0.1s;
+        .fitting-toggle:active { transform: scale(0.9); }
+        
+        .fitting-panel {
+            position: fixed; bottom: 80px; right: 20px; width: 260px;
+            background: #1c1c1e; border: 1px solid #333; border-radius: 16px;
+            padding: 16px; z-index: 10000; transform: translateY(20px); opacity: 0; pointer-events: none;
+            transition: all 0.3s ease; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-        .btn:active { transform: scale(0.97); }
+        .fitting-panel.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+        .fitting-header { font-size: 12px; text-transform: uppercase; color: #888; margin-bottom: 10px; font-weight: 700; display: flex; justify-content: space-between; }
+        .fitting-options { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
         
-        .btn-primary { background: var(--gold-primary); color: #000; }
-        .btn-secondary { background: var(--card-active); color: var(--text-primary); border: 1px solid var(--border-color); }
-        
-        /* Иконки в кнопках поменьше */
-        .btn svg { width: 18px; height: 18px; }
+        .option-label {
+            display: flex; align-items: center; gap: 10px; font-size: 13px; color: #fff;
+            padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+        }
+        .option-label input { accent-color: var(--accent-color); }
+        .reset-btn { background: none; border: none; color: #EF4444; font-size: 10px; cursor: pointer; text-transform: uppercase; }
 
-        svg { display: block; width: 100%; height: 100%; }
     </style>
 </head>
 <body>
 
-<div id="app">
+<div class="noise-overlay"></div>
 
+<div id="app">
     <!-- ГЛАВНАЯ -->
     <div id="page-home" class="page">
         <header class="header">
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Сменить тему">
-                <svg id="icon-moon" style="width:18px; height:18px; display:block;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                <svg id="icon-sun" style="width:20px; height:20px; display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            </button>
-
             <div class="brand-title">КИНОЦЕХ</div>
-            <div class="brand-subtitle">Премиум-платформа | 2026</div>
+            <div class="brand-subtitle">Примерочная</div>
         </header>
 
         <div class="menu-grid">
-            <!-- 1. Правила -->
-            <div class="card large" onclick="openPage('page-rules')">
-                <div class="card-content">
-                    <div class="card-title">Правила группы</div>
-                    <div class="card-desc">Обязательно к ознакомлению</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                </div>
-            </div>
-
-            <!-- 2. Разместить объявление -->
-            <div class="card" onclick="openPage('page-post-ad')">
+            <div class="card large" onclick="openPage('page-post-ad')">
                 <div class="card-content">
                     <div class="card-title">Разместить объявление</div>
+                    <div class="card-desc">Нажмите сюда, чтобы увидеть новый текст</div>
                 </div>
                 <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 </div>
             </div>
-
-            <!-- 3. Разместить рекламу -->
-            <div class="card" onclick="openPage('page-place-ads')">
-                <div class="card-content">
-                    <div class="card-title">Разместить рекламу</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
-                </div>
-            </div>
-
-            <!-- 4. Бригадиры (С ГАЛОЧКОЙ) -->
             <div class="card locked">
-                <span class="badge-soon">Скоро</span>
-                <div class="card-content">
-                    <div class="card-title">Проверенные бригадиры</div>
-                </div>
-                <!-- Watermark: Shield with Check -->
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <polyline points="9 12 11 14 15 10"></polyline>
-                    </svg>
-                </div>
+                <div class="card-title">Другой раздел</div>
+                <div class="card-desc">Неактивен в демо</div>
             </div>
-
-            <!-- 5. Статьи -->
             <div class="card locked">
-                <span class="badge-soon">Скоро</span>
-                <div class="card-content">
-                    <div class="card-title">Полезные статьи</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                </div>
+                <div class="card-title">Другой раздел</div>
+                <div class="card-desc">Неактивен в демо</div>
             </div>
         </div>
     </div>
 
-    <!-- СТРАНИЦА: ПРАВИЛА -->
-    <div id="page-rules" class="page sub-page">
-        <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-rules')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Назад
-            </button>
-        </div>
-
-        <div class="page-intro">
-            <p><strong>Премиум-платформа для индустрии.</strong></p>
-            <p>Заказчики находят исполнителей, Актеры и АМС — проекты. Чтобы всем было комфортно, за порядком следит Модератор и автоматическая система.</p>
-        </div>
-
-        <div class="accordion">
-            <!-- 1. Модерация -->
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        <span class="acc-title">1. Модерация и Доступ</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>1.1. Регламент вступления</strong><br>
-                        Группа работает в закрытом режиме. Заявки рассматриваются вручную (до 24 часов). Пустые аккаунты отклоняются.</p>
-                        <p><strong>1.2. Техническая защита</strong><br>
-                        При вступлении возможность писать временно отключена (фильтр от спамеров).</p>
-                        <p><strong>1.4. Ссылки и Безопасность</strong><br>
-                        Подозрительные ссылки блокируются ботом.</p>
-                        <p><strong>1.5. «Анти-Бегунок»</strong><br>
-                        Частый выход и вход (более 4-х раз) — автоматический бан.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. Бригадиры (NEW ICON: SEARCH PEOPLE) -->
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <!-- Icon: User with Magnifying Glass (Casting) -->
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="10" cy="7" r="4"></circle>
-                            <path d="M10.3 15H7a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="17" cy="17" r="3"></circle>
-                            <line x1="21" y1="21" x2="19" y2="19"></line>
-                        </svg>
-                        <span class="acc-title">2. Для Бригадиров</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>2.1. Оформление объявления</strong><br>
-                        Указывайте сразу: Город, Дату, Проект, Типаж, Занятость, Гонорар. Если позиция закрыта — удалите пост.</p>
-                        
-                        <p><strong>2.2. Гонорары (Москва)</strong><br>
-                        Минимум: от 2500₽ / смена.</p>
-                        
-                        <div class="custom-alert alert-warning">
-                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                            <div class="alert-body">
-                                <span class="alert-title">Исключение (Москва):</span>
-                                <span class="alert-text">2000₽ допускается только за короткую смену (до 6 часов). Злоупотребление наказывается.</span>
-                            </div>
-                        </div>
-
-                        <p><strong>2.3. Неизвестный гонорар</strong><br>
-                        Пишите «По договоренности». Фразы без конкретики удаляются.</p>
-                        
-                        <p><strong>2.5. Запрет на перегон трафика</strong><br>
-                        Запрещено принуждать подписываться на каналы через автоответчик или ЛС.</p>
-                        
-                        <div class="custom-alert alert-danger">
-                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></div>
-                            <div class="alert-body">
-                                <span class="alert-title">Санкция:</span>
-                                <span class="alert-text">Полное закрытие доступа.</span>
-                            </div>
-                        </div>
-
-                        <p><strong>2.6. ЗАПРЕТЫ</strong><br>
-                        Эскорт, порнография, крипто-схемы.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. Актеры (ICON: MASKS) -->
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10c0-4.4 3.6-8 8-8s8 3.6 8 8a8 8 0 0 1-8 8c-4.4 0-8-3.6-8-8z"></path><path d="M14 14a2 2 0 0 1 2 2"></path><path d="M10 14a2 2 0 0 0-2 2"></path><path d="M10 10h.01"></path><path d="M14 10h.01"></path><path d="M12 18a3 3 0 0 0 3-3"></path></svg>
-                        <span class="acc-title">3. Для Актеров и АМС</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>3.1. Чистота чата</strong><br>
-                        Не пишите «Я отправил» в общий чат. Заявки — строго по контактам.</p>
-                        <p><strong>3.2. Черный список</strong><br>
-                        Невыход, пьянство, агрессия, шантаж — бан.</p>
-                        <p><strong>3.3. Конфликты</strong><br>
-                        Споры решаются в группе «Разбор полетов», а не в общем чате.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ -->
+    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ (С НОВЫМ ТЕКСТОМ) -->
     <div id="page-post-ad" class="page sub-page">
         <div class="nav-bar">
             <button class="btn-back" onclick="closePage('page-post-ad')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 Назад
             </button>
         </div>
-        <div class="page-intro">
-            <p><strong>Верификация Заказчиков</strong></p>
-            <p>Чтобы получить право публиковать объявления, нужно пройти строгую проверку.</p>
-        </div>
-        <div class="content-inner">
-            <p>Напишите Модератору (@kinocekhadmin). Мы можем запросить детали проекта (скрины переписки, вызывной), чтобы убедиться, что съемка реальна.</p>
-            <p><em>Нет подтверждения — нет публикации. Приоритет — безопасность участников.</em></p>
 
-            <div class="custom-alert alert-warning">
-                <div class="alert-icon-box">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
+        <div class="content-inner">
+            <p>Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.</p>
+
+            <h3 class="section-title">🔍 Процедура верификации</h3>
+
+            <ol class="steps-list">
+                <li>
+                    <span class="step-title">Напишите Админу</span>
+                    Свяжитесь с модератором для начала проверки.
+                </li>
+                <li>
+                    <span class="step-title">Подготовьте материалы</span>
+                    <ul class="sub-list">
+                        <li>Отправьте текст поста, который планируете опубликовать.</li>
+                        <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
+                        <li><em>Для кино/сериалов:</em> вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
+                        <li><em>Для рекламы/соцсетей:</em> ссылку на официальный канал заказчика, ТЗ, примеры ранее реализованных проектов.</li>
+                    </ul>
+                </li>
+                <li>
+                    <span class="step-title">Проверка профиля</span>
+                    Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
+                </li>
+            </ol>
+
+            <p><strong>Важно:</strong></p>
+            <ul class="sub-list" style="margin-bottom: 24px;">
+                <li>Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.</li>
+                <li>Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.</li>
+            </ul>
+
+            <div class="custom-alert alert-danger">
+                <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 <div class="alert-body">
-                    <span class="alert-title">Важное предупреждение:</span>
-                    <span class="alert-text">Если условия в посте отличаются от того, что вы пишете в ЛС (занижаете ставку) — бан навсегда. Актеры пересылают переписки модератору.</span>
+                    <span class="alert-title">Антифрод-правило</span>
+                    <div class="alert-text">
+                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору.
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ -->
-    <div id="page-place-ads" class="page sub-page">
-        <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-place-ads')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Назад
-            </button>
-        </div>
-        <div class="page-intro">
-            <p><strong>Реклама и Сотрудничество</strong></p>
-            <p>Условия размещения коммерческих постов.</p>
-        </div>
-        <div class="content-inner">
-            <p>По всем вопросам размещения рекламы услуг или товаров обращайтесь к Администратору.</p>
-            <p>Самовольное размещение рекламных постов в чате запрещено и ведет к бану.</p>
-        </div>
+<!-- ПАНЕЛЬ ПРИМЕРОЧНОЙ -->
+<div class="fitting-toggle" onclick="toggleFitting()">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+</div>
+
+<div class="fitting-panel" id="fittingPanel">
+    <div class="fitting-header">
+        <span>Стилизация</span>
+        <button class="reset-btn" onclick="resetStyles()">Сброс</button>
     </div>
-
-    <!-- ФУТЕР (V1 - ТОНКИЙ) -->
-    <div class="sticky-footer">
-        <button class="btn btn-primary" onclick="window.open('https://t.me/boost/kinocekh', '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
-            Boost
-        </button>
-        <button class="btn btn-secondary" onclick="window.open('https://t.me/kinocekhadmin', '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            Админ
-        </button>
+    <div class="fitting-options">
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-minimal')"> 1. Минимализм (Ч/Б)</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-cyber')"> 2. Cyberpunk Neon</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-editorial')"> 3. Editorial (Serif)</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-terminal')"> 4. Terminal / Code</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-glass')"> 5. Glassmorphism</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-contrast')"> 6. Высокий контраст</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-gold')"> 7. Luxury Gold +</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-cards')"> 8. Карточный текст</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-gradient')"> 9. Градиент заголовков</label>
+        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-compact')"> 10. Компактный вид</label>
     </div>
-
 </div>
 
 <script>
-    // --- ЛОГИКА ТЕМЫ ---
-    function toggleTheme() {
-        const body = document.body;
-        const iconMoon = document.getElementById('icon-moon');
-        const iconSun = document.getElementById('icon-sun');
-        
-        if (body.getAttribute('data-theme') === 'light') {
-            body.removeAttribute('data-theme');
-            iconMoon.style.display = 'block';
-            iconSun.style.display = 'none';
-            localStorage.setItem('theme', 'dark');
-        } else {
-            body.setAttribute('data-theme', 'light');
-            iconMoon.style.display = 'none';
-            iconSun.style.display = 'block';
-            localStorage.setItem('theme', 'light');
-        }
+    // --- ЛОГИКА ПРИМЕРОЧНОЙ ---
+    function toggleFitting() {
+        document.getElementById('fittingPanel').classList.toggle('open');
     }
 
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-        document.body.setAttribute('data-theme', 'light');
-        document.getElementById('icon-moon').style.display = 'none';
-        document.getElementById('icon-sun').style.display = 'block';
+    function toggleStyle(className) {
+        document.body.classList.toggle(className);
+    }
+
+    function resetStyles() {
+        document.body.className = '';
+        const checkboxes = document.querySelectorAll('.fitting-options input');
+        checkboxes.forEach(cb => cb.checked = false);
     }
 
     // --- НАВИГАЦИЯ ---
-    function openPage(pageId) {
-        document.getElementById(pageId).classList.add('active');
+    function openPage(id) {
+        document.getElementById(id).classList.add('active');
+        document.getElementById('page-home').classList.add('behind');
     }
 
-    function closePage(pageId) {
-        document.getElementById(pageId).classList.remove('active');
-    }
-
-    // --- АККОРДЕОН ---
-    function toggleAccordion(header) {
-        const item = header.parentElement;
-        const content = item.querySelector('.accordion-content');
-        const isActive = item.classList.contains('active');
-
-        document.querySelectorAll('.accordion-item').forEach(accItem => {
-            accItem.classList.remove('active');
-            accItem.querySelector('.accordion-content').style.maxHeight = null;
-        });
-
-        if (!isActive) {
-            item.classList.add('active');
-            content.style.maxHeight = content.scrollHeight + "px";
-        }
+    function closePage(id) {
+        document.getElementById(id).classList.remove('active');
+        document.getElementById('page-home').classList.remove('behind');
     }
 </script>
 
