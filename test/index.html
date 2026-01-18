@@ -3,374 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | Примерочная</title>
+    <title>КИНОЦЕХ | Visual Fitting</title>
     
-    <!-- TELEGRAM API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- ШРИФТЫ (Добавил вариативности для примерочной) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&family=Roboto+Mono:wght@400;500&family=Unbounded:wght@400;600&display=block" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&family=Roboto+Mono:wght@400;500&display=block" rel="stylesheet">
     
     <style>
-        /* --- БАЗОВЫЕ ПЕРЕМЕННЫЕ (DEFAULT) --- */
+        /* --- БАЗА (DARK PREMIUM) --- */
         :root {
-            --font-display: 'Montserrat', sans-serif; 
-            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
-            --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1); 
+            --font-main: 'Montserrat', sans-serif;
+            --font-serif: 'Playfair Display', serif;
+            --font-mono: 'Roboto Mono', monospace;
             
-            --bg-color: #0F0F11;
-            --card-bg: rgba(255, 255, 255, 0.04);
-            --card-active-bg: rgba(255, 255, 255, 0.08);
-            --border-color: rgba(255, 255, 255, 0.08);
+            --bg-app: #0F0F11;
+            --text-main: #F2F2F2;
+            --text-muted: #9CA3AF;
+            --accent: #D4AF37;
             
-            --text-primary: #F2F2F2;
-            --text-secondary: #9CA3AF;
-            --accent-color: #D4AF37; 
-            --nav-bg: rgba(15, 15, 17, 0.75); 
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
             
-            --warn-bg: rgba(245, 158, 11, 0.08);
-            --warn-border: rgba(245, 158, 11, 0.3);
-            --warn-text: #F59E0B;
-            --danger-bg: rgba(220, 38, 38, 0.08);
-            --danger-border: rgba(220, 38, 38, 0.3);
-            --danger-text: #EF4444;
-            
-            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
-            --card-shadow: var(--glass-highlight), 0 12px 40px -12px rgba(212, 175, 55, 0.15);
+            --danger: #EF4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
         }
 
-        /* --- ВАРИАНТЫ ДИЗАЙНА (ПРИМЕРОЧНАЯ) --- */
+        body { margin: 0; background: var(--bg-app); color: var(--text-main); font-family: var(--font-main); overflow: hidden; height: 100dvh; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        /* 1. Строгий Минимализм (Ч/Б) */
-        body.var-minimal {
-            --bg-color: #000000;
-            --card-bg: #111111;
-            --border-color: #333;
-            --accent-color: #FFFFFF;
-            --text-secondary: #888;
-            --card-shadow: none;
-            --font-display: 'Inter', sans-serif;
-        }
-        body.var-minimal .card, body.var-minimal .btn { border-radius: 4px; }
-        body.var-minimal .brand-title { background: #FFF; -webkit-text-fill-color: #FFF; }
-
-        /* 2. Неоновый Киберпанк */
-        body.var-cyber {
-            --bg-color: #050505;
-            --accent-color: #00ff9d;
-            --card-bg: rgba(0, 255, 157, 0.03);
-            --border-color: rgba(0, 255, 157, 0.2);
-            --text-primary: #e0fff4;
-            --font-display: 'Unbounded', sans-serif;
-            --card-shadow: 0 0 15px rgba(0, 255, 157, 0.1);
-        }
-        body.var-cyber .brand-title { background: linear-gradient(90deg, #00ff9d, #00ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        /* 3. Типографика (Serif / Editorial) */
-        body.var-editorial {
-            --font-display: 'Playfair Display', serif;
-            --font-body: 'Inter', sans-serif;
-            --bg-color: #1a1818;
-            --card-bg: rgba(255,255,255,0.02);
-            --accent-color: #d4a373;
-        }
-        body.var-editorial h3 { font-style: italic; letter-spacing: 1px; }
-
-        /* 4. Технический / Терминал */
-        body.var-terminal {
-            --font-display: 'Roboto Mono', monospace;
-            --font-body: 'Roboto Mono', monospace;
-            --bg-color: #0d1117;
-            --accent-color: #58a6ff;
-            --text-secondary: #8b949e;
-            --card-bg: #161b22;
-            --border-color: #30363d;
-        }
-        body.var-terminal .card { border-radius: 0; border: 1px solid var(--border-color); }
-
-        /* 5. Мягкое стекло (Glassmorphism Light) */
-        body.var-glass {
-            --bg-color: #2c3e50;
-            --card-bg: rgba(255, 255, 255, 0.1);
-            --border-color: rgba(255, 255, 255, 0.2);
-            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            --accent-color: #a8d0e6;
-        }
-        body.var-glass::before { background: radial-gradient(circle at 50% 50%, rgba(76, 29, 149, 0.4), transparent 60%); }
-
-        /* 6. Высокий контраст (Акцент на текст) */
-        body.var-contrast .content-inner { font-size: 16px; line-height: 1.6; }
-        body.var-contrast h3 { text-decoration: underline; text-decoration-color: var(--accent-color); text-underline-offset: 5px; }
-        body.var-contrast .steps-list li { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-
-        /* 7. Золотой Люкс (Усиленный) */
-        body.var-gold {
-            --bg-color: #0a0a0a;
-            --accent-color: #FFD700;
-            --border-color: #FFD700;
-            --card-bg: linear-gradient(145deg, #111, #0f0f0f);
-        }
-        body.var-gold .card { border: 1px solid rgba(255, 215, 0, 0.2); }
-
-        /* 8. Карточный стиль текста */
-        body.var-cards .content-inner h3 { background: var(--card-active-bg); padding: 10px; border-radius: 8px; margin-top: 20px; }
-        body.var-cards .content-inner p { margin-bottom: 15px; }
-
-        /* 9. Градиентный текст */
-        body.var-gradient h3, body.var-gradient strong {
-            background: linear-gradient(45deg, var(--accent-color), #fff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* 10. Компактный (Информационный) */
-        body.var-compact .content-inner { font-size: 13px; line-height: 1.4; }
-        body.var-compact .card { height: 100px; }
-        body.var-compact h3 { margin-top: 10px; margin-bottom: 5px; }
-
-        /* --- ОБЩИЕ СТИЛИ --- */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        html, body { height: 100dvh; overflow: hidden; background-color: var(--bg-color); margin: 0; color: var(--text-primary); font-family: var(--font-body); transition: background-color 0.3s, color 0.3s; }
+        /* СТРУКТУРА СТРАНИЦ */
+        #app { position: relative; width: 100%; height: 100%; }
+        .page { position: absolute; inset: 0; background: var(--bg-app); overflow-y: auto; padding-bottom: 100px; transition: transform 0.3s ease; z-index: 10; }
+        .sub-page { transform: translateX(100%); z-index: 20; }
+        .sub-page.active { transform: translateX(0); }
         
-        /* Шум */
-        .noise-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: var(--z-noise); opacity: 0.04; background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII="); mix-blend-mode: overlay; }
+        /* НАВИГАЦИЯ */
+        .nav-bar { position: sticky; top: 0; background: rgba(15,15,17,0.9); backdrop-filter: blur(10px); padding: 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; z-index: 50; }
+        .btn-back { background: none; border: none; color: var(--text-main); font-family: var(--font-main); font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 15px; cursor: pointer; }
 
-        #app { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        /* МЕНЮ (ГЛАВНАЯ) */
+        .menu-grid { padding: 20px; display: grid; gap: 15px; }
+        .menu-card { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; border-radius: 16px; cursor: pointer; }
+        .menu-card h3 { margin: 0 0 5px; font-size: 16px; }
+        .menu-card p { margin: 0; font-size: 12px; color: var(--text-muted); }
+
+        /* --- КОНТЕЙНЕР КОНТЕНТА (ГДЕ МЕНЯЕМ СТИЛИ) --- */
+        .content-wrapper { padding: 20px; max-width: 600px; margin: 0 auto; }
         
-        /* Страницы */
-        .page { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; padding-bottom: 100px; background-color: var(--bg-color); transition: transform 0.4s var(--ease-smooth), opacity 0.4s; z-index: 30; }
-        #page-home { z-index: 10; }
-        .page.sub-page { transform: translateX(100%); }
-        .page.sub-page.active { transform: translateX(0); }
-        .page.behind { transform: scale(0.95); opacity: 0.5; pointer-events: none; }
-
-        /* Шапка */
-        .header { padding: 20px; text-align: center; }
-        .brand-title { font-family: var(--font-display); font-size: 30px; font-weight: 800; text-transform: uppercase; background: linear-gradient(to right, #bf953f, #fcf6ba, #bf953f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
-        .brand-subtitle { font-size: 10px; color: var(--accent-color); text-transform: uppercase; letter-spacing: 3px; }
-
-        /* Меню */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; }
-        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; height: 130px; position: relative; cursor: pointer; transition: transform 0.2s; box-shadow: var(--card-shadow); }
-        .card:active { transform: scale(0.97); background: var(--card-active-bg); }
-        .card.large { grid-column: span 2; height: 110px; }
-        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
-        .card-desc { font-size: 11px; color: var(--text-secondary); }
-        .card-watermark { position: absolute; right: 10px; bottom: 10px; opacity: 0.2; color: var(--accent-color); }
-        .card.locked { opacity: 0.6; cursor: default; }
-
-        /* Навигация */
-        .nav-bar { display: flex; align-items: center; padding: 15px 16px; position: sticky; top: 0; background: var(--nav-bg); backdrop-filter: blur(20px); z-index: 40; border-bottom: 1px solid var(--border-color); }
-        .btn-back { background: none; border: none; color: var(--text-primary); font-family: var(--font-display); font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 15px; cursor: pointer; }
-
-        /* --- КОНТЕНТ (НОВЫЙ ТЕКСТ) --- */
-        .content-inner { padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-        .content-inner p { margin-bottom: 16px; }
-        .content-inner strong { color: var(--text-primary); font-weight: 700; }
+        /* БАЗОВЫЕ ЭЛЕМЕНТЫ (СБРОС) */
+        .intro-text { font-size: 14px; line-height: 1.6; color: var(--text-muted); margin-bottom: 25px; }
+        .section-header { font-size: 18px; font-weight: 800; text-transform: uppercase; margin: 30px 0 20px; display: flex; align-items: center; gap: 10px; color: var(--text-main); }
         
-        .section-title { 
-            font-family: var(--font-display); 
-            color: var(--text-primary); 
-            font-size: 16px; 
-            margin: 24px 0 16px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-            display: flex; align-items: center; gap: 8px;
-        }
-
-        /* Списки */
-        .steps-list { padding-left: 0; list-style: none; counter-reset: step-counter; margin-bottom: 24px; }
-        .steps-list > li { position: relative; padding-left: 36px; margin-bottom: 20px; }
-        .steps-list > li::before {
-            content: counter(step-counter); counter-increment: step-counter;
-            position: absolute; left: 0; top: 0;
-            width: 24px; height: 24px;
-            background: var(--card-active-bg); border: 1px solid var(--border-color);
-            color: var(--accent-color); border-radius: 50%;
-            font-size: 12px; font-weight: 700;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .step-title { display: block; color: var(--text-primary); font-weight: 700; margin-bottom: 6px; font-family: var(--font-display); }
+        .steps-container { display: flex; flex-direction: column; gap: 20px; }
+        .step-item { position: relative; }
+        .step-num { display: none; } /* Скрыто по умолчанию */
+        .step-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; display: block; }
+        .step-desc { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+        .step-sublist { margin-top: 8px; padding-left: 15px; border-left: 2px solid var(--border); }
+        .step-sublist div { margin-bottom: 6px; font-size: 13px; color: var(--text-muted); }
         
-        .sub-list { list-style: none; padding-left: 0; margin-top: 8px; border-left: 2px solid var(--border-color); padding-left: 12px; }
-        .sub-list li { margin-bottom: 8px; font-size: 13px; }
-        .sub-list li::before { content: '•'; color: var(--accent-color); margin-right: 6px; }
-
-        /* Алерт */
-        .custom-alert { border-radius: 12px; padding: 16px; margin: 20px 0; display: flex; gap: 12px; align-items: flex-start; }
-        .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); }
-        .alert-danger .alert-title { color: var(--danger-text); font-weight: 800; text-transform: uppercase; font-size: 11px; display: block; margin-bottom: 4px; letter-spacing: 1px; }
-        .alert-text { font-size: 13px; color: var(--text-primary); opacity: 0.9; }
-        .alert-icon { color: var(--danger-text); width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; }
-
-        /* --- ПАНЕЛЬ ПРИМЕРОЧНОЙ --- */
-        .fitting-toggle {
-            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
-            background: var(--accent-color); color: #000; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10001; cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .fitting-toggle:active { transform: scale(0.9); }
+        .info-block { margin-top: 30px; padding: 15px; background: var(--card-bg); border-radius: 12px; font-size: 13px; line-height: 1.5; }
+        .info-title { font-weight: 700; display: block; margin-bottom: 8px; color: var(--accent); }
         
-        .fitting-panel {
-            position: fixed; bottom: 80px; right: 20px; width: 260px;
-            background: #1c1c1e; border: 1px solid #333; border-radius: 16px;
-            padding: 16px; z-index: 10000; transform: translateY(20px); opacity: 0; pointer-events: none;
-            transition: all 0.3s ease; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        .warning-block { margin-top: 20px; padding: 15px; background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 12px; }
+        .warning-header { color: var(--danger); font-weight: 800; text-transform: uppercase; font-size: 12px; margin-bottom: 8px; letter-spacing: 1px; }
+        .warning-text { font-size: 13px; line-height: 1.5; color: var(--text-main); opacity: 0.9; }
+
+        /* =========================================
+           ВАРИАНТЫ ДИЗАЙНА (STYLES)
+           ========================================= */
+
+        /* 1. CLEAN LIST (Аккуратный список) */
+        .style-1 .step-item { padding-left: 15px; border-left: 3px solid var(--accent); }
+        .style-1 .step-title { color: var(--accent); }
+
+        /* 2. TIMELINE (Линия времени) */
+        .style-2 .steps-container { border-left: 2px solid var(--border); margin-left: 10px; padding-left: 25px; gap: 30px; }
+        .style-2 .step-item::before { content: ''; position: absolute; left: -32px; top: 0; width: 12px; height: 12px; background: var(--bg-app); border: 2px solid var(--accent); border-radius: 50%; z-index: 2; }
+        .style-2 .step-title { font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* 3. GLASS CARDS (Стеклянные карточки) */
+        .style-3 .step-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 20px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        .style-3 .step-num { display: block; position: absolute; top: 15px; right: 15px; font-size: 40px; font-weight: 800; color: rgba(255,255,255,0.03); line-height: 1; pointer-events: none; }
+        .style-3 .section-header { justify-content: center; background: var(--card-bg); padding: 10px; border-radius: 12px; }
+
+        /* 4. LUXURY GOLD (Золотой люкс) */
+        .style-4 { --font-main: 'Playfair Display', serif; }
+        .style-4 .section-header { color: var(--accent); font-style: italic; border-bottom: 1px solid var(--accent); padding-bottom: 10px; }
+        .style-4 .step-title { color: var(--accent); font-size: 18px; }
+        .style-4 .info-block { border: 1px solid var(--accent); background: transparent; }
+        .style-4 .warning-block { border-color: var(--accent); background: rgba(212, 175, 55, 0.05); }
+        .style-4 .warning-header { color: var(--accent); }
+
+        /* 5. CYBER TERMINAL (Код) */
+        .style-5 { --font-main: 'Roboto Mono', monospace; }
+        .style-5 .step-item { border: 1px dashed var(--border); padding: 15px; margin-bottom: 10px; }
+        .style-5 .step-title::before { content: '> '; color: #0f0; }
+        .style-5 .section-header { background: #000; color: #0f0; padding: 5px; display: inline-block; }
+        .style-5 .warning-block { border: 2px solid red; background: #000; }
+
+        /* 6. BIG NUMBERS (Крупная типографика) */
+        .style-6 .step-item { display: grid; grid-template-columns: 40px 1fr; gap: 15px; align-items: baseline; }
+        .style-6 .step-num { display: block; font-size: 32px; font-weight: 800; color: var(--border); }
+        .style-6 .step-item:hover .step-num { color: var(--accent); transition: 0.3s; }
+        .style-6 .step-title { font-size: 18px; margin-bottom: 4px; }
+
+        /* 7. GRADIENT FLOW (Градиент) */
+        .style-7 .step-item { background: linear-gradient(145deg, rgba(255,255,255,0.05), transparent); padding: 20px; border-radius: 20px; border-left: 4px solid var(--accent); }
+        .style-7 .section-header { background: linear-gradient(90deg, var(--accent), transparent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 22px; }
+
+        /* 8. MINIMALIST (Минимализм) */
+        .style-8 .content-wrapper { text-align: center; }
+        .style-8 .steps-container { gap: 40px; }
+        .style-8 .step-title { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid var(--border); padding-bottom: 5px; display: inline-block; margin-bottom: 15px; }
+        .style-8 .step-sublist { border: none; padding: 0; }
+        .style-8 .warning-block { background: transparent; border-top: 1px solid var(--danger); border-bottom: 1px solid var(--danger); border-left: none; border-right: none; border-radius: 0; }
+
+        /* 9. MAGAZINE (Журнальная верстка) */
+        .style-9 .step-item { margin-bottom: 20px; }
+        .style-9 .step-title { font-family: 'Playfair Display', serif; font-size: 20px; font-style: italic; color: #FFF; }
+        .style-9 .step-desc { font-family: 'Montserrat', sans-serif; opacity: 0.7; }
+        .style-9 .info-block { border-left: 4px solid #FFF; border-radius: 0; background: transparent; padding-left: 20px; }
+
+        /* 10. COMPACT (Плотная верстка) */
+        .style-10 .steps-container { gap: 10px; }
+        .style-10 .step-item { background: #1C1C1E; padding: 12px 15px; border-radius: 8px; display: flex; flex-direction: column; }
+        .style-10 .step-title { font-size: 13px; color: var(--accent); margin-bottom: 2px; }
+        .style-10 .step-desc { font-size: 12px; }
+        .style-10 .intro-text { font-size: 12px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; }
+
+        /* --- ПАНЕЛЬ УПРАВЛЕНИЯ --- */
+        .fitting-controls {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #111; border-top: 1px solid #333;
+            padding: 15px; z-index: 100;
+            display: flex; gap: 10px; overflow-x: auto;
+            padding-bottom: max(15px, env(safe-area-inset-bottom));
         }
-        .fitting-panel.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
-        .fitting-header { font-size: 12px; text-transform: uppercase; color: #888; margin-bottom: 10px; font-weight: 700; display: flex; justify-content: space-between; }
-        .fitting-options { display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; }
+        .style-btn {
+            flex: 0 0 auto; padding: 8px 16px; border-radius: 20px;
+            background: #222; border: 1px solid #444; color: #fff;
+            font-size: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .style-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
         
-        .option-label {
-            display: flex; align-items: center; gap: 10px; font-size: 13px; color: #fff;
-            padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer;
+        .toggle-panel-btn {
+            position: fixed; bottom: 20px; right: 20px; width: 44px; height: 44px;
+            background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            z-index: 101; box-shadow: 0 5px 20px rgba(0,0,0,0.5); cursor: pointer;
         }
-        .option-label input { accent-color: var(--accent-color); }
-        .reset-btn { background: none; border: none; color: #EF4444; font-size: 10px; cursor: pointer; text-transform: uppercase; }
+        .panel-wrapper {
+            position: fixed; bottom: 80px; left: 10px; right: 10px;
+            background: rgba(20,20,20,0.95); backdrop-filter: blur(20px);
+            border: 1px solid #333; border-radius: 16px; padding: 15px;
+            z-index: 100; transform: translateY(150%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .panel-wrapper.open { transform: translateY(0); }
+        .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     </style>
 </head>
 <body>
 
-<div class="noise-overlay"></div>
-
 <div id="app">
     <!-- ГЛАВНАЯ -->
     <div id="page-home" class="page">
-        <header class="header">
-            <div class="brand-title">КИНОЦЕХ</div>
-            <div class="brand-subtitle">Примерочная</div>
-        </header>
-
+        <div class="nav-bar" style="justify-content: center;">
+            <span style="font-weight: 800; letter-spacing: 1px;">КИНОЦЕХ</span>
+        </div>
         <div class="menu-grid">
-            <div class="card large" onclick="openPage('page-post-ad')">
-                <div class="card-content">
-                    <div class="card-title">Разместить объявление</div>
-                    <div class="card-desc">Нажмите сюда, чтобы увидеть новый текст</div>
-                </div>
-                <div class="card-watermark">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                </div>
-            </div>
-            <div class="card locked">
-                <div class="card-title">Другой раздел</div>
-                <div class="card-desc">Неактивен в демо</div>
-            </div>
-            <div class="card locked">
-                <div class="card-title">Другой раздел</div>
-                <div class="card-desc">Неактивен в демо</div>
+            <div class="menu-card" onclick="openPage('page-ad')">
+                <h3>Разместить объявление</h3>
+                <p>Нажмите, чтобы открыть и примерить стили</p>
             </div>
         </div>
     </div>
 
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ (С НОВЫМ ТЕКСТОМ) -->
-    <div id="page-post-ad" class="page sub-page">
+    <!-- СТРАНИЦА ОБЪЯВЛЕНИЯ (ГДЕ МЕНЯЕМ СТИЛИ) -->
+    <div id="page-ad" class="page sub-page">
         <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-post-ad')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <button class="btn-back" onclick="closePage('page-ad')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 Назад
             </button>
         </div>
 
-        <div class="content-inner">
-            <p>Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.</p>
+        <!-- КОНТЕЙНЕР, К КОТОРОМУ ПРИМЕНЯЮТСЯ СТИЛИ -->
+        <div id="content-area" class="content-wrapper style-1">
+            
+            <p class="intro-text">
+                Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
+            </p>
 
-            <h3 class="section-title">🔍 Процедура верификации</h3>
+            <div class="section-header">
+                🔍 Процедура верификации
+            </div>
 
-            <ol class="steps-list">
-                <li>
+            <div class="steps-container">
+                <!-- ШАГ 1 -->
+                <div class="step-item">
+                    <span class="step-num">01</span>
                     <span class="step-title">Напишите Админу</span>
-                    Свяжитесь с модератором для начала проверки.
-                </li>
-                <li>
+                    <div class="step-desc">Свяжитесь с модератором для начала проверки.</div>
+                </div>
+
+                <!-- ШАГ 2 -->
+                <div class="step-item">
+                    <span class="step-num">02</span>
                     <span class="step-title">Подготовьте материалы</span>
-                    <ul class="sub-list">
-                        <li>Отправьте текст поста, который планируете опубликовать.</li>
-                        <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
-                        <li><em>Для кино/сериалов:</em> вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
-                        <li><em>Для рекламы/соцсетей:</em> ссылку на официальный канал заказчика, ТЗ, примеры ранее реализованных проектов.</li>
-                    </ul>
-                </li>
-                <li>
+                    <div class="step-desc">
+                        Отправьте текст поста, который планируете опубликовать.
+                        <div class="step-sublist">
+                            <div><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</div>
+                            <div>— Для кино/сериалов: вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</div>
+                            <div>— Для рекламы, рилсов, контента для соцсетей: ссылку на официальный канал заказчика, техническое задание, примеры ранее реализованных проектов.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ШАГ 3 -->
+                <div class="step-item">
+                    <span class="step-num">03</span>
                     <span class="step-title">Проверка профиля</span>
-                    Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
-                </li>
-            </ol>
-
-            <p><strong>Важно:</strong></p>
-            <ul class="sub-list" style="margin-bottom: 24px;">
-                <li>Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.</li>
-                <li>Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.</li>
-            </ul>
-
-            <div class="custom-alert alert-danger">
-                <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                <div class="alert-body">
-                    <span class="alert-title">Антифрод-правило</span>
-                    <div class="alert-text">
-                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору.
+                    <div class="step-desc">
+                        Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
                     </div>
                 </div>
             </div>
+
+            <!-- ВАЖНО -->
+            <div class="info-block">
+                <span class="info-title">Важно:</span>
+                <div>· Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.</div>
+                <div style="margin-top:5px;">· Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.</div>
+            </div>
+
+            <!-- АНТИФРОД -->
+            <div class="warning-block">
+                <div class="warning-header">⚠️ Антифрод-правило</div>
+                <div class="warning-text">
+                    Условия в посте и в личных сообщениях должны полностью совпадать.<br>
+                    Занижение ставки в переписке ведёт к перманентному бану.<br>
+                    Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
+                </div>
+            </div>
+
+            <div style="height: 100px;"></div> <!-- Отступ для панели -->
         </div>
     </div>
 </div>
 
-<!-- ПАНЕЛЬ ПРИМЕРОЧНОЙ -->
-<div class="fitting-toggle" onclick="toggleFitting()">
+<!-- КНОПКА ОТКРЫТИЯ ПАНЕЛИ -->
+<div class="toggle-panel-btn" onclick="togglePanel()">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
 </div>
 
-<div class="fitting-panel" id="fittingPanel">
-    <div class="fitting-header">
-        <span>Стилизация</span>
-        <button class="reset-btn" onclick="resetStyles()">Сброс</button>
-    </div>
-    <div class="fitting-options">
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-minimal')"> 1. Минимализм (Ч/Б)</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-cyber')"> 2. Cyberpunk Neon</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-editorial')"> 3. Editorial (Serif)</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-terminal')"> 4. Terminal / Code</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-glass')"> 5. Glassmorphism</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-contrast')"> 6. Высокий контраст</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-gold')"> 7. Luxury Gold +</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-cards')"> 8. Карточный текст</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-gradient')"> 9. Градиент заголовков</label>
-        <label class="option-label"><input type="checkbox" onchange="toggleStyle('var-compact')"> 10. Компактный вид</label>
+<!-- ПАНЕЛЬ ВЫБОРА СТИЛЯ -->
+<div class="panel-wrapper" id="stylePanel">
+    <div style="text-align: center; font-size: 12px; color: #888; margin-bottom: 10px; text-transform: uppercase; font-weight: 700;">Выберите стиль верстки</div>
+    <div class="panel-grid">
+        <button class="style-btn active" onclick="setStyle(1, this)">1. Clean List</button>
+        <button class="style-btn" onclick="setStyle(2, this)">2. Timeline</button>
+        <button class="style-btn" onclick="setStyle(3, this)">3. Glass Cards</button>
+        <button class="style-btn" onclick="setStyle(4, this)">4. Luxury Gold</button>
+        <button class="style-btn" onclick="setStyle(5, this)">5. Cyber Code</button>
+        <button class="style-btn" onclick="setStyle(6, this)">6. Big Numbers</button>
+        <button class="style-btn" onclick="setStyle(7, this)">7. Gradient</button>
+        <button class="style-btn" onclick="setStyle(8, this)">8. Minimalist</button>
+        <button class="style-btn" onclick="setStyle(9, this)">9. Magazine</button>
+        <button class="style-btn" onclick="setStyle(10, this)">10. Compact</button>
     </div>
 </div>
 
 <script>
-    // --- ЛОГИКА ПРИМЕРОЧНОЙ ---
-    function toggleFitting() {
-        document.getElementById('fittingPanel').classList.toggle('open');
-    }
-
-    function toggleStyle(className) {
-        document.body.classList.toggle(className);
-    }
-
-    function resetStyles() {
-        document.body.className = '';
-        const checkboxes = document.querySelectorAll('.fitting-options input');
-        checkboxes.forEach(cb => cb.checked = false);
-    }
-
-    // --- НАВИГАЦИЯ ---
+    // НАВИГАЦИЯ
     function openPage(id) {
         document.getElementById(id).classList.add('active');
-        document.getElementById('page-home').classList.add('behind');
     }
-
     function closePage(id) {
         document.getElementById(id).classList.remove('active');
-        document.getElementById('page-home').classList.remove('behind');
+    }
+
+    // ПРИМЕРОЧНАЯ
+    function togglePanel() {
+        document.getElementById('stylePanel').classList.toggle('open');
+    }
+
+    function setStyle(num, btn) {
+        // Смена класса на контенте
+        const content = document.getElementById('content-area');
+        content.className = `content-wrapper style-${num}`;
+        
+        // Активная кнопка
+        document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
     }
 </script>
 
