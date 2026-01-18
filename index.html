@@ -2,14 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- ВНЕДРЕНО: viewport-fit=cover и запрет масштабирования (Красная зона) -->
+    <!-- viewport-fit=cover и запрет масштабирования -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>КИНОЦЕХ | App</title>
     
     <!-- 1. TELEGRAM API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- 2. МГНОВЕННЫЕ ШРИФТЫ -->
+    <!-- 2. ШРИФТЫ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=block" rel="stylesheet">
@@ -50,7 +50,7 @@
             /* ТОЛСТОЕ СТЕКЛО (БЛИК) */
             --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
             
-            /* ВНЕДРЕНО: ДОРОГИЕ ТЕНИ (GOLD GLOW) */
+            /* ТЕНИ (GOLD GLOW) */
             --card-shadow: var(--glass-highlight), 0 12px 40px -12px rgba(212, 175, 55, 0.15);
             
             --text-primary: #F2F2F2;
@@ -85,7 +85,7 @@
             
             --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 1), inset 0 0 0 1px rgba(0,0,0,0.02);
             
-            /* ВНЕДРЕНО: ДОРОГИЕ ТЕНИ (BLUE GLOW) */
+            /* ТЕНИ (BLUE GLOW) */
             --card-shadow: var(--glass-highlight), 0 12px 30px -10px rgba(0, 51, 102, 0.15);
             
             --text-primary: #1C1C1E;
@@ -112,7 +112,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         
         /* УСКОРЕННЫЕ ТРАНЗИШЕНЫ */
-        html, body, .page, .card, .nav-bar, .sticky-footer, .btn, .accordion-header, .accordion-content, .custom-alert {
+        html, body, .page, .card, .nav-bar, .sticky-footer, .btn, .accordion-header, .accordion-content, .custom-alert, .step-card {
             transition: 
                 background-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
                 color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
@@ -122,7 +122,6 @@
                 stroke var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* ВНЕДРЕНО: 100dvh для стабильности экрана (Красная зона) */
         html, body { height: 100dvh; overflow: hidden; background-color: var(--bg-color); }
         
         body {
@@ -203,10 +202,10 @@
         }
         #page-home { z-index: var(--z-home); }
         
-        /* ВНЕДРЕНО: 3D ГЛУБИНА (ПАРАЛЛАКС) */
+        /* 3D ГЛУБИНА (ПАРАЛЛАКС) */
         .page.behind { 
-            transform: scale(0.92) translateX(-15%); /* Уезжает влево */
-            filter: brightness(0.6) blur(2px); /* Оптимизированный блюр */
+            transform: scale(0.92) translateX(-15%); 
+            filter: brightness(0.6) blur(2px); 
             border-radius: 20px; 
             overflow: hidden; 
             pointer-events: none;
@@ -373,7 +372,7 @@
             background: rgba(0,0,0,0.015);
         }
         
-        /* ВНЕДРЕНО: КАСКАД ТЕКСТА */
+        /* --- КОНТЕНТ --- */
         .content-inner { 
             padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; 
             font-variant-numeric: tabular-nums;
@@ -391,6 +390,38 @@
         .content-inner ul { padding-left: 20px; margin-bottom: 16px; list-style: none; }
         .content-inner li { margin-bottom: 8px; position: relative; }
         .content-inner li::before { content: '—'; position: absolute; left: -20px; color: var(--accent-color); font-weight: 700; }
+
+        /* --- НОВЫЕ СТИЛИ ДЛЯ "FLAT CARDS" (Разместить объявление) --- */
+        .ad-intro { font-size: 14px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 24px; }
+        .ad-section-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; text-transform: uppercase; margin: 30px 0 20px; color: var(--text-primary); letter-spacing: 0.5px; }
+        
+        .steps-wrapper { display: flex; flex-direction: column; gap: 12px; }
+        .step-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            padding: 20px; 
+            border-radius: 16px; 
+            transition: background-color 0.3s ease, border-color 0.3s ease; 
+        }
+        .step-card:active { background: var(--card-active-bg); }
+        
+        .step-card-title { 
+            font-family: var(--font-display); 
+            font-weight: 700; 
+            font-size: 15px; 
+            color: var(--accent-color); 
+            margin-bottom: 8px; 
+            display: block; 
+        }
+        .step-card-desc { font-size: 14px; line-height: 1.55; color: var(--text-secondary); }
+        
+        .ad-sub-list { margin-top: 12px; padding-left: 0; list-style: none; }
+        .ad-sub-list li { position: relative; padding-left: 16px; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); }
+        .ad-sub-list li::before { content: '—'; position: absolute; left: 0; color: var(--accent-color); }
+        .ad-sub-list strong { color: var(--text-primary); font-weight: 600; }
+
+        .important-block { margin-top: 32px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+        .important-block strong { color: var(--text-primary); display: block; margin-bottom: 8px; font-family: var(--font-display); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
 
         /* --- ALERTS --- */
         .custom-alert { border-radius: 12px; padding: 14px 16px; margin: 18px 0; display: flex; gap: 12px; align-items: flex-start; }
@@ -645,7 +676,7 @@
         </div>
     </div>
 
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ -->
+    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ (ОБНОВЛЕННАЯ: FLAT CARDS) -->
     <div id="page-post-ad" class="page sub-page">
         <div class="nav-bar">
             <button class="btn-back" onclick="closePage('page-post-ad')">
@@ -653,20 +684,62 @@
                 Назад
             </button>
         </div>
-        <div class="page-intro">
-            <p><strong>Верификация Заказчиков</strong></p>
-            <p>Чтобы получить право публиковать объявления, нужно пройти строгую проверку.</p>
-        </div>
+        
         <div class="content-inner">
-            <p>Напишите Модератору (@kinocekhadmin). Мы можем запросить детали проекта (скрины переписки, вызывной), чтобы убедиться, что съемка реальна.</p>
-            <p><em>Нет подтверждения — нет публикации. Приоритет — безопасность участников.</em></p>
-            <div class="custom-alert alert-warning">
+            <p class="ad-intro">
+                Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
+            </p>
+
+            <div class="ad-section-title">
+                🔍 Процедура верификации
+            </div>
+
+            <div class="steps-wrapper">
+                <!-- ШАГ 1 -->
+                <div class="step-card">
+                    <span class="step-card-title">1. Напишите Админу</span>
+                    <div class="step-card-desc">Свяжитесь с модератором для начала проверки.</div>
+                </div>
+
+                <!-- ШАГ 2 -->
+                <div class="step-card">
+                    <span class="step-card-title">2. Подготовьте материалы</span>
+                    <div class="step-card-desc">
+                        Отправьте текст поста, который планируете опубликовать.
+                        <ul class="ad-sub-list">
+                            <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
+                            <li>Для кино/сериалов: вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
+                            <li>Для рекламы, рилсов, контента для соцсетей: ссылку на официальный канал заказчика, техническое задание, примеры ранее реализованных проектов.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ШАГ 3 -->
+                <div class="step-card">
+                    <span class="step-card-title">3. Проверка профиля</span>
+                    <div class="step-card-desc">
+                        Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
+                    </div>
+                </div>
+            </div>
+
+            <!-- ВАЖНО -->
+            <div class="important-block">
+                <strong>Важно:</strong>
+                Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.<br>
+                Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.
+            </div>
+
+            <!-- АНТИФРОД -->
+            <div class="custom-alert alert-danger">
                 <div class="alert-icon-box">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </div>
                 <div class="alert-body">
-                    <span class="alert-title">Важное предупреждение:</span>
-                    <span class="alert-text">Если условия в посте отличаются от того, что вы пишете в ЛС (занижаете ставку) — бан навсегда. Актеры пересылают переписки модератору.</span>
+                    <span class="alert-title">Антифрод-правило</span>
+                    <span class="alert-text">
+                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
+                    </span>
                 </div>
             </div>
         </div>
@@ -741,7 +814,7 @@
 
     // --- TOUCH PHYSICS (Только визуал) ---
     function initTouchPhysics() {
-        const interactives = document.querySelectorAll('.card, .btn, .accordion-header, .theme-toggle, .btn-back');
+        const interactives = document.querySelectorAll('.card, .btn, .accordion-header, .theme-toggle, .btn-back, .step-card');
         interactives.forEach(el => {
             el.addEventListener('touchstart', () => {
                 el.classList.add('active-state');
@@ -753,7 +826,7 @@
         });
     }
 
-    // --- ВНЕДРЕНО: СВАЙП НАЗАД ---
+    // --- СВАЙП НАЗАД ---
     let touchStartX = 0;
     document.addEventListener('touchstart', e => { 
         touchStartX = e.changedTouches[0].screenX; 
