@@ -112,7 +112,7 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         
         /* УСКОРЕННЫЕ ТРАНЗИШЕНЫ */
-        html, body, .page, .card, .nav-bar, .sticky-footer, .btn, .accordion-header, .accordion-content, .custom-alert, .step-card {
+        html, body, .page, .card, .nav-bar, .sticky-footer, .btn, .accordion-header, .accordion-content, .custom-alert, .step-card, .glass-card {
             transition: 
                 background-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
                 color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
@@ -434,6 +434,51 @@
         .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); }
         .alert-danger .alert-title, .alert-danger .alert-icon-box { color: var(--danger-text); }
 
+        /* --- НОВЫЕ СТИЛИ ДЛЯ РЕКЛАМЫ (GLASS PANELS) --- */
+        .glass-alert {
+            background: rgba(220, 38, 38, 0.08); 
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            padding: 16px;
+            border-radius: 16px;
+            margin: 24px 0;
+        }
+        [data-theme="light"] .glass-alert {
+            background: rgba(255, 59, 48, 0.1);
+            border-color: rgba(255, 59, 48, 0.2);
+        }
+        .glass-alert-title {
+            color: var(--danger-text);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .glass-card {
+            background: var(--card-bg);
+            box-shadow: var(--glass-highlight);
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .glass-card-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .glass-card-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
         /* --- FOOTER --- */
         .sticky-footer {
             position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 16px;
@@ -676,7 +721,7 @@
         </div>
     </div>
 
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ (ОБНОВЛЕННАЯ: FLAT CARDS) -->
+    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ (FLAT CARDS) -->
     <div id="page-post-ad" class="page sub-page">
         <div class="nav-bar">
             <button class="btn-back" onclick="closePage('page-post-ad')">
@@ -745,7 +790,7 @@
         </div>
     </div>
 
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ -->
+    <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ (ОБНОВЛЕННАЯ: GLASS PANELS) -->
     <div id="page-place-ads" class="page sub-page">
         <div class="nav-bar">
             <button class="btn-back" onclick="closePage('page-place-ads')">
@@ -758,8 +803,38 @@
             <p>Условия размещения коммерческих постов.</p>
         </div>
         <div class="content-inner">
-            <p>По всем вопросам размещения рекламы услуг или товаров обращайтесь к Администратору.</p>
-            <p>Самовольное размещение рекламных постов в чате запрещено и ведет к бану.</p>
+            <p>Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения о размещении рекламы, соответствующей тематике группы.</p>
+            <p>Для согласования условий публикации, уточнения формата и сроков необходимо обратиться к администратору. Мы обеспечиваем цивилизованный подход к сотрудничеству и помогаем донести ваше предложение до целевой аудитории.</p>
+            
+            <div class="glass-alert">
+                <span class="glass-alert-title">Важно:</span>
+                <ul style="margin:0; padding-left:16px; font-size:13px; color:var(--text-secondary);">
+                    <li>Размещение рекламы без предварительного согласования запрещено и влечёт за собой бан.</li>
+                    <li>Решение о публикации принимается администрацией на основе соответствия правилам группы.</li>
+                </ul>
+            </div>
+
+            <div class="ad-section-title">Направления, которые мы не продвигаем:</div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">1. Нецелевая тематика</span>
+                <div class="glass-card-desc">Предложения, не связанные с кинопроизводством, кастингами, творческими или техническими услугами для киноиндустрии.</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">2. Личный пиар</span>
+                <div class="glass-card-desc">Публикации, направленные исключительно на самопрезентацию («ищу работу», «смотрите моё портфолио», «готов к проектам»).</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">3. Рисковые и финансовые услуги</span>
+                <div class="glass-card-desc">Реклама криптовалют, трейдинга, инвестиций, букмекерских контор, азартных игр, микрофинансовых организаций и схожих сервисов.</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">4. Сомнительные или нелегитимные проекты</span>
+                <div class="glass-card-desc">Любые предложения, нарушающие законодательство РФ или этические нормы сообщества.</div>
+            </div>
         </div>
     </div>
 
@@ -814,7 +889,7 @@
 
     // --- TOUCH PHYSICS (Только визуал) ---
     function initTouchPhysics() {
-        const interactives = document.querySelectorAll('.card, .btn, .accordion-header, .theme-toggle, .btn-back, .step-card');
+        const interactives = document.querySelectorAll('.card, .btn, .accordion-header, .theme-toggle, .btn-back, .step-card, .glass-card');
         interactives.forEach(el => {
             el.addEventListener('touchstart', () => {
                 el.classList.add('active-state');
