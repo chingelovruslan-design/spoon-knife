@@ -2,260 +2,711 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <!-- viewport-fit=cover и запрет масштабирования -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | Minimalist Fitting</title>
+    <title>КИНОЦЕХ | App</title>
     
+    <!-- 1. TELEGRAM API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- 2. ШРИФТЫ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Montserrat:wght@400;500;600;700;800&family=Manrope:wght@400;600;800&family=IBM+Plex+Mono:wght@400;500&display=block" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- СИСТЕМА ЦВЕТОВ (ДЕНЬ / НОЧЬ) --- */
+        /* --- ПЕРЕМЕННЫЕ --- */
         :root {
-            /* ШРИФТЫ */
-            --font-base: 'Inter', -apple-system, sans-serif;
-            --font-display: 'Montserrat', sans-serif;
-            --font-tech: 'IBM Plex Mono', monospace;
+            --font-display: 'Montserrat', sans-serif; 
+            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+            /* ФИЗИКА */
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
+            --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1); 
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1); 
             
-            /* DARK THEME (DEFAULT) */
-            --bg-page: #0F0F11;
-            --bg-card: rgba(255, 255, 255, 0.04);
-            --bg-card-hover: rgba(255, 255, 255, 0.08);
-            --text-main: #F2F2F2;
-            --text-muted: #9CA3AF;
-            --border: rgba(255, 255, 255, 0.1);
-            --accent: #D4AF37; /* Золото */
+            /* ТАЙМИНГИ */
+            --duration-base: 0.3s;
+            --duration-page: 0.45s;
+
+            /* Z-INDEX LAYERS */
+            --z-noise: 0;
+            --z-home: 10;
+            --z-header: 20;
+            --z-page: 30;
+            --z-nav: 40;
+            --z-footer: 50;
+            --z-toast: 100;
+            --z-loader: 9999;
+
+            /* DARK THEME */
+            --bg-color: #0F0F11;
+            --spotlight-color: rgba(255, 255, 255, 0.12); 
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-locked-bg: rgba(255, 255, 255, 0.02);
+            --card-active-bg: rgba(255, 255, 255, 0.08);
+            --border-color: rgba(255, 255, 255, 0.08);
             
-            --alert-warn-bg: rgba(245, 158, 11, 0.1);
-            --alert-warn-text: #F59E0B;
-            --alert-danger-bg: rgba(220, 38, 38, 0.1);
-            --alert-danger-text: #EF4444;
+            /* ТОЛСТОЕ СТЕКЛО (БЛИК) */
+            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
             
-            --nav-blur: rgba(15, 15, 17, 0.85);
+            /* ТЕНИ (GOLD GLOW) */
+            --card-shadow: var(--glass-highlight), 0 12px 40px -12px rgba(212, 175, 55, 0.15);
+            
+            --text-primary: #F2F2F2;
+            --text-secondary: #9CA3AF;
+            --text-locked: #52525b;
+            --accent-color: #D4AF37; 
+            --nav-bg: rgba(15, 15, 17, 0.75); 
+            --warn-bg: rgba(245, 158, 11, 0.08);
+            --warn-border: rgba(245, 158, 11, 0.3);
+            --warn-text: #F59E0B;
+            --danger-bg: rgba(220, 38, 38, 0.08);
+            --danger-border: rgba(220, 38, 38, 0.3);
+            --danger-text: #EF4444;
+            --icon-color: #D4AF37;
+            --icon-opacity: 0.25; 
+            --icon-locked-color: #D4AF37;
+            --icon-locked-opacity: 0.08;
+            --selection-bg: rgba(212, 175, 55, 0.3);
+            
+            --skeleton-base: #1c1c1e;
+            --skeleton-highlight: #2c2c2e;
         }
 
-        /* LIGHT THEME OVERRIDE */
+        /* LIGHT THEME */
         [data-theme="light"] {
-            --bg-page: #F2F2F7;
-            --bg-card: #FFFFFF;
-            --bg-card-hover: #F5F5F5;
-            --text-main: #1C1C1E;
-            --text-muted: #636366;
-            --border: rgba(0, 0, 0, 0.1);
-            --accent: #003366; /* Строгий синий */
+            --bg-color: #F2F2F7;
+            --spotlight-color: rgba(0, 51, 102, 0.05);
+            --card-bg: #FFFFFF;
+            --card-locked-bg: #F5F5F7;
+            --card-active-bg: #FFFFFF;
+            --border-color: rgba(0, 51, 102, 0.15);
             
-            --alert-warn-bg: rgba(255, 149, 0, 0.1);
-            --alert-warn-text: #D47600;
-            --alert-danger-bg: rgba(255, 59, 48, 0.1);
-            --alert-danger-text: #D70015;
+            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 1), inset 0 0 0 1px rgba(0,0,0,0.02);
             
-            --nav-blur: rgba(242, 242, 247, 0.85);
+            /* ТЕНИ (BLUE GLOW) */
+            --card-shadow: var(--glass-highlight), 0 12px 30px -10px rgba(0, 51, 102, 0.15);
+            
+            --text-primary: #1C1C1E;
+            --text-secondary: #636366;
+            --text-locked: #8E8E93;
+            --accent-color: #003366; 
+            --nav-bg: rgba(255, 255, 255, 0.75);
+            --warn-bg: rgba(255, 149, 0, 0.1);
+            --warn-border: rgba(255, 149, 0, 0.3);
+            --warn-text: #D47600;
+            --danger-bg: rgba(255, 59, 48, 0.1);
+            --danger-border: rgba(255, 59, 48, 0.3);
+            --danger-text: #D70015;
+            --icon-color: #003366;
+            --icon-opacity: 0.25;
+            --icon-locked-color: #003366;
+            --icon-locked-opacity: 0.08;
+            --selection-bg: rgba(0, 51, 102, 0.2);
+            
+            --skeleton-base: #e5e5ea;
+            --skeleton-highlight: #f2f2f7;
         }
 
-        /* --- БАЗА --- */
-        body { margin: 0; background-color: var(--bg-page); color: var(--text-main); font-family: var(--font-base); transition: background-color 0.3s ease, color 0.3s ease; overflow: hidden; height: 100dvh; -webkit-font-smoothing: antialiased; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        
+        /* УСКОРЕННЫЕ ТРАНЗИШЕНЫ */
+        html, body, .page, .card, .nav-bar, .sticky-footer, .btn, .accordion-header, .accordion-content, .custom-alert, .step-card {
+            transition: 
+                background-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                border-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                fill var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                stroke var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-        /* СТРУКТУРА */
-        #app { position: relative; width: 100%; height: 100%; }
-        .page { position: absolute; inset: 0; overflow-y: auto; padding-bottom: 120px; background: var(--bg-page); transition: transform 0.3s ease; z-index: 10; }
-        .sub-page { transform: translateX(100%); z-index: 20; }
+        html, body { height: 100dvh; overflow: hidden; background-color: var(--bg-color); }
+        
+        body {
+            position: fixed; 
+            top: 0; left: 0; width: 100%;
+            margin: 0; padding: 0; 
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            user-select: none; -webkit-user-select: none;
+            font-variant-numeric: tabular-nums;
+            overscroll-behavior: none; 
+        }
+
+        /* УЛУЧШЕННЫЙ ШУМ (OVERLAY) */
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: var(--z-noise); opacity: 0.04; 
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII=");
+            background-repeat: repeat;
+            mix-blend-mode: overlay; 
+        }
+
+        /* ЖИВОЙ СВЕТ */
+        @keyframes breathe {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60vh;
+            background: radial-gradient(circle at 50% -10%, var(--spotlight-color) 0%, transparent 70%);
+            pointer-events: none; z-index: var(--z-noise); 
+            animation: breathe 8s ease-in-out infinite;
+            will-change: opacity, transform;
+        }
+
+        #app { position: relative; width: 100%; height: 100%; overflow: hidden; perspective: 1000px; }
+        ::-webkit-scrollbar { display: none; }
+        ::selection { background: var(--selection-bg); color: inherit; }
+
+        /* --- СКЕЛЕТОН --- */
+        #skeleton-loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color); z-index: var(--z-loader);
+            padding: 20px; padding-top: max(20px, env(safe-area-inset-top));
+            display: flex; flex-direction: column;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        #skeleton-loader.hidden { opacity: 0; visibility: hidden; }
+        
+        .sk-header { height: 40px; width: 60%; background: var(--skeleton-base); border-radius: 8px; margin: 20px auto 30px; position: relative; overflow: hidden; }
+        .sk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .sk-card { height: 130px; background: var(--skeleton-base); border-radius: 18px; position: relative; overflow: hidden; }
+        .sk-card.large { grid-column: span 2; height: 110px; }
+        
+        .sk-header::after, .sk-card::after {
+            content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+            transform: translateX(-100%);
+            background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0));
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+        /* --- СТРАНИЦЫ --- */
+        .page {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding-bottom: 140px; 
+            background-color: var(--bg-color);
+            transition: transform var(--duration-page) var(--ease-smooth), filter var(--duration-page) ease, opacity var(--duration-page) ease, background-color var(--duration-base) ease;
+            z-index: var(--z-page); 
+            overscroll-behavior-y: contain; 
+            will-change: transform, filter;
+            transform: translateZ(0); /* GPU Hack */
+            backface-visibility: hidden; 
+        }
+        #page-home { z-index: var(--z-home); }
+        
+        /* 3D ГЛУБИНА (ПАРАЛЛАКС) */
+        .page.behind { 
+            transform: scale(0.92) translateX(-15%); 
+            filter: brightness(0.6) blur(2px); 
+            border-radius: 20px; 
+            overflow: hidden; 
+            pointer-events: none;
+        }
+        
+        .sub-page { transform: translateX(100%); }
         .sub-page.active { transform: translateX(0); }
 
-        /* НАВИГАЦИЯ */
-        .nav-bar { position: sticky; top: 0; background: var(--nav-blur); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; z-index: 50; transition: background 0.3s, border-color 0.3s; }
-        .btn-back { background: none; border: none; color: var(--text-main); font-family: var(--font-display); font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 15px; cursor: pointer; padding: 0; }
-        
-        /* КНОПКА ТЕМЫ */
-        .theme-switch { background: var(--bg-card); border: 1px solid var(--border); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-main); cursor: pointer; transition: 0.3s; }
-
-        /* МЕНЮ */
-        .menu-list { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-        .menu-item { background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border); cursor: pointer; }
-        .menu-item h3 { margin: 0 0 4px; font-family: var(--font-display); font-size: 16px; }
-        .menu-item p { margin: 0; font-size: 12px; color: var(--text-muted); }
-
-        /* --- КОНТЕНТ (ОБЩИЕ ЭЛЕМЕНТЫ) --- */
-        .content-wrapper { padding: 24px 20px; max-width: 600px; margin: 0 auto; }
-        
-        .intro-text { font-size: 14px; line-height: 1.6; color: var(--text-muted); margin-bottom: 32px; }
-        .section-header { font-family: var(--font-display); font-size: 18px; font-weight: 700; text-transform: uppercase; margin: 40px 0 24px; color: var(--text-main); letter-spacing: 0.5px; }
-        
-        .steps-wrapper { display: flex; flex-direction: column; gap: 24px; }
-        .step-block { position: relative; }
-        .step-title { display: block; font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--text-main); margin-bottom: 8px; }
-        .step-desc { font-size: 14px; line-height: 1.55; color: var(--text-muted); }
-        
-        .sub-list { margin-top: 12px; padding-left: 0; list-style: none; }
-        .sub-list li { position: relative; padding-left: 16px; margin-bottom: 8px; font-size: 13px; color: var(--text-muted); }
-        .sub-list li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
-        .sub-list strong { color: var(--text-main); font-weight: 600; }
-
-        .important-block { margin-top: 32px; font-size: 13px; line-height: 1.6; color: var(--text-muted); }
-        .important-block strong { color: var(--text-main); display: block; margin-bottom: 8px; font-family: var(--font-display); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
-
-        .alert-box { margin-top: 32px; padding: 16px; border-radius: 12px; background: var(--alert-danger-bg); border: 1px solid var(--alert-danger-text); display: flex; flex-direction: column; gap: 8px; }
-        .alert-title { color: var(--alert-danger-text); font-weight: 800; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
-        .alert-text { font-size: 13px; line-height: 1.5; color: var(--text-main); opacity: 0.95; }
-
-        /* ============================================================
-           10 МИНИМАЛИСТИЧНЫХ ВАРИАНТОВ (ДЕНЬ/НОЧЬ СОВМЕСТИМЫЕ)
-           ============================================================ */
-
-        /* 1. SWISS (Швейцарский стиль) - Сетка и воздух */
-        .v-swiss .step-block { padding-top: 16px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 24px 1fr; gap: 16px; }
-        .v-swiss .step-block::before { content: counter(step-counter, decimal-leading-zero); counter-increment: step-counter; font-size: 11px; font-weight: 700; color: var(--accent); margin-top: 3px; }
-        .v-swiss .steps-wrapper { counter-reset: step-counter; gap: 0; }
-        .v-swiss .section-header { font-size: 14px; letter-spacing: 2px; border-bottom: 2px solid var(--text-main); padding-bottom: 10px; display: inline-block; }
-
-        /* 2. EDITORIAL (Редакционный) - Акцент на типографику */
-        .v-editorial .step-title { font-size: 18px; margin-bottom: 4px; }
-        .v-editorial .step-desc { font-family: 'Inter', serif; font-size: 15px; color: var(--text-muted); }
-        .v-editorial .step-block { margin-bottom: 10px; }
-        .v-editorial .sub-list li::before { content: ''; width: 4px; height: 4px; background: var(--text-main); border-radius: 50%; top: 8px; }
-
-        /* 3. TECH (Технический) - Моноширинный, строгий */
-        .v-tech { --font-base: 'IBM Plex Mono', monospace; }
-        .v-tech .section-header { background: var(--bg-card); padding: 8px 12px; font-size: 12px; border-left: 3px solid var(--accent); }
-        .v-tech .step-block { padding-left: 16px; border-left: 1px solid var(--border); margin-left: 4px; }
-        .v-tech .step-title { text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
-        .v-tech .alert-box { border-radius: 0; border: 1px dashed var(--alert-danger-text); }
-
-        /* 4. CARDS FLAT (Плоские карты) - Чистота */
-        .v-cards .step-block { background: var(--bg-card); padding: 20px; border-radius: 16px; transition: background 0.3s; }
-        .v-cards .step-title { color: var(--accent); }
-        .v-cards .steps-wrapper { gap: 12px; }
-        .v-cards .alert-box { background: var(--bg-card); border: 1px solid var(--alert-danger-text); }
-
-        /* 5. DIVIDERS (Разделители) - Классика UI */
-        .v-dividers .step-block { padding-bottom: 24px; border-bottom: 1px solid var(--border); }
-        .v-dividers .step-block:last-child { border-bottom: none; }
-        .v-dividers .step-title { font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
-        .v-dividers .step-title::after { content: '↓'; font-size: 12px; opacity: 0.3; }
-
-        /* 6. NUMBERS BIG (Крупные цифры) - Иерархия */
-        .v-big-num .steps-wrapper { counter-reset: step-counter; }
-        .v-big-num .step-block { position: relative; padding-left: 40px; }
-        .v-big-num .step-block::before { 
-            content: counter(step-counter); counter-increment: step-counter;
-            position: absolute; left: 0; top: -2px;
-            font-size: 24px; font-weight: 800; color: var(--border); font-family: var(--font-display);
+        /* --- ШАПКА --- */
+        .header {
+            padding: 20px 20px 10px; padding-top: max(20px, env(safe-area-inset-top)); 
+            display: flex; flex-direction: column; align-items: center; position: relative; z-index: var(--z-header);
         }
-        .v-big-num .step-block:hover::before { color: var(--accent); transition: 0.3s; }
 
-        /* 7. SOFT ACCENT (Мягкий акцент) - Цветная полоса */
-        .v-soft .step-block { padding-left: 16px; border-left: 2px solid var(--border); transition: border-color 0.3s; }
-        .v-soft .step-block:hover { border-left-color: var(--accent); }
-        .v-soft .step-title { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* 8. BUBBLES (Пузыри) - Современный чат-стиль */
-        .v-bubbles .step-block { background: var(--bg-card); padding: 16px 20px; border-radius: 0 16px 16px 16px; margin-left: 10px; border: 1px solid var(--border); }
-        .v-bubbles .step-block::before { content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px; background: var(--bg-card); border-left: 1px solid var(--border); border-top: 1px solid var(--border); transform: skew(0deg); border-radius: 2px; } /* Декор убран для чистоты, оставил просто форму */
-        .v-bubbles .step-title { color: var(--text-main); font-weight: 800; }
-
-        /* 9. FOCUS (Фокус) - Затемнение неактивного */
-        .v-focus .step-block { opacity: 0.7; transition: opacity 0.3s; }
-        .v-focus .step-block:hover { opacity: 1; }
-        .v-focus .step-title { color: var(--accent); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; transition: 0.3s; }
-        .v-focus .step-block:hover .step-title { text-decoration-color: var(--accent); }
-
-        /* 10. MINIMAL GRID (Сетка) - Компактность */
-        .v-grid .steps-wrapper { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        .v-grid .step-block { border: 1px solid var(--border); padding: 16px; border-radius: 8px; }
-        .v-grid .step-title { font-size: 13px; margin-bottom: 4px; color: var(--text-muted); text-transform: uppercase; }
-        .v-grid .step-desc { font-size: 13px; color: var(--text-main); }
-
-        /* --- ПАНЕЛЬ УПРАВЛЕНИЯ --- */
-        .controls-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: var(--nav-blur); backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border); padding: 12px;
-            display: flex; gap: 8px; overflow-x: auto; z-index: 100;
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
-        }
-        .style-btn {
-            flex: 0 0 auto; height: 36px; padding: 0 16px; border-radius: 18px;
-            background: var(--bg-card); border: 1px solid var(--border);
-            color: var(--text-main); font-size: 12px; font-weight: 600;
-            cursor: pointer; transition: 0.2s; white-space: nowrap;
-        }
-        .style-btn.active { background: var(--text-main); color: var(--bg-page); border-color: var(--text-main); }
-        
-        .toggle-panel {
-            position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px;
-            background: var(--text-main); color: var(--bg-page); border-radius: 50%;
+        .theme-toggle {
+            position: absolute; top: max(20px, env(safe-area-inset-top)); right: 20px;
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--card-bg); border: 1px solid var(--border-color);
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 101; cursor: pointer;
+            cursor: pointer; color: var(--text-primary); overflow: hidden; 
+            transition: transform 0.3s var(--ease-spring), background-color var(--duration-base) ease, border-color var(--duration-base) ease;
+            box-shadow: var(--glass-highlight);
+        }
+        .theme-toggle::after { content: ''; position: absolute; top: -15px; left: -15px; right: -15px; bottom: -15px; }
+        .theme-toggle:active, .theme-toggle.active-state { transform: scale(0.85); }
+        .theme-icon { position: absolute; transition: all 0.4s var(--ease-spring); }
+        #icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
+        #icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
+        [data-theme="light"] #icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+        [data-theme="light"] #icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
+
+        /* БРЕНД */
+        .brand-title {
+            font-family: var(--font-display); font-size: 30px; font-weight: 800; 
+            letter-spacing: 2px; 
+            text-transform: uppercase; margin-top: 20px; margin-bottom: 4px;
+            background: linear-gradient(to right, #bf953f 0%, #fcf6ba 20%, #b38728 40%, #fbf5b7 60%, #aa771c 80%, #bf953f 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            animation: shine 6s linear infinite; 
+            will-change: background-position;
+            transition: all 0.3s ease;
+        }
+        [data-theme="light"] .brand-title {
+            background: linear-gradient(to right, #003366 0%, #4da6ff 20%, #003366 40%, #4da6ff 60%, #003366 100%);
+            background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        @keyframes shine { to { background-position: 200% center; } }
+
+        .brand-subtitle {
+            font-family: var(--font-display); font-size: 10px; color: var(--accent-color); opacity: 0.9;
+            text-transform: uppercase; letter-spacing: 3px; font-weight: 600;
         }
 
-        .panel-container {
-            position: fixed; bottom: 80px; left: 10px; right: 10px;
-            background: var(--bg-page); border: 1px solid var(--border);
-            border-radius: 20px; padding: 16px; z-index: 100;
-            transform: translateY(150%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        /* --- КАРТОЧКИ --- */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 16px; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            box-shadow: var(--card-shadow);
+            border-radius: 18px; padding: 18px; height: 130px; position: relative; overflow: hidden; cursor: pointer;
+            transition: transform 0.2s var(--ease-spring), background-color var(--duration-base) ease, border-color var(--duration-base) ease, box-shadow var(--duration-base) ease;
+            animation: fadeInUp 0.5s var(--ease-out-expo) backwards; backface-visibility: hidden;
+            will-change: transform;
+            transform: translateZ(0);
         }
-        .panel-container.open { transform: translateY(0); }
-        .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        .card:nth-child(1) { animation-delay: 0.05s; }
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.15s; }
+        .card:nth-child(4) { animation-delay: 0.2s; }
+        .card:nth-child(5) { animation-delay: 0.25s; }
+        
+        .card:active, .card.active-state { transform: scale(0.97); background: var(--card-active-bg); border-color: var(--accent-color); transition-duration: 0.1s; }
+        
+        .card.large { grid-column: span 2; height: 110px; }
+        
+        .card-content { 
+            position: relative; z-index: 2; width: 100%; pointer-events: none;
+            opacity: 0; animation: fadeInContent 0.4s ease forwards; animation-delay: 0.2s;
+        }
+        @keyframes fadeInContent { to { opacity: 1; } }
+
+        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.35; max-width: 95%; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; font-weight: 500; letter-spacing: 0.2px; }
+        .card-watermark {
+            position: absolute; right: 8px; bottom: 8px; width: 55px; height: 55px;
+            color: var(--icon-color); opacity: var(--icon-opacity);
+            transition: transform 0.4s var(--ease-spring), opacity 0.3s ease, color 0.6s ease; 
+            z-index: 1; pointer-events: none;
+        }
+        .card:active .card-watermark, .card.active-state .card-watermark { transform: scale(1.1) rotate(-8deg); opacity: calc(var(--icon-opacity) + 0.15); }
+        
+        .card.locked { background: var(--card-locked-bg); border-color: transparent; box-shadow: none; cursor: default; }
+        .card.locked:active, .card.locked.active-state { transform: scale(0.96); } 
+        .card.locked .card-title { color: var(--text-locked); }
+        .card.locked .card-watermark { color: var(--icon-locked-color); opacity: var(--icon-locked-opacity); }
+        
+        .badge-soon {
+            position: absolute; bottom: 12px; left: 12px; background: var(--bg-color); 
+            border: 1px solid var(--border-color); padding: 4px 7px; border-radius: 6px;
+            font-size: 9px; font-weight: 800; color: var(--text-locked); z-index: 3; text-transform: uppercase; opacity: 0.8;
+        }
+
+        /* --- DEVELOPER CREDITS --- */
+        .dev-credits {
+            text-align: center;
+            font-family: var(--font-display);
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            opacity: 0.4;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        /* --- ВНУТРЕННИЕ СТРАНИЦЫ --- */
+        .nav-bar {
+            display: flex; align-items: center; padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); 
+            position: sticky; top: 0; background: var(--nav-bg);
+            backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+            z-index: var(--z-nav); border-bottom: 1px solid var(--border-color);
+        }
+        @supports not (backdrop-filter: blur(20px)) { 
+            .nav-bar, .sticky-footer { background: var(--bg-color); opacity: 0.98; } 
+        }
+        
+        .btn-back {
+            background: none; border: none; color: var(--text-primary);
+            display: flex; align-items: center; font-size: 15px; cursor: pointer; padding: 0;
+            font-family: var(--font-display); font-weight: 600; position: relative; transition: opacity 0.2s ease;
+        }
+        .btn-back::after { content: ''; position: absolute; top: -15px; left: -15px; right: -25px; bottom: -15px; }
+        .btn-back:active, .btn-back.active-state { opacity: 0.6; }
+        .btn-back svg { width: 20px; height: 20px; margin-right: 6px; }
+        .page-intro { padding: 24px 20px; border-bottom: 1px solid var(--border-color); }
+        .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+        .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
+
+        /* --- АККОРДЕОН --- */
+        .accordion-item { position: relative; }
+        .accordion-item::after {
+            content: ''; position: absolute; bottom: 0; left: 20px; right: 20px; height: 1px;
+            background: linear-gradient(to right, transparent, var(--border-color) 10%, var(--border-color) 90%, transparent);
+        }
+        .accordion-header {
+            width: 100%; background: none; border: none; padding: 22px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            text-align: left; cursor: pointer; position: relative; transition: background-color 0.2s ease;
+        }
+        .accordion-header:active, .accordion-header.active-state { background: var(--card-active-bg); }
+        .acc-title-group { display: flex; align-items: center; gap: 14px; }
+        .acc-icon { width: 22px; height: 22px; color: var(--accent-color); flex-shrink: 0; }
+        .acc-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 1px; }
+        .acc-chevron { width: 18px; height: 18px; color: var(--text-secondary); transition: transform 0.3s var(--ease-spring), color 0.3s ease; }
+        .accordion-item.active .acc-chevron { transform: rotate(180deg); }
+        .accordion-item.active .acc-title { color: var(--accent-color); }
+        .accordion-content {
+            max-height: 0; overflow: hidden; 
+            transition: max-height 0.4s var(--ease-smooth), background-color 0.4s ease;
+            background: rgba(0,0,0,0.015);
+        }
+        
+        /* --- КОНТЕНТ --- */
+        .content-inner { 
+            padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; 
+            font-variant-numeric: tabular-nums;
+        }
+        .content-inner > * {
+            opacity: 0; animation: fadeInUp 0.4s ease forwards;
+        }
+        .content-inner > *:nth-child(1) { animation-delay: 0.05s; }
+        .content-inner > *:nth-child(2) { animation-delay: 0.1s; }
+        .content-inner > *:nth-child(3) { animation-delay: 0.15s; }
+        .content-inner > *:nth-child(4) { animation-delay: 0.2s; }
+        .content-inner > *:nth-child(5) { animation-delay: 0.25s; }
+
+        .content-inner strong { color: var(--text-primary); }
+        .content-inner ul { padding-left: 20px; margin-bottom: 16px; list-style: none; }
+        .content-inner li { margin-bottom: 8px; position: relative; }
+        .content-inner li::before { content: '—'; position: absolute; left: -20px; color: var(--accent-color); font-weight: 700; }
+
+        /* --- НОВЫЕ СТИЛИ ДЛЯ "FLAT CARDS" (Разместить объявление) --- */
+        .ad-intro { font-size: 14px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 24px; }
+        .ad-section-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; text-transform: uppercase; margin: 30px 0 20px; color: var(--text-primary); letter-spacing: 0.5px; }
+        
+        .steps-wrapper { display: flex; flex-direction: column; gap: 12px; }
+        .step-card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            padding: 20px; 
+            border-radius: 16px; 
+            transition: background-color 0.3s ease, border-color 0.3s ease; 
+        }
+        .step-card:active { background: var(--card-active-bg); }
+        
+        .step-card-title { 
+            font-family: var(--font-display); 
+            font-weight: 700; 
+            font-size: 15px; 
+            color: var(--accent-color); 
+            margin-bottom: 8px; 
+            display: block; 
+        }
+        .step-card-desc { font-size: 14px; line-height: 1.55; color: var(--text-secondary); }
+        
+        .ad-sub-list { margin-top: 12px; padding-left: 0; list-style: none; }
+        .ad-sub-list li { position: relative; padding-left: 16px; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); }
+        .ad-sub-list li::before { content: '—'; position: absolute; left: 0; color: var(--accent-color); }
+        .ad-sub-list strong { color: var(--text-primary); font-weight: 600; }
+
+        .important-block { margin-top: 32px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+        .important-block strong { color: var(--text-primary); display: block; margin-bottom: 8px; font-family: var(--font-display); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+
+        /* --- ALERTS --- */
+        .custom-alert { border-radius: 12px; padding: 14px 16px; margin: 18px 0; display: flex; gap: 12px; align-items: flex-start; }
+        .alert-icon-box { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+        .alert-body { flex: 1; }
+        .alert-title { display: block; font-weight: 700; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .alert-text { font-size: 13px; opacity: 0.95; line-height: 1.45; }
+        .alert-warning { background: var(--warn-bg); border: 1px solid var(--warn-border); }
+        .alert-warning .alert-title, .alert-warning .alert-icon-box { color: var(--warn-text); }
+        .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); }
+        .alert-danger .alert-title, .alert-danger .alert-icon-box { color: var(--danger-text); }
+
+        /* --- FOOTER --- */
+        .sticky-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 16px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-top: 1px solid var(--border-color); display: flex; gap: 10px; z-index: var(--z-footer);
+        }
+        .btn {
+            flex: 1; height: 42px; border-radius: 12px; border: none;
+            font-family: var(--font-display); font-weight: 600; font-size: 14px; 
+            display: flex; align-items: center; justify-content: center; gap: 10px; 
+            cursor: pointer; 
+            box-shadow: var(--glass-highlight);
+            position: relative; overflow: hidden; padding: 0; 
+            transition: transform 0.2s var(--ease-spring), background-color 0.2s ease;
+        }
+        .btn:active, .btn.active-state { transform: scale(0.95); }
+        .btn-primary { background: var(--accent-color); color: #000; }
+        [data-theme="light"] .btn-primary { color: #FFF; } 
+        .btn-primary::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.6), transparent);
+            transform: skewX(-25deg); mix-blend-mode: overlay; animation: shimmer-anim 6s infinite linear; pointer-events: none;
+        }
+        @keyframes shimmer-anim { 0% { left: -100%; } 35% { left: 200%; } 100% { left: 200%; } }
+        .btn-secondary { background: var(--card-active-bg); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn svg { display: block; width: 20px; height: 20px; flex-shrink: 0; }
+
+        /* --- TOAST --- */
+        .toast-container {
+            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
+            z-index: var(--z-toast); pointer-events: none;
+            display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;
+        }
+        .toast {
+            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px);
+            color: #FFF; padding: 10px 20px; border-radius: 50px;
+            font-size: 12px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            opacity: 0; transform: translateY(10px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        [data-theme="light"] .toast { background: rgba(0,0,0,0.8); }
+        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
 
     </style>
 </head>
-<body>
+<body ontouchstart="">
+
+<!-- NOISE OVERLAY -->
+<div class="noise-overlay"></div>
+
+<!-- СКЕЛЕТОН -->
+<div id="skeleton-loader">
+    <div class="sk-header"></div>
+    <div class="sk-grid">
+        <div class="sk-card large"></div>
+        <div class="sk-card"></div>
+        <div class="sk-card"></div>
+        <div class="sk-card"></div>
+        <div class="sk-card"></div>
+    </div>
+</div>
 
 <div id="app">
+
     <!-- ГЛАВНАЯ -->
     <div id="page-home" class="page">
+        <header class="header">
+            <!-- КНОПКА ТЕМЫ -->
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Сменить тему">
+                <svg id="icon-moon" class="theme-icon" style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg id="icon-sun" class="theme-icon" style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            </button>
+
+            <div id="brand-title" class="brand-title">КИНОЦЕХ</div>
+            <div class="brand-subtitle">ВЕРСИЯ 3.4</div>
+        </header>
+
+        <div class="menu-grid">
+            <div class="card large" onclick="openPage('page-rules')">
+                <div class="card-content">
+                    <div class="card-title">Правила группы</div>
+                    <div class="card-desc">Обязательно к ознакомлению</div>
+                </div>
+                <div class="card-watermark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </div>
+            </div>
+
+            <div class="card" onclick="openPage('page-post-ad')">
+                <div class="card-content">
+                    <div class="card-title">Разместить объявление</div>
+                </div>
+                <div class="card-watermark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                </div>
+            </div>
+
+            <div class="card" onclick="openPage('page-place-ads')">
+                <div class="card-content">
+                    <div class="card-title">Разместить рекламу</div>
+                </div>
+                <div class="card-watermark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
+                </div>
+            </div>
+
+            <div class="card locked" onclick="handleLockedClick(this, 'Раздел находится в разработке')">
+                <span class="badge-soon">Скоро</span>
+                <div class="card-content">
+                    <div class="card-title">Проверенные бригадиры</div>
+                </div>
+                <div class="card-watermark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <polyline points="9 12 11 14 15 10"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="card locked" onclick="handleLockedClick(this, 'Скоро появятся полезные статьи')">
+                <span class="badge-soon">Скоро</span>
+                <div class="card-content">
+                    <div class="card-title">Полезные статьи</div>
+                </div>
+                <div class="card-watermark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEVELOPER CREDITS -->
+        <div class="dev-credits">
+            © 2022–2026 KINOCEKH. Dev by Ruslan
+        </div>
+
+    </div>
+
+    <!-- СТРАНИЦА: ПРАВИЛА -->
+    <div id="page-rules" class="page sub-page">
         <div class="nav-bar">
-            <span style="font-weight: 800; letter-spacing: 1px;">КИНОЦЕХ</span>
-            <button class="theme-switch" onclick="toggleTheme()">
-                <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            <button class="btn-back" onclick="closePage('page-rules')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Назад
             </button>
         </div>
-        <div class="menu-list">
-            <div class="menu-item" onclick="openPage('page-ad')">
-                <h3>Разместить объявление</h3>
-                <p>Нажмите для входа в примерочную</p>
+
+        <div class="page-intro">
+            <p><strong>Премиум-платформа для индустрии.</strong></p>
+            <p>Заказчики находят исполнителей, Актеры и АМС — проекты. Чтобы всем было комфортно, за порядком следит Модератор и автоматическая система.</p>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="acc-title-group">
+                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        <span class="acc-title">1. Модерация и Доступ</span>
+                    </div>
+                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-inner">
+                        <p><strong>1.1. Регламент вступления</strong><br>
+                        Группа работает в закрытом режиме. Заявки рассматриваются вручную (до 24 часов). Пустые аккаунты отклоняются.</p>
+                        <p><strong>1.2. Техническая защита</strong><br>
+                        При вступлении возможность писать временно отключена (фильтр от спамеров).</p>
+                        <p><strong>1.4. Ссылки и Безопасность</strong><br>
+                        Подозрительные ссылки блокируются ботом.</p>
+                        <p><strong>1.5. «Анти-Бегунок»</strong><br>
+                        Частый выход и вход (более 4-х раз) — автоматический бан.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="acc-title-group">
+                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="10" cy="7" r="4"></circle>
+                            <path d="M10.3 15H7a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="17" cy="17" r="3"></circle>
+                            <line x1="21" y1="21" x2="19" y2="19"></line>
+                        </svg>
+                        <span class="acc-title">2. Для Бригадиров</span>
+                    </div>
+                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-inner">
+                        <p><strong>2.1. Оформление объявления</strong><br>
+                        Указывайте сразу: Город, Дату, Проект, Типаж, Занятость, Гонорар. Если позиция закрыта — удалите пост.</p>
+                        <p><strong>2.2. Гонорары (Москва)</strong><br>
+                        Минимум: от 2500₽ / смена.</p>
+                        <div class="custom-alert alert-warning">
+                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                            <div class="alert-body">
+                                <span class="alert-title">Исключение (Москва):</span>
+                                <span class="alert-text">2000₽ допускается только за короткую смену (до 6 часов). Злоупотребление наказывается.</span>
+                            </div>
+                        </div>
+                        <p><strong>2.3. Неизвестный гонорар</strong><br>
+                        Пишите «По договоренности». Фразы без конкретики удаляются.</p>
+                        <p><strong>2.5. Запрет на перегон трафика</strong><br>
+                        Запрещено принуждать подписываться на каналы через автоответчик или ЛС.</p>
+                        <div class="custom-alert alert-danger">
+                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></div>
+                            <div class="alert-body">
+                                <span class="alert-title">Санкция:</span>
+                                <span class="alert-text">Полное закрытие доступа.</span>
+                            </div>
+                        </div>
+                        <p><strong>2.6. ЗАПРЕТЫ</strong><br>
+                        Эскорт, порнография, крипто-схемы.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="acc-title-group">
+                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10c0-4.4 3.6-8 8-8s8 3.6 8 8a8 8 0 0 1-8 8c-4.4 0-8-3.6-8-8z"></path><path d="M14 14a2 2 0 0 1 2 2"></path><path d="M10 14a2 2 0 0 0-2 2"></path><path d="M10 10h.01"></path><path d="M14 10h.01"></path><path d="M12 18a3 3 0 0 0 3-3"></path></svg>
+                        <span class="acc-title">3. Для Актеров и АМС</span>
+                    </div>
+                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-inner">
+                        <p><strong>3.1. Чистота чата</strong><br>
+                        Не пишите «Я отправил» в общий чат. Заявки — строго по контактам.</p>
+                        <p><strong>3.2. Черный список</strong><br>
+                        Невыход, пьянство, агрессия, шантаж — бан.</p>
+                        <p><strong>3.3. Конфликты</strong><br>
+                        Споры решаются в группе «Разбор полетов», а не в общем чате.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- СТРАНИЦА ОБЪЯВЛЕНИЯ -->
-    <div id="page-ad" class="page sub-page">
+    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ (ОБНОВЛЕННАЯ: FLAT CARDS) -->
+    <div id="page-post-ad" class="page sub-page">
         <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-ad')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <button class="btn-back" onclick="closePage('page-post-ad')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 Назад
             </button>
-            <button class="theme-switch" onclick="toggleTheme()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            </button>
         </div>
-
-        <!-- КОНТЕЙНЕР ДЛЯ СТИЛИЗАЦИИ -->
-        <div id="content-area" class="content-wrapper v-swiss">
-            
-            <p class="intro-text">
+        
+        <div class="content-inner">
+            <p class="ad-intro">
                 Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
             </p>
 
-            <div class="section-header">
+            <div class="ad-section-title">
                 🔍 Процедура верификации
             </div>
 
             <div class="steps-wrapper">
                 <!-- ШАГ 1 -->
-                <div class="step-block">
-                    <span class="step-title">Напишите Админу</span>
-                    <div class="step-desc">Свяжитесь с модератором для начала проверки.</div>
+                <div class="step-card">
+                    <span class="step-card-title">1. Напишите Админу</span>
+                    <div class="step-card-desc">Свяжитесь с модератором для начала проверки.</div>
                 </div>
 
                 <!-- ШАГ 2 -->
-                <div class="step-block">
-                    <span class="step-title">Подготовьте материалы</span>
-                    <div class="step-desc">
+                <div class="step-card">
+                    <span class="step-card-title">2. Подготовьте материалы</span>
+                    <div class="step-card-desc">
                         Отправьте текст поста, который планируете опубликовать.
-                        <ul class="sub-list">
+                        <ul class="ad-sub-list">
                             <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
                             <li>Для кино/сериалов: вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
                             <li>Для рекламы, рилсов, контента для соцсетей: ссылку на официальный канал заказчика, техническое задание, примеры ранее реализованных проектов.</li>
@@ -264,9 +715,9 @@
                 </div>
 
                 <!-- ШАГ 3 -->
-                <div class="step-block">
-                    <span class="step-title">Проверка профиля</span>
-                    <div class="step-desc">
+                <div class="step-card">
+                    <span class="step-card-title">3. Проверка профиля</span>
+                    <div class="step-card-desc">
                         Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
                     </div>
                 </div>
@@ -280,75 +731,247 @@
             </div>
 
             <!-- АНТИФРОД -->
-            <div class="alert-box">
-                <div class="alert-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                    Антифрод-правило
+            <div class="custom-alert alert-danger">
+                <div class="alert-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </div>
-                <div class="alert-text">
-                    Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
+                <div class="alert-body">
+                    <span class="alert-title">Антифрод-правило</span>
+                    <span class="alert-text">
+                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
+                    </span>
                 </div>
             </div>
-
-            <div style="height: 100px;"></div>
         </div>
     </div>
-</div>
 
-<!-- КНОПКА ОТКРЫТИЯ ПАНЕЛИ -->
-<div class="toggle-panel" onclick="togglePanel()">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-</div>
-
-<!-- ПАНЕЛЬ ВЫБОРА СТИЛЯ -->
-<div class="panel-container" id="stylePanel">
-    <div style="text-align: center; font-size: 11px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Выберите стиль (Minimalist)</div>
-    <div class="panel-grid">
-        <button class="style-btn active" onclick="setStyle('v-swiss', this)">1. Swiss Grid</button>
-        <button class="style-btn" onclick="setStyle('v-editorial', this)">2. Editorial</button>
-        <button class="style-btn" onclick="setStyle('v-tech', this)">3. Tech Mono</button>
-        <button class="style-btn" onclick="setStyle('v-cards', this)">4. Flat Cards</button>
-        <button class="style-btn" onclick="setStyle('v-dividers', this)">5. Clean Dividers</button>
-        <button class="style-btn" onclick="setStyle('v-big-num', this)">6. Big Numbers</button>
-        <button class="style-btn" onclick="setStyle('v-soft', this)">7. Soft Accent</button>
-        <button class="style-btn" onclick="setStyle('v-bubbles', this)">8. Chat Bubbles</button>
-        <button class="style-btn" onclick="setStyle('v-focus', this)">9. Focus Mode</button>
-        <button class="style-btn" onclick="setStyle('v-grid', this)">10. Minimal Grid</button>
+    <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ -->
+    <div id="page-place-ads" class="page sub-page">
+        <div class="nav-bar">
+            <button class="btn-back" onclick="closePage('page-place-ads')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                Назад
+            </button>
+        </div>
+        <div class="page-intro">
+            <p><strong>Реклама и Сотрудничество</strong></p>
+            <p>Условия размещения коммерческих постов.</p>
+        </div>
+        <div class="content-inner">
+            <p>По всем вопросам размещения рекламы услуг или товаров обращайтесь к Администратору.</p>
+            <p>Самовольное размещение рекламных постов в чате запрещено и ведет к бану.</p>
+        </div>
     </div>
+
+    <!-- ФУТЕР -->
+    <div class="sticky-footer">
+        <button class="btn btn-primary" onclick="window.open('https://t.me/boost/kinocekh', '_blank')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+            Boost
+        </button>
+        <button class="btn btn-secondary" onclick="window.open('https://t.me/kinocekhadmin', '_blank')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            Админ
+        </button>
+    </div>
+
+    <!-- КОНТЕЙНЕР ДЛЯ УВЕДОМЛЕНИЙ -->
+    <div id="toast-container" class="toast-container"></div>
+
 </div>
 
 <script>
-    // НАВИГАЦИЯ
-    function openPage(id) {
-        document.getElementById(id).classList.add('active');
-    }
-    function closePage(id) {
-        document.getElementById(id).classList.remove('active');
+    // --- ИНИЦИАЛИЗАЦИЯ TELEGRAM ---
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // ПЕРЕХВАТ КНОПКИ "НАЗАД" (ANDROID)
+    tg.BackButton.onClick(() => {
+        const activePage = document.querySelector('.sub-page.active');
+        if (activePage) {
+            closePage(activePage.id);
+        } else {
+            tg.close();
+        }
+    });
+
+    // --- SKELETON LOADER (СИНХРОНИЗАЦИЯ ШРИФТОВ) ---
+    window.addEventListener('load', () => {
+        const skeleton = document.getElementById('skeleton-loader');
+        
+        // Ждем загрузку шрифта Montserrat
+        document.fonts.ready.then(() => {
+            skeleton.classList.add('hidden');
+            setTimeout(() => { skeleton.style.display = 'none'; }, 500);
+        });
+        
+        initTouchPhysics();
+        restoreState(); 
+        checkConnection(); 
+        initTheme();
+    });
+
+    // --- TOUCH PHYSICS (Только визуал) ---
+    function initTouchPhysics() {
+        const interactives = document.querySelectorAll('.card, .btn, .accordion-header, .theme-toggle, .btn-back, .step-card');
+        interactives.forEach(el => {
+            el.addEventListener('touchstart', () => {
+                el.classList.add('active-state');
+            }, { passive: true });
+            el.addEventListener('touchend', () => {
+                setTimeout(() => { el.classList.remove('active-state'); }, 150);
+            }, { passive: true });
+            el.addEventListener('touchcancel', () => { el.classList.remove('active-state'); }, { passive: true });
+        });
     }
 
-    // ТЕМА (ДЕНЬ/НОЧЬ)
-    function toggleTheme() {
-        const body = document.body;
-        if (body.getAttribute('data-theme') === 'light') {
-            body.removeAttribute('data-theme');
+    // --- СВАЙП НАЗАД ---
+    let touchStartX = 0;
+    document.addEventListener('touchstart', e => { 
+        touchStartX = e.changedTouches[0].screenX; 
+    }, {passive: true});
+    
+    document.addEventListener('touchend', e => {
+        const touchEndX = e.changedTouches[0].screenX;
+        // Если свайп слева направо больше 100px
+        if (touchEndX - touchStartX > 100) { 
+            const activePage = document.querySelector('.sub-page.active');
+            if (activePage) {
+                closePage(activePage.id);
+            }
+        }
+    }, {passive: true});
+
+    // --- ОБРАБОТКА ЗАКРЫТЫХ РАЗДЕЛОВ ---
+    function handleLockedClick(card, message) {
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred('error');
+        }
+        showToast(message);
+    }
+
+    // --- TOAST ---
+    function showToast(message) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        container.appendChild(toast);
+        requestAnimationFrame(() => { toast.classList.add('show'); });
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => { toast.remove(); }, 300);
+        }, 2000);
+    }
+
+    // --- УМНЫЕ УВЕДОМЛЕНИЯ (ИНТЕРНЕТ) ---
+    function checkConnection() {
+        window.addEventListener('offline', () => {
+            showToast('Нет соединения с интернетом');
+        });
+        window.addEventListener('online', () => {
+            showToast('Соединение восстановлено');
+        });
+    }
+
+    // --- THEME (СИСТЕМНАЯ + РУЧНАЯ) ---
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            if (savedTheme === 'light') document.body.setAttribute('data-theme', 'light');
         } else {
-            body.setAttribute('data-theme', 'light');
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                document.body.setAttribute('data-theme', 'light');
+            }
         }
     }
 
-    // ПРИМЕРОЧНАЯ
-    function togglePanel() {
-        document.getElementById('stylePanel').classList.toggle('open');
+    function toggleTheme() {
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+        const body = document.body;
+        if (body.getAttribute('data-theme') === 'light') {
+            body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            body.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+        }
     }
 
-    function setStyle(className, btn) {
-        const content = document.getElementById('content-area');
-        // Удаляем все классы стилей
-        content.className = 'content-wrapper ' + className;
+    // --- NAVIGATION & MEMORY (ПАМЯТЬ СКРОЛЛА) ---
+    const scrollPositions = {}; 
+
+    function openPage(pageId) {
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+        const page = document.getElementById(pageId);
+        const home = document.getElementById('page-home');
         
-        // Активная кнопка
-        document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        if (tg.BackButton) tg.BackButton.show();
+
+        home.classList.add('behind');
+        page.classList.add('active');
+        
+        if (scrollPositions[pageId]) {
+            page.scrollTop = scrollPositions[pageId];
+        } else {
+            page.scrollTop = 0;
+        }
+        
+        localStorage.setItem('lastPage', pageId);
+    }
+
+    function closePage(pageId) { 
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+        const page = document.getElementById(pageId);
+        const home = document.getElementById('page-home');
+        
+        scrollPositions[pageId] = page.scrollTop;
+
+        if (tg.BackButton) tg.BackButton.hide();
+
+        page.classList.remove('active');
+        setTimeout(() => {
+            home.classList.remove('behind');
+        }, 50);
+        
+        localStorage.removeItem('lastPage');
+    }
+
+    function restoreState() {
+        const lastPageId = localStorage.getItem('lastPage');
+        if (lastPageId) {
+            const page = document.getElementById(lastPageId);
+            const home = document.getElementById('page-home');
+            if (page && home) {
+                if (tg.BackButton) tg.BackButton.show();
+                home.classList.add('behind');
+                page.classList.add('active');
+            }
+        }
+    }
+
+    // --- ACCORDION ---
+    function toggleAccordion(header) {
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+        const isActive = item.classList.contains('active');
+        
+        document.querySelectorAll('.accordion-item').forEach(accItem => {
+            accItem.classList.remove('active');
+            accItem.querySelector('.accordion-content').style.maxHeight = null;
+        });
+
+        if (!isActive) {
+            item.classList.add('active');
+            content.style.maxHeight = content.scrollHeight + "px";
+        }
     }
 </script>
 
