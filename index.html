@@ -39,13 +39,17 @@
             --z-toast: 100;
             --z-loader: 9999;
 
-            /* DARK THEME */
+            /* DARK THEME (DEFAULT) */
             --bg-color: #0F0F11;
             --spotlight-color: rgba(255, 255, 255, 0.12); 
             --card-bg: rgba(255, 255, 255, 0.04);
             --card-locked-bg: rgba(255, 255, 255, 0.02);
             --card-active-bg: rgba(255, 255, 255, 0.08);
             --border-color: rgba(255, 255, 255, 0.08);
+            
+            /* Цвета для Lite Mode (без прозрачности) */
+            --nav-bg-lite: #0F0F11;
+            --card-bg-lite: #18181A;
             
             /* ТОЛСТОЕ СТЕКЛО (БЛИК) */
             --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
@@ -58,7 +62,6 @@
             --text-locked: #52525b;
             --accent-color: #D4AF37; 
             --nav-bg: rgba(15, 15, 17, 0.75); 
-            --nav-bg-lite: #0F0F11; /* Solid color for Lite Mode */
             --warn-bg: rgba(245, 158, 11, 0.08);
             --warn-border: rgba(245, 158, 11, 0.3);
             --warn-text: #F59E0B;
@@ -84,6 +87,9 @@
             --card-active-bg: #FFFFFF;
             --border-color: rgba(0, 51, 102, 0.15);
             
+            --nav-bg-lite: #F2F2F7;
+            --card-bg-lite: #FFFFFF;
+            
             --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 1), inset 0 0 0 1px rgba(0,0,0,0.02);
             
             /* ТЕНИ (BLUE GLOW) */
@@ -94,7 +100,6 @@
             --text-locked: #8E8E93;
             --accent-color: #003366; 
             --nav-bg: rgba(255, 255, 255, 0.75);
-            --nav-bg-lite: #F2F2F7; /* Solid color for Lite Mode */
             --warn-bg: rgba(255, 149, 0, 0.1);
             --warn-border: rgba(255, 149, 0, 0.3);
             --warn-text: #D47600;
@@ -163,7 +168,7 @@
             animation: breathe 8s ease-in-out infinite;
             will-change: opacity, transform;
         }
-        /* LITE MODE: Отключаем анимацию фона */
+        /* LITE MODE: Статичный свет без анимации */
         .lite-mode body::before { animation: none; opacity: 0.5; }
 
         #app { position: relative; width: 100%; height: 100%; overflow: hidden; perspective: 1000px; }
@@ -347,7 +352,7 @@
             z-index: var(--z-nav); border-bottom: 1px solid var(--border-color);
         }
         /* LITE MODE: Убираем блюр, ставим непрозрачный фон */
-        .lite-mode .nav-bar { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--nav-bg-lite); opacity: 0.96; }
+        .lite-mode .nav-bar { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--nav-bg-lite); opacity: 0.98; }
 
         @supports not (backdrop-filter: blur(20px)) { 
             .nav-bar, .sticky-footer { background: var(--bg-color); opacity: 0.98; } 
@@ -482,7 +487,7 @@
             -webkit-backdrop-filter: blur(10px);
         }
         /* LITE MODE: Без блюра */
-        .lite-mode .glass-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--card-bg); }
+        .lite-mode .glass-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--card-bg-lite); }
 
         .glass-card-title {
             font-family: var(--font-display);
@@ -508,7 +513,7 @@
             border-top: 1px solid var(--border-color); display: flex; gap: 10px; z-index: var(--z-footer);
         }
         /* LITE MODE: Убираем блюр */
-        .lite-mode .sticky-footer { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--nav-bg-lite); opacity: 0.96; }
+        .lite-mode .sticky-footer { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--nav-bg-lite); opacity: 0.98; }
 
         .btn {
             flex: 1; height: 42px; border-radius: 12px; border: none;
@@ -887,214 +892,33 @@
     tg.ready();
     tg.expand();
 
-    // --- АВТО-ОПРЕДЕЛЕНИЕ ПРОИЗВОДИТЕЛЬНОСТИ (LITE MODE) ---
-    function initPerformance() {
-        // 1. Проверка на режим энергосбережения
-        const isLowPower = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        
-        // 2. Проверка на iPhone X (разрешение 375x812, pixel ratio 3)
-        const isIPhoneX = (window.screen.height === 812 && window.screen.width === 375 && window.devicePixelRatio === 3);
-        
-        // 3. Проверка на Android (часто проблемы с backdrop-filter)
-        const isAndroid = /Android/i.test(navigator.userAgent);
-
-        // Если совпало что-то из списка - включаем Lite Mode
-        if (isLowPower || isIPhoneX || isAndroid) {
-            document.body.classList.add('lite-mode');
-            console.log('Lite Mode Activated: Performance Optimized');
-        }
-    }
-
-    // ПЕРЕХВАТ КНОПКИ "НАЗАД" (ANDROID)
-    tg.BackButton.onClick(() => {
-        const activePage = document.querySelector('.sub-page.active');
-        if (activePage) {
-            closePage(activePage.id);
-        } else {
-            tg.close();
-        }
-    });
-
-    // --- SKELETON LOADER (СИНХРОНИЗАЦИЯ ШРИФТОВ) ---
-    window.addEventListener('load', () => {
-        initPerformance(); // Запускаем проверку производительности
-        
-        const skeleton = document.getElementById('skeleton-loader');
-        
-        // Ждем загрузку шрифта Montserrat
-        document.fonts.ready.then(() => {
-            skeleton.classList.add('hidden');
-            setTimeout(() => { skeleton.style.display = 'none'; }, 500);
-        });
-        
-        initTouchPhysics();
-        restoreState(); 
-        checkConnection(); 
-        initTheme();
-    });
-
-    // --- TOUCH PHYSICS (Только визуал) ---
-    function initTouchPhysics() {
-        const interactives = document.querySelectorAll('.card, .btn, .accordion-header, .theme-toggle, .btn-back, .step-card, .glass-card');
-        interactives.forEach(el => {
-            el.addEventListener('touchstart', () => {
-                el.classList.add('active-state');
-            }, { passive: true });
-            el.addEventListener('touchend', () => {
-                setTimeout(() => { el.classList.remove('active-state'); }, 150);
-            }, { passive: true });
-            el.addEventListener('touchcancel', () => { el.classList.remove('active-state'); }, { passive: true });
-        });
-    }
-
-    // --- СВАЙП НАЗАД ---
-    let touchStartX = 0;
-    document.addEventListener('touchstart', e => { 
-        touchStartX = e.changedTouches[0].screenX; 
-    }, {passive: true});
-    
-    document.addEventListener('touchend', e => {
-        const touchEndX = e.changedTouches[0].screenX;
-        // Если свайп слева направо больше 100px
-        if (touchEndX - touchStartX > 100) { 
-            const activePage = document.querySelector('.sub-page.active');
-            if (activePage) {
-                closePage(activePage.id);
-            }
-        }
-    }, {passive: true});
-
-    // --- ОБРАБОТКА ЗАКРЫТЫХ РАЗДЕЛОВ ---
-    function handleLockedClick(card, message) {
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.notificationOccurred('error');
-        }
-        showToast(message);
-    }
-
-    // --- TOAST ---
-    function showToast(message) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        container.appendChild(toast);
-        requestAnimationFrame(() => { toast.classList.add('show'); });
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => { toast.remove(); }, 300);
-        }, 2000);
-    }
-
-    // --- УМНЫЕ УВЕДОМЛЕНИЯ (ИНТЕРНЕТ) ---
-    function checkConnection() {
-        window.addEventListener('offline', () => {
-            showToast('Нет соединения с интернетом');
-        });
-        window.addEventListener('online', () => {
-            showToast('Соединение восстановлено');
-        });
-    }
-
-    // --- THEME (СИСТЕМНАЯ + РУЧНАЯ) ---
-    function initTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            if (savedTheme === 'light') document.body.setAttribute('data-theme', 'light');
-        } else {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                document.body.setAttribute('data-theme', 'light');
-            }
-        }
-    }
-
-    function toggleTheme() {
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
+    // --- УМНАЯ АДАПТАЦИЯ (HYBRID PERFORMANCE) ---
+    function initAdaptation() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
         const body = document.body;
-        if (body.getAttribute('data-theme') === 'light') {
-            body.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            body.setAttribute('data-theme', 'light');
-            localStorage.setItem('theme', 'light');
+        let isLite = false;
+
+        // 1. Проверка на режим энергосбережения (Универсально)
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            isLite = true;
         }
-    }
 
-    // --- NAVIGATION & MEMORY (ПАМЯТЬ СКРОЛЛА) ---
-    const scrollPositions = {}; 
-
-    function openPage(pageId) {
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-        const page = document.getElementById(pageId);
-        const home = document.getElementById('page-home');
-        
-        if (tg.BackButton) tg.BackButton.show();
-
-        home.classList.add('behind');
-        page.classList.add('active');
-        
-        if (scrollPositions[pageId]) {
-            page.scrollTop = scrollPositions[pageId];
-        } else {
-            page.scrollTop = 0;
-        }
-        
-        localStorage.setItem('lastPage', pageId);
-    }
-
-    function closePage(pageId) { 
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-        const page = document.getElementById(pageId);
-        const home = document.getElementById('page-home');
-        
-        scrollPositions[pageId] = page.scrollTop;
-
-        if (tg.BackButton) tg.BackButton.hide();
-
-        page.classList.remove('active');
-        setTimeout(() => {
-            home.classList.remove('behind');
-        }, 50);
-        
-        localStorage.removeItem('lastPage');
-    }
-
-    function restoreState() {
-        const lastPageId = localStorage.getItem('lastPage');
-        if (lastPageId) {
-            const page = document.getElementById(lastPageId);
-            const home = document.getElementById('page-home');
-            if (page && home) {
-                if (tg.BackButton) tg.BackButton.show();
-                home.classList.add('behind');
-                page.classList.add('active');
+        // 2. Проверка iOS (iPhone)
+        // iPhone X и старее застряли на iOS 16. Новые iPhone (15, 16, 17) на iOS 17+.
+        const iosMatch = ua.match(/OS (\d+)_/);
+        if (iosMatch && iosMatch.length > 1) {
+            const version = parseInt(iosMatch[1], 10);
+            if (version < 17) {
+                isLite = true; // iOS 16 и ниже -> Lite Mode
             }
         }
-    }
 
-    // --- ACCORDION ---
-    function toggleAccordion(header) {
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-        const item = header.parentElement;
-        const content = item.querySelector('.accordion-content');
-        const isActive = item.classList.contains('active');
-        
-        document.querySelectorAll('.accordion-item').forEach(accItem => {
-            accItem.classList.remove('active');
-            accItem.querySelector('.accordion-content').style.maxHeight = null;
-        });
-
-        if (!isActive) {
-            item.classList.add('active');
-            content.style.maxHeight = content.scrollHeight + "px";
-        }
-    }
-</script>
-
-</body>
-</html>
+        // 3. Проверка Android (Xiaomi, Samsung и др.)
+        if (/android/i.test(ua)) {
+            // Если ядер меньше 8 - считаем устройство слабым/средним
+            if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 8) {
+                isLite = true;
+            }
+            // Дополнительная защита для старых версий Android WebView
+            if (/Chrome\/[0-9]{2}/.test(ua)) { // Chrome версии < 100 (старые)
+                 isLite
