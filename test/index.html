@@ -2,928 +2,324 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- viewport-fit=cover и запрет масштабирования -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | App</title>
+    <title>KINOCEKH | Visual Concept Fitting</title>
     
-    <!-- 1. TELEGRAM API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- 2. ШРИФТЫ -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=block" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- ПЕРЕМЕННЫЕ --- */
+        /* --- БАЗА (GLASS STYLE) --- */
         :root {
-            --font-display: 'Montserrat', sans-serif; 
-            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-            /* ФИЗИКА */
-            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
-            --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1); 
+            --font-main: 'Montserrat', sans-serif;
             
-            /* ТАЙМИНГИ */
-            --duration-base: 0.3s;
-            --duration-page: 0.45s;
-
-            /* Z-INDEX LAYERS */
-            --z-noise: 0;
-            --z-home: 10;
-            --z-header: 20;
-            --z-page: 30;
-            --z-nav: 40;
-            --z-footer: 50;
-            --z-toast: 100;
-            --z-loader: 9999;
-
-            /* DARK THEME (DEFAULT) - GLASS STYLE */
+            /* DARK THEME */
             --bg-color: #0F0F11;
-            --spotlight-color: rgba(255, 255, 255, 0.12); 
+            --text-primary: #FFFFFF;
+            --text-secondary: #9aa0a6;
             
-            /* СТЕКЛО (DARK) */
+            /* СТЕКЛО */
             --card-bg: rgba(255, 255, 255, 0.03);
             --card-border: rgba(255, 255, 255, 0.1);
             --card-blur: 12px;
-            
-            --card-active-bg: rgba(255, 255, 255, 0.08);
-            --card-locked-bg: rgba(255, 255, 255, 0.01);
-            
-            /* ТЕНИ И СВЕЧЕНИЕ */
             --card-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
             
-            --text-primary: #F2F2F2;
-            --text-secondary: #9CA3AF;
-            --text-locked: #52525b;
-            
-            --accent-color: #D4AF37; /* ЗОЛОТО */
-            --accent-glow: rgba(212, 175, 55, 0.5);
-            
-            --nav-bg: rgba(15, 15, 17, 0.85); 
-            
-            --warn-bg: rgba(245, 158, 11, 0.08);
-            --warn-border: rgba(245, 158, 11, 0.3);
-            --warn-text: #F59E0B;
-            --danger-bg: rgba(220, 38, 38, 0.08);
-            --danger-border: rgba(220, 38, 38, 0.3);
-            --danger-text: #EF4444;
-            
-            --skeleton-base: #1c1c1e;
+            --accent-color: #D4AF37;
+            --accent-glow: rgba(212, 175, 55, 0.4);
         }
 
-        /* LIGHT THEME - GLASS STYLE */
         [data-theme="light"] {
             --bg-color: #F2F2F7;
-            --spotlight-color: rgba(0, 51, 102, 0.05);
+            --text-primary: #000000;
+            --text-secondary: #6e6e73;
             
-            /* СТЕКЛО (LIGHT) */
+            /* СТЕКЛО LIGHT */
             --card-bg: rgba(255, 255, 255, 0.65);
             --card-border: rgba(255, 255, 255, 0.4);
-            --card-blur: 12px;
-            
-            --card-active-bg: rgba(255, 255, 255, 0.85);
-            --card-locked-bg: rgba(255, 255, 255, 0.4);
-            
             --card-shadow: 0 10px 30px -10px rgba(0, 51, 102, 0.1);
-            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
             
-            --text-primary: #1C1C1E;
-            --text-secondary: #636366;
-            --text-locked: #8E8E93;
-            
-            --accent-color: #007AFF; /* СИНИЙ */
-            --accent-glow: rgba(0, 122, 255, 0.4);
-            
-            --nav-bg: rgba(242, 242, 247, 0.85);
-            
-            --warn-bg: rgba(255, 149, 0, 0.1);
-            --warn-border: rgba(255, 149, 0, 0.3);
-            --warn-text: #D47600;
-            --danger-bg: rgba(255, 59, 48, 0.1);
-            --danger-border: rgba(255, 59, 48, 0.3);
-            --danger-text: #D70015;
-            
-            --skeleton-base: #e5e5ea;
+            --accent-color: #007AFF;
+            --accent-glow: rgba(0, 122, 255, 0.3);
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        
-        html, body { height: 100dvh; overflow: hidden; background-color: var(--bg-color); }
-        
         body {
-            position: fixed; top: 0; left: 0; width: 100%; margin: 0; padding: 0; 
-            color: var(--text-primary); font-family: var(--font-body);
-            -webkit-font-smoothing: antialiased; user-select: none;
+            margin: 0; padding: 0; background: var(--bg-color); color: var(--text-primary);
+            font-family: var(--font-main); transition: background 0.4s ease;
+            overflow: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        /* ШУМ (NOISE) */
-        .noise-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: var(--z-noise); opacity: 0.04; 
-            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII=");
-            background-repeat: repeat; mix-blend-mode: overlay; 
-        }
-        .lite-mode .noise-overlay { display: none; }
-
-        /* ФОНОВОЕ ДЫХАНИЕ */
-        @keyframes breathe {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-        }
+        /* ФОНОВЫЙ СВЕТ */
         body::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60vh;
-            background: radial-gradient(circle at 50% -10%, var(--spotlight-color) 0%, transparent 70%);
-            pointer-events: none; z-index: var(--z-noise); 
-            animation: breathe 8s ease-in-out infinite;
-        }
-        .lite-mode body::before { animation: none; opacity: 0.5; }
-
-        #app { position: relative; width: 100%; height: 100%; overflow: hidden; perspective: 1000px; }
-        ::-webkit-scrollbar { display: none; }
-
-        /* --- СКЕЛЕТОН --- */
-        #skeleton-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color); z-index: var(--z-loader);
-            padding: 20px; padding-top: max(20px, env(safe-area-inset-top));
-            display: flex; flex-direction: column;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
-        #skeleton-loader.hidden { opacity: 0; visibility: hidden; }
-        .sk-header { height: 40px; width: 60%; background: var(--skeleton-base); border-radius: 8px; margin: 20px auto 30px; }
-        .sk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .sk-card { height: 130px; background: var(--skeleton-base); border-radius: 18px; }
-        .sk-card.large { grid-column: span 2; height: 110px; }
-
-        /* --- СТРАНИЦЫ --- */
-        .page {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding-bottom: 140px; 
-            background-color: var(--bg-color);
-            transition: transform var(--duration-page) var(--ease-smooth), filter var(--duration-page) ease;
-            z-index: var(--z-page); 
-            will-change: transform;
-        }
-        #page-home { z-index: var(--z-home); }
-        
-        .page.behind { 
-            transform: scale(0.92) translateX(-15%); 
-            filter: brightness(0.6) blur(2px); 
-            border-radius: 20px; overflow: hidden; pointer-events: none;
-        }
-        .lite-mode .page.behind { filter: brightness(0.6); }
-        
-        .sub-page { transform: translateX(100%); }
-        .sub-page.active { transform: translateX(0); }
-
-        /* --- ШАПКА --- */
-        .header {
-            padding: 20px 20px 10px; padding-top: max(20px, env(safe-area-inset-top)); 
-            display: flex; flex-direction: column; align-items: center; position: relative; z-index: var(--z-header);
+            content: ''; position: absolute; top: -10%; left: 0; right: 0; height: 60vh;
+            background: radial-gradient(circle at 50% 0%, var(--accent-glow) 0%, transparent 60%);
+            opacity: 0.4; pointer-events: none; z-index: 0;
+            transition: background 0.5s ease;
         }
 
-        .theme-toggle {
-            position: absolute; top: max(20px, env(safe-area-inset-top)); right: 20px;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-primary); 
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            transition: transform 0.3s var(--ease-spring);
-            box-shadow: var(--glass-highlight);
-        }
-        .theme-toggle:active { transform: scale(0.85); }
-        .theme-icon { position: absolute; transition: all 0.4s var(--ease-spring); }
-        #icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
-        #icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
-        [data-theme="light"] #icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
-        [data-theme="light"] #icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
+        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 220px; position: relative; z-index: 1; }
 
-        /* БРЕНД */
-        .brand-title {
-            font-family: var(--font-display); font-size: 30px; font-weight: 800; 
-            letter-spacing: 2px; text-transform: uppercase; margin-top: 20px; margin-bottom: 4px;
-            background: linear-gradient(to right, #bf953f 0%, #fcf6ba 20%, #b38728 40%, #fbf5b7 60%, #aa771c 80%, #bf953f 100%);
-            background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-            animation: shine 6s linear infinite;
-        }
-        .lite-mode .brand-title { animation: none; background: linear-gradient(to bottom, #fcf6ba, #bf953f); -webkit-background-clip: text; background-clip: text; }
-        
-        [data-theme="light"] .brand-title {
-            background: linear-gradient(to right, #003366 0%, #4da6ff 20%, #003366 40%, #4da6ff 60%, #003366 100%);
-            background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .lite-mode[data-theme="light"] .brand-title { animation: none; background: linear-gradient(to bottom, #4da6ff, #003366); -webkit-background-clip: text; background-clip: text; }
-        @keyframes shine { to { background-position: 200% center; } }
+        .header { margin-bottom: 24px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
-        .brand-subtitle {
-            font-family: var(--font-display); font-size: 10px; color: var(--accent-color); opacity: 0.9;
-            text-transform: uppercase; letter-spacing: 3px; font-weight: 600;
-        }
-
-        /* --- КАРТОЧКИ (GLASS + 3D) --- */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 16px; }
+        /* --- СЕТКА --- */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         .card {
-            /* СТЕКЛО */
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             backdrop-filter: blur(var(--card-blur)); -webkit-backdrop-filter: blur(var(--card-blur));
-            box-shadow: var(--card-shadow), var(--glass-highlight);
-            
-            border-radius: 24px; /* Более скругленные углы для 3D стиля */
-            padding: 18px; height: 140px; 
-            position: relative; overflow: hidden; cursor: pointer;
-            transition: transform 0.2s var(--ease-spring), border-color 0.3s ease, background-color 0.3s ease;
-            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-            transform: translateZ(0);
+            border-radius: 24px;
+            padding: 18px;
+            position: relative;
+            height: 150px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s, border-color 0.3s;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card:active { transform: scale(0.97); border-color: var(--accent-color); }
+        .card.large { grid-column: span 2; height: 120px; flex-direction: row; align-items: center; }
 
-        .card:nth-child(1) { animation-delay: 0.05s; }
-        .card:nth-child(2) { animation-delay: 0.1s; }
-        .card:nth-child(3) { animation-delay: 0.15s; }
-        .card:nth-child(4) { animation-delay: 0.2s; }
-        .card:nth-child(5) { animation-delay: 0.25s; }
-        
-        /* ЭФФЕКТ НАЖАТИЯ (PARALLAX) */
-        .card:active, .card.active-state { 
-            transform: scale(0.97); 
-            background: var(--card-active-bg); 
-            border-color: var(--accent-color); /* Свечение грани */
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
-        
-        .card.large { grid-column: span 2; height: 120px; display: flex; align-items: center; }
-        
-        .card-content { 
-            position: relative; z-index: 2; width: 100%; pointer-events: none;
-            opacity: 0; animation: fadeInContent 0.4s ease forwards; animation-delay: 0.2s;
-        }
-        @keyframes fadeInContent { to { opacity: 1; } }
+        .card-text { position: relative; z-index: 2; max-width: 100%; }
+        .card-title { font-size: 15px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; text-transform: uppercase; }
+        .card-sub { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
 
-        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.35; max-width: 95%; text-transform: uppercase; letter-spacing: 0.5px; }
-        .card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; font-weight: 500; letter-spacing: 0.2px; }
-        
-        /* --- 3D ИКОНКИ (PNG) --- */
+        /* --- 3D ИКОНКИ --- */
         .img-3d {
             position: absolute;
             right: 0; bottom: 0;
-            width: 85px; height: 85px;
+            width: 90px; height: 90px;
             object-fit: contain;
             z-index: 1;
-            transition: transform 0.4s var(--ease-spring), filter 0.3s ease;
-            /* Анимация парения */
-            animation: float 5s ease-in-out infinite;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
             pointer-events: none;
+            
+            /* Анимация появления */
+            opacity: 0; transform: translateY(20px) scale(0.8);
         }
         
-        /* Анимация парения (Levitation) */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-        }
-        
-        /* Parallax при нажатии: Картинка увеличивается навстречу */
-        .card:active .img-3d, .card.active-state .img-3d {
-            transform: scale(1.15) translateY(-5px) rotate(-5deg);
-            filter: drop-shadow(0 15px 20px rgba(0,0,0,0.3));
-        }
+        /* Класс для показа картинки */
+        .img-3d.visible { opacity: 1; transform: translateY(0) scale(1); }
 
-        /* Специфичные настройки для каждой картинки */
-        .card.large .img-3d { right: 10px; bottom: 10px; width: 90px; height: 90px; }
-        
-        /* LOCKED STATE */
-        .card.locked { background: var(--card-locked-bg); border-color: transparent; box-shadow: none; cursor: default; }
-        .card.locked .card-title { color: var(--text-locked); }
-        .card.locked .img-3d { 
-            filter: grayscale(100%) opacity(0.4); 
-            animation: none; /* Без движения */
-        }
-        .card.locked:active { transform: scale(0.98); border-color: transparent; box-shadow: none; }
-        
-        .badge-soon {
-            position: absolute; bottom: 12px; left: 12px; background: var(--bg-color); 
-            border: 1px solid var(--card-border); padding: 4px 7px; border-radius: 6px;
-            font-size: 9px; font-weight: 800; color: var(--text-locked); z-index: 3; text-transform: uppercase; opacity: 0.8;
-        }
+        /* Анимация парения */
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .img-3d.visible { animation: float 5s ease-in-out infinite; }
 
-        /* --- DEVELOPER CREDITS --- */
-        .dev-credits {
-            text-align: center; font-family: var(--font-display); font-size: 10px; font-weight: 500;
-            color: var(--text-secondary); opacity: 0.4; letter-spacing: 0.5px;
-            margin-top: 10px; margin-bottom: 20px; text-transform: uppercase;
-        }
+        /* Специфика для большой карточки */
+        .card.large .img-3d { right: 10px; bottom: 10px; width: 100px; height: 100px; }
 
-        /* --- ВНУТРЕННИЕ СТРАНИЦЫ (NAVBAR) --- */
-        .nav-bar {
-            display: flex; align-items: center; padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); 
-            position: sticky; top: 0; 
-            background: var(--nav-bg);
-            backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-            z-index: var(--z-nav); border-bottom: 1px solid var(--card-border);
-        }
-        .lite-mode .nav-bar { backdrop-filter: none; opacity: 0.98; }
-        
-        .btn-back {
-            background: none; border: none; color: var(--text-primary);
-            display: flex; align-items: center; font-size: 15px; cursor: pointer; padding: 0;
-            font-family: var(--font-display); font-weight: 600; position: relative; transition: opacity 0.2s ease;
-        }
-        .btn-back:active { opacity: 0.6; }
-        .btn-back svg { width: 20px; height: 20px; margin-right: 6px; }
-        
-        .page-intro { padding: 24px 20px; border-bottom: 1px solid var(--card-border); }
-        .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
-        .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
-
-        /* --- АККОРДЕОН --- */
-        .accordion-item { position: relative; }
-        .accordion-item::after {
-            content: ''; position: absolute; bottom: 0; left: 20px; right: 20px; height: 1px;
-            background: linear-gradient(to right, transparent, var(--card-border) 10%, var(--card-border) 90%, transparent);
-        }
-        .accordion-header {
-            width: 100%; background: none; border: none; padding: 22px 20px;
-            display: flex; align-items: center; justify-content: space-between;
-            text-align: left; cursor: pointer; position: relative; transition: background-color 0.2s ease;
-        }
-        .accordion-header:active { background: var(--card-active-bg); }
-        .acc-title-group { display: flex; align-items: center; gap: 14px; }
-        .acc-icon { width: 22px; height: 22px; color: var(--accent-color); flex-shrink: 0; }
-        .acc-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 1px; }
-        .acc-chevron { width: 18px; height: 18px; color: var(--text-secondary); transition: transform 0.3s var(--ease-spring), color 0.3s ease; }
-        .accordion-item.active .acc-chevron { transform: rotate(180deg); }
-        .accordion-item.active .acc-title { color: var(--accent-color); }
-        .accordion-content {
-            max-height: 0; overflow: hidden; 
-            transition: max-height 0.4s var(--ease-smooth), background-color 0.4s ease;
-            background: rgba(0,0,0,0.015);
-        }
-        
-        /* --- КОНТЕНТ --- */
-        .content-inner { padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
-        .content-inner strong { color: var(--text-primary); }
-        .content-inner ul { padding-left: 20px; margin-bottom: 16px; list-style: none; }
-        .content-inner li { margin-bottom: 8px; position: relative; }
-        .content-inner li::before { content: '—'; position: absolute; left: -20px; color: var(--accent-color); font-weight: 700; }
-
-        /* --- FLAT CARDS (Steps) --- */
-        .ad-section-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; text-transform: uppercase; margin: 30px 0 20px; color: var(--text-primary); letter-spacing: 0.5px; }
-        .steps-wrapper { display: flex; flex-direction: column; gap: 12px; }
-        .step-card { 
-            background: var(--card-bg); border: 1px solid var(--card-border); 
-            padding: 20px; border-radius: 16px; 
-            transition: background-color 0.3s ease; 
-        }
-        .step-card:active { background: var(--card-active-bg); }
-        .step-card-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--accent-color); margin-bottom: 8px; display: block; }
-        .step-card-desc { font-size: 14px; line-height: 1.55; color: var(--text-secondary); }
-        
-        /* --- ALERTS --- */
-        .custom-alert { border-radius: 12px; padding: 14px 16px; margin: 18px 0; display: flex; gap: 12px; align-items: flex-start; }
-        .alert-icon-box { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
-        .alert-body { flex: 1; }
-        .alert-title { display: block; font-weight: 700; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .alert-text { font-size: 13px; opacity: 0.95; line-height: 1.45; }
-        .alert-warning { background: var(--warn-bg); border: 1px solid var(--warn-border); }
-        .alert-warning .alert-title, .alert-warning .alert-icon-box { color: var(--warn-text); }
-        .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); }
-        .alert-danger .alert-title, .alert-danger .alert-icon-box { color: var(--danger-text); }
-
-        /* --- GLASS PANELS (Ads) --- */
-        .glass-alert {
-            background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.2);
-            padding: 16px; border-radius: 16px; margin: 24px 0;
-        }
-        [data-theme="light"] .glass-alert { background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.2); }
-        .glass-alert-title { color: var(--danger-text); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-        
-        .glass-card {
-            background: var(--card-bg); box-shadow: var(--glass-highlight);
-            padding: 18px; border-radius: 16px; margin-bottom: 12px;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--card-border);
-        }
-        .glass-card-title { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--accent-color); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        .glass-card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
-
-        /* --- FOOTER --- */
-        .sticky-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 16px;
+        /* --- ПАНЕЛЬ ВЫБОРА --- */
+        .panel {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(20, 20, 22, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px 24px 0 0;
+            padding: 20px; z-index: 100;
+            border-top: 1px solid rgba(255,255,255,0.1);
             padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            background: var(--nav-bg);
-            backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-top: 1px solid var(--card-border); display: flex; gap: 10px; z-index: var(--z-footer);
         }
-        .lite-mode .sticky-footer { backdrop-filter: none; opacity: 0.98; }
+        [data-theme="light"] .panel { background: rgba(255, 255, 255, 0.95); border-top: 1px solid rgba(0,0,0,0.1); }
 
-        .btn {
-            flex: 1; height: 42px; border-radius: 12px; border: none;
-            font-family: var(--font-display); font-weight: 600; font-size: 14px; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; 
-            cursor: pointer; box-shadow: var(--glass-highlight);
-            position: relative; overflow: hidden; padding: 0; 
-            transition: transform 0.2s var(--ease-spring);
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .panel-title { font-weight: 700; font-size: 14px; text-transform: uppercase; color: var(--text-secondary); }
+        
+        .theme-btn {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            color: var(--text-primary); cursor: pointer;
         }
-        .btn:active { transform: scale(0.95); }
-        .btn-primary { background: var(--accent-color); color: #000; }
-        [data-theme="light"] .btn-primary { color: #FFF; } 
-        .btn-primary::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.6), transparent);
-            transform: skewX(-25deg); mix-blend-mode: overlay; animation: shimmer-anim 6s infinite linear; pointer-events: none;
-        }
-        @keyframes shimmer-anim { 0% { left: -100%; } 35% { left: 200%; } 100% { left: 200%; } }
-        .btn-secondary { background: var(--card-active-bg); color: var(--text-primary); border: 1px solid var(--card-border); }
-        .btn svg { display: block; width: 20px; height: 20px; flex-shrink: 0; }
 
-        /* --- TOAST --- */
-        .toast-container {
-            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
-            z-index: var(--z-toast); pointer-events: none;
-            display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;
+        .concept-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        
+        .concept-btn {
+            background: var(--card-bg); border: 1px solid transparent;
+            border-radius: 16px; padding: 12px 5px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            cursor: pointer; transition: all 0.2s;
         }
-        .toast {
-            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px);
-            color: #FFF; padding: 10px 20px; border-radius: 50px;
-            font-size: 12px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            opacity: 0; transform: translateY(10px) scale(0.95);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255,255,255,0.1);
+        .concept-btn.active { 
+            background: var(--accent-glow); 
+            border-color: var(--accent-color); 
+            color: #FFF;
         }
-        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        [data-theme="light"] .concept-btn.active { color: #000; }
+        
+        .c-emoji { font-size: 24px; }
+        .c-name { font-size: 11px; font-weight: 700; text-transform: uppercase; }
 
     </style>
 </head>
-<body ontouchstart="">
+<body data-theme="dark">
 
-<!-- NOISE OVERLAY -->
-<div class="noise-overlay"></div>
+<div id="app">
+    <div class="header">
+        <div class="brand">КИНОЦЕХ</div>
+    </div>
 
-<!-- СКЕЛЕТОН -->
-<div id="skeleton-loader">
-    <div class="sk-header"></div>
-    <div class="sk-grid">
-        <div class="sk-card large"></div>
-        <div class="sk-card"></div>
-        <div class="sk-card"></div>
-        <div class="sk-card"></div>
-        <div class="sk-card"></div>
+    <div class="grid">
+        <!-- 1. ПРАВИЛА -->
+        <div class="card large">
+            <div class="card-text">
+                <div class="card-title">Правила группы</div>
+                <div class="card-sub">Обязательно к прочтению</div>
+            </div>
+            <img id="img-rules" src="" class="img-3d" alt="Rules">
+        </div>
+
+        <!-- 2. ОБЪЯВЛЕНИЕ -->
+        <div class="card">
+            <div class="card-text">
+                <div class="card-title">Разместить<br>объявление</div>
+            </div>
+            <img id="img-post" src="" class="img-3d" alt="Post">
+        </div>
+
+        <!-- 3. РЕКЛАМА -->
+        <div class="card">
+            <div class="card-text">
+                <div class="card-title">Разместить<br>рекламу</div>
+            </div>
+            <img id="img-ads" src="" class="img-3d" alt="Ads">
+        </div>
+
+        <!-- 4. БРИГАДИРЫ -->
+        <div class="card" style="opacity: 0.8;">
+            <div class="card-text">
+                <div class="card-title">Проверенные<br>бригадиры</div>
+                <div class="card-sub" style="margin-top:4px;">Скоро</div>
+            </div>
+            <img id="img-brig" src="" class="img-3d" alt="Brigadiers">
+        </div>
+
+        <!-- 5. СТАТЬИ -->
+        <div class="card" style="opacity: 0.8;">
+            <div class="card-text">
+                <div class="card-title">Полезные<br>статьи</div>
+                <div class="card-sub" style="margin-top:4px;">Скоро</div>
+            </div>
+            <img id="img-art" src="" class="img-3d" alt="Articles">
+        </div>
     </div>
 </div>
 
-<div id="app">
-
-    <!-- ГЛАВНАЯ -->
-    <div id="page-home" class="page">
-        <header class="header">
-            <!-- КНОПКА ТЕМЫ -->
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Сменить тему">
-                <svg id="icon-moon" class="theme-icon" style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                <svg id="icon-sun" class="theme-icon" style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            </button>
-
-            <div id="brand-title" class="brand-title">КИНОЦЕХ</div>
-            <div class="brand-subtitle">ВЕРСИЯ 3.5 GLASS</div>
-        </header>
-
-        <div class="menu-grid">
-            <!-- 1. ПРАВИЛА -->
-            <div class="card large" onclick="openPage('page-rules')">
-                <div class="card-content">
-                    <div class="card-title">Правила группы</div>
-                    <div class="card-desc">Обязательно к ознакомлению</div>
-                </div>
-                <!-- 3D IMAGE: SCROLL -->
-                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png" class="img-3d" alt="Rules">
-            </div>
-
-            <!-- 2. ОБЪЯВЛЕНИЕ -->
-            <div class="card" onclick="openPage('page-post-ad')">
-                <div class="card-content">
-                    <div class="card-title">Разместить объявление</div>
-                </div>
-                <!-- 3D IMAGE: MEMO -->
-                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Memo.png" class="img-3d" alt="Post">
-            </div>
-
-            <!-- 3. РЕКЛАМА -->
-            <div class="card" onclick="openPage('page-place-ads')">
-                <div class="card-content">
-                    <div class="card-title">Разместить рекламу</div>
-                </div>
-                <!-- 3D IMAGE: MEGAPHONE -->
-                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Megaphone.png" class="img-3d" alt="Ads">
-            </div>
-
-            <!-- 4. БРИГАДИРЫ (LOCKED) -->
-            <div class="card locked" onclick="handleLockedClick(this, 'Раздел находится в разработке')">
-                <span class="badge-soon">Скоро</span>
-                <div class="card-content">
-                    <div class="card-title">Проверенные бригадиры</div>
-                </div>
-                <!-- 3D IMAGE: SHIELD -->
-                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" class="img-3d" alt="Brigadiers">
-            </div>
-
-            <!-- 5. СТАТЬИ (LOCKED) -->
-            <div class="card locked" onclick="handleLockedClick(this, 'Скоро появятся полезные статьи')">
-                <span class="badge-soon">Скоро</span>
-                <div class="card-content">
-                    <div class="card-title">Полезные статьи</div>
-                </div>
-                <!-- 3D IMAGE: BOOKS -->
-                <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png" class="img-3d" alt="Articles">
-            </div>
-        </div>
-
-        <!-- DEVELOPER CREDITS -->
-        <div class="dev-credits">
-            © 2022–2026 KINOCEKH. Dev by Ruslan
-        </div>
-
+<!-- ПАНЕЛЬ ВЫБОРА КОНЦЕПЦИИ -->
+<div class="panel">
+    <div class="panel-header">
+        <div class="panel-title">Выберите концепцию</div>
+        <button class="theme-btn" onclick="toggleTheme()">День / Ночь</button>
     </div>
-
-    <!-- СТРАНИЦА: ПРАВИЛА -->
-    <div id="page-rules" class="page sub-page">
-        <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-rules')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Назад
-            </button>
-        </div>
-
-        <div class="page-intro">
-            <p><strong>Премиум-платформа для индустрии.</strong></p>
-            <p>Заказчики находят исполнителей, Актеры и АМС — проекты. Чтобы всем было комфортно, за порядком следит Модератор и автоматическая система.</p>
-        </div>
-
-        <div class="accordion">
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        <span class="acc-title">1. Модерация и Доступ</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>1.1. Регламент вступления</strong><br>
-                        Группа работает в закрытом режиме. Заявки рассматриваются вручную (до 24 часов). Пустые аккаунты отклоняются.</p>
-                        <p><strong>1.2. Техническая защита</strong><br>
-                        При вступлении возможность писать временно отключена (фильтр от спамеров).</p>
-                        <p><strong>1.4. Ссылки и Безопасность</strong><br>
-                        Подозрительные ссылки блокируются ботом.</p>
-                        <p><strong>1.5. «Анти-Бегунок»</strong><br>
-                        Частый выход и вход (более 4-х раз) — автоматический бан.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="10" cy="7" r="4"></circle>
-                            <path d="M10.3 15H7a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="17" cy="17" r="3"></circle>
-                            <line x1="21" y1="21" x2="19" y2="19"></line>
-                        </svg>
-                        <span class="acc-title">2. Для Бригадиров</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>2.1. Оформление объявления</strong><br>
-                        Указывайте сразу: Город, Дату, Проект, Типаж, Занятость, Гонорар. Если позиция закрыта — удалите пост.</p>
-                        <p><strong>2.2. Гонорары (Москва)</strong><br>
-                        Минимум: от 2500₽ / смена.</p>
-                        <div class="custom-alert alert-warning">
-                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                            <div class="alert-body">
-                                <span class="alert-title">Исключение (Москва):</span>
-                                <span class="alert-text">2000₽ допускается только за короткую смену (до 6 часов). Злоупотребление наказывается.</span>
-                            </div>
-                        </div>
-                        <p><strong>2.3. Неизвестный гонорар</strong><br>
-                        Пишите «По договоренности». Фразы без конкретики удаляются.</p>
-                        <p><strong>2.5. Запрет на перегон трафика</strong><br>
-                        Запрещено принуждать подписываться на каналы через автоответчик или ЛС.</p>
-                        <div class="custom-alert alert-danger">
-                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></div>
-                            <div class="alert-body">
-                                <span class="alert-title">Санкция:</span>
-                                <span class="alert-text">Полное закрытие доступа.</span>
-                            </div>
-                        </div>
-                        <p><strong>2.6. ЗАПРЕТЫ</strong><br>
-                        Эскорт, порнография, крипто-схемы.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10c0-4.4 3.6-8 8-8s8 3.6 8 8a8 8 0 0 1-8 8c-4.4 0-8-3.6-8-8z"></path><path d="M14 14a2 2 0 0 1 2 2"></path><path d="M10 14a2 2 0 0 0-2 2"></path><path d="M10 10h.01"></path><path d="M14 10h.01"></path><path d="M12 18a3 3 0 0 0 3-3"></path></svg>
-                        <span class="acc-title">3. Для Актеров и АМС</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>3.1. Чистота чата</strong><br>
-                        Не пишите «Я отправил» в общий чат. Заявки — строго по контактам.</p>
-                        <p><strong>3.2. Черный список</strong><br>
-                        Невыход, пьянство, агрессия, шантаж — бан.</p>
-                        <p><strong>3.3. Конфликты</strong><br>
-                        Споры решаются в группе «Разбор полетов», а не в общем чате.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ -->
-    <div id="page-post-ad" class="page sub-page">
-        <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-post-ad')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Назад
-            </button>
+    
+    <div class="concept-grid">
+        <!-- ВАРИАНТ 1: ЛЮДИ -->
+        <div class="concept-btn active" onclick="setConcept('people', this)">
+            <span class="c-emoji">🎬</span>
+            <span class="c-name">Люди (Pro)</span>
         </div>
         
-        <div class="content-inner">
-            <p class="ad-intro">
-                Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
-            </p>
-
-            <div class="ad-section-title">
-                🔍 Процедура верификации
-            </div>
-
-            <div class="steps-wrapper">
-                <!-- ШАГ 1 -->
-                <div class="step-card">
-                    <span class="step-card-title">1. Напишите Админу</span>
-                    <div class="step-card-desc">Свяжитесь с модератором для начала проверки.</div>
-                </div>
-
-                <!-- ШАГ 2 -->
-                <div class="step-card">
-                    <span class="step-card-title">2. Подготовьте материалы</span>
-                    <div class="step-card-desc">
-                        Отправьте текст поста, который планируете опубликовать.
-                        <ul class="ad-sub-list">
-                            <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
-                            <li>Для кино/сериалов: вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
-                            <li>Для рекламы, рилсов, контента для соцсетей: ссылку на официальный канал заказчика, техническое задание, примеры ранее реализованных проектов.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- ШАГ 3 -->
-                <div class="step-card">
-                    <span class="step-card-title">3. Проверка профиля</span>
-                    <div class="step-card-desc">
-                        Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
-                    </div>
-                </div>
-            </div>
-
-            <!-- ВАЖНО -->
-            <div class="important-block">
-                <strong>Важно:</strong>
-                Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.<br>
-                Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.
-            </div>
-
-            <!-- АНТИФРОД -->
-            <div class="custom-alert alert-danger">
-                <div class="alert-icon-box">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-                <div class="alert-body">
-                    <span class="alert-title">Антифрод-правило</span>
-                    <span class="alert-text">
-                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
-                    </span>
-                </div>
-            </div>
+        <!-- ВАРИАНТ 2: РУКИ -->
+        <div class="concept-btn" onclick="setConcept('hands', this)">
+            <span class="c-emoji">🤌</span>
+            <span class="c-name">Руки</span>
+        </div>
+        
+        <!-- ВАРИАНТ 3: ПРЕДМЕТЫ -->
+        <div class="concept-btn" onclick="setConcept('objects', this)">
+            <span class="c-emoji">🧊</span>
+            <span class="c-name">Предметы</span>
         </div>
     </div>
-
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ -->
-    <div id="page-place-ads" class="page sub-page">
-        <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-place-ads')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Назад
-            </button>
-        </div>
-        <div class="page-intro">
-            <p><strong>Реклама и Сотрудничество</strong></p>
-            <p>Условия размещения коммерческих постов.</p>
-        </div>
-        <div class="content-inner">
-            <p>Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения о размещении рекламы, соответствующей тематике группы.</p>
-            <p>Для согласования условий публикации, уточнения формата и сроков необходимо обратиться к администратору. Мы обеспечиваем цивилизованный подход к сотрудничеству и помогаем донести ваше предложение до целевой аудитории.</p>
-            
-            <div class="glass-alert">
-                <span class="glass-alert-title">Важно:</span>
-                <ul style="margin:0; padding-left:16px; font-size:13px; color:var(--text-secondary);">
-                    <li>Размещение рекламы без предварительного согласования запрещено и влечёт за собой бан.</li>
-                    <li>Решение о публикации принимается администрацией на основе соответствия правилам группы.</li>
-                </ul>
-            </div>
-
-            <div class="ad-section-title">Направления, которые мы не продвигаем:</div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">1. Нецелевая тематика</span>
-                <div class="glass-card-desc">Предложения, не связанные с кинопроизводством, кастингами, творческими или техническими услугами для киноиндустрии.</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">2. Личный пиар</span>
-                <div class="glass-card-desc">Публикации, направленные исключительно на самопрезентацию («ищу работу», «смотрите моё портфолио», «готов к проектам»).</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">3. Рисковые и финансовые услуги</span>
-                <div class="glass-card-desc">Реклама криптовалют, трейдинга, инвестиций, букмекерских контор, азартных игр, микрофинансовых организаций и схожих сервисов.</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">4. Сомнительные или нелегитимные проекты</span>
-                <div class="glass-card-desc">Любые предложения, нарушающие законодательство РФ или этические нормы сообщества.</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ФУТЕР -->
-    <div class="sticky-footer">
-        <button class="btn btn-primary" onclick="window.open('https://t.me/boost/kinocekh', '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
-            Boost
-        </button>
-        <button class="btn btn-secondary" onclick="window.open('https://t.me/kinocekhadmin', '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            Админ
-        </button>
-    </div>
-
-    <!-- КОНТЕЙНЕР ДЛЯ УВЕДОМЛЕНИЙ -->
-    <div id="toast-container" class="toast-container"></div>
-
 </div>
 
 <script>
-    // --- ИНИЦИАЛИЗАЦИЯ TELEGRAM ---
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-
-    // --- УМНАЯ АДАПТАЦИЯ (HYBRID PERFORMANCE) ---
-    function initAdaptation() {
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        let isLite = false;
-
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) isLite = true;
-
-        const iosMatch = ua.match(/OS (\d+)_/);
-        if (iosMatch && iosMatch.length > 1) {
-            if (parseInt(iosMatch[1], 10) < 17) isLite = true;
+    // --- БАЗА КАРТИНОК (Fluent 3D) ---
+    const assets = {
+        // ВАРИАНТ 1: ЛЮДИ (ПРОФЕССИИ)
+        people: {
+            rules: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Professions/Woman%20Teacher.png", // Учитель (Правила)
+            post: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Person/Person%20Raising%20Hand.png", // Хочу сказать (Объявление)
+            ads: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Person/Woman%20Genie.png", // Магия/Джинн (Реклама)
+            brig: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Professions/Construction%20Worker.png", // Рабочий (Бригадир)
+            art: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Professions/Woman%20Student.png" // Студент (Статьи)
+        },
+        
+        // ВАРИАНТ 2: РУКИ (ЖЕСТЫ)
+        hands: {
+            rules: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Writing%20Hand.png", // Пишущая рука
+            post: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Hand%20with%20Index%20Finger%20and%20Thumb%20Crossed.png", // Жест "Деньги/Внимание"
+            ads: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Clapping%20Hands.png", // Аплодисменты
+            brig: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Handshake.png", // Рукопожатие
+            art: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Ok%20Hand.png" // ОК
+        },
+        
+        // ВАРИАНТ 3: ПРЕДМЕТЫ (КЛАССИКА)
+        objects: {
+            rules: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png",
+            post: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Memo.png",
+            ads: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Megaphone.png",
+            brig: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png",
+            art: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png"
         }
-
-        if (/android/i.test(ua)) {
-            if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 6) isLite = true;
-            if (/Chrome\/[0-9]{2}/.test(ua)) isLite = true;
-        }
-
-        if (isLite) {
-            document.body.classList.add('lite-mode');
-            console.log('Lite Mode Activated');
-        }
-    }
-
-    // --- НАВИГАЦИЯ ---
-    function openPage(pageId) {
-        const page = document.getElementById(pageId);
-        const home = document.getElementById('page-home');
-        
-        if (page) {
-            page.classList.add('active');
-            home.classList.add('behind');
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        }
-    }
-
-    function closePage(pageId) {
-        const page = document.getElementById(pageId);
-        const home = document.getElementById('page-home');
-        
-        if (page) {
-            page.classList.remove('active');
-            home.classList.remove('behind');
-            setTimeout(() => { page.scrollTop = 0; }, 400);
-        }
-    }
-
-    // --- АККОРДЕОН ---
-    function toggleAccordion(header) {
-        const item = header.parentElement;
-        const content = item.querySelector('.accordion-content');
-        const isActive = item.classList.contains('active');
-        
-        document.querySelectorAll('.accordion-item.active').forEach(activeItem => {
-            if (activeItem !== item) {
-                activeItem.classList.remove('active');
-                activeItem.querySelector('.accordion-content').style.maxHeight = null;
-            }
-        });
-
-        if (isActive) {
-            item.classList.remove('active');
-            content.style.maxHeight = null;
-        } else {
-            item.classList.add('active');
-            content.style.maxHeight = content.scrollHeight + "px";
-            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        }
-    }
-
-    // --- ТЕМА (ДЕНЬ / НОЧЬ) ---
-    function toggleTheme() {
-        const body = document.body;
-        const currentTheme = body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        
-        body.setAttribute('data-theme', newTheme);
-        
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-        
-        if (newTheme === 'light') {
-            tg.setHeaderColor('#F2F2F7');
-            tg.setBackgroundColor('#F2F2F7');
-        } else {
-            tg.setHeaderColor('#0F0F11');
-            tg.setBackgroundColor('#0F0F11');
-        }
-    }
-
-    // --- ОБРАБОТКА ЗАКРЫТЫХ КАРТОЧЕК ---
-    function handleLockedClick(card, message) {
-        card.classList.add('active-state');
-        setTimeout(() => card.classList.remove('active-state'), 150);
-        
-        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
-        showToast(message);
-    }
-
-    // --- TOAST NOTIFICATIONS ---
-    function showToast(message) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        
-        container.appendChild(toast);
-        requestAnimationFrame(() => { toast.classList.add('show'); });
-        
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 2500);
-    }
-
-    // --- ЗАПУСК ---
-    window.onload = function() {
-        initAdaptation();
-        setTimeout(() => {
-            const loader = document.getElementById('skeleton-loader');
-            if (loader) {
-                loader.classList.add('hidden');
-                setTimeout(() => loader.style.display = 'none', 500);
-            }
-        }, 400);
     };
 
-    setTimeout(() => {
-        const loader = document.getElementById('skeleton-loader');
-        if (loader && !loader.classList.contains('hidden')) {
-            loader.classList.add('hidden');
-            setTimeout(() => loader.style.display = 'none', 500);
-        }
-    }, 3000);
+    // --- ЛОГИКА СМЕНЫ ---
+    function setConcept(conceptName, btnElement) {
+        // 1. Анимация кнопок
+        document.querySelectorAll('.concept-btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
 
+        // 2. Получаем набор
+        const set = assets[conceptName];
+        
+        // 3. Обновляем картинки с анимацией перезагрузки
+        updateImage('img-rules', set.rules);
+        updateImage('img-post', set.post);
+        updateImage('img-ads', set.ads);
+        updateImage('img-brig', set.brig);
+        updateImage('img-art', set.art);
+        
+        // Вибрация
+        if(window.Telegram && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.selectionChanged();
+        }
+    }
+
+    function updateImage(id, src) {
+        const img = document.getElementById(id);
+        // Скрываем
+        img.classList.remove('visible');
+        
+        setTimeout(() => {
+            img.src = src;
+            // Ждем загрузки (или просто тайм-аут для эффекта)
+            img.onload = () => {
+                img.classList.add('visible');
+            };
+            // На случай если картинка в кеше и onload не сработает
+            setTimeout(() => img.classList.add('visible'), 50);
+        }, 200);
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        if(window.Telegram && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+    }
+
+    // Инициализация (Запуск первой концепции)
+    window.onload = () => {
+        const firstBtn = document.querySelector('.concept-btn.active');
+        setConcept('people', firstBtn);
+        
+        if(window.Telegram) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
+        }
+    };
 </script>
+
 </body>
 </html>
