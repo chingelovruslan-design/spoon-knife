@@ -3,396 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | Примерочная 2.0</title>
+    <title>КИНОЦЕХ | 3D Fitting Room</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- ПОДКЛЮЧЕНИЕ РАЗНЫХ ШРИФТОВ ДЛЯ ВАРИАНТОВ -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;500;800&family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@400;600;800&family=Oswald:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Tenor+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- БАЗОВЫЕ ПЕРЕМЕННЫЕ --- */
+        /* --- БАЗА --- */
         :root {
-            --bg-color: #0F0F11;
-            --text-primary: #F2F2F2;
-            --text-secondary: #9CA3AF;
-            --accent-color: #D4AF37;
-            --card-bg: rgba(255, 255, 255, 0.04);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --icon-color: #D4AF37;
-            
-            /* Динамические переменные для вариантов */
             --font-main: 'Montserrat', sans-serif;
-            --card-radius: 18px;
-            --card-padding: 18px;
-            --icon-size: 55px;
-            --icon-pos-right: 8px;
-            --icon-pos-bottom: 8px;
-            --icon-opacity: 0.25;
-            --title-case: uppercase;
-            --title-size: 15px;
-            --title-weight: 700;
-            --border-width: 1px;
+            --bg-color: #121214;
+            --text-primary: #FFFFFF;
+            --text-secondary: #9aa0a6;
+            --card-bg: #1C1C1E;
+            --accent-color: #D4AF37; /* Золото */
+            --accent-gradient: linear-gradient(135deg, #D4AF37, #F2D06B);
+            
+            /* Параметры для 3D вариантов */
+            --card-radius: 24px;
+            --icon-size: 60px;
+            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
 
         [data-theme="light"] {
             --bg-color: #F2F2F7;
-            --text-primary: #1C1C1E;
-            --text-secondary: #636366;
-            --accent-color: #003366;
+            --text-primary: #000000;
+            --text-secondary: #6e6e73;
             --card-bg: #FFFFFF;
-            --border-color: rgba(0, 51, 102, 0.15);
-            --icon-color: #003366;
+            --accent-color: #007AFF; /* Синий */
+            --accent-gradient: linear-gradient(135deg, #007AFF, #5AC8FA);
+            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.15);
         }
 
         body {
             margin: 0; padding: 0; background: var(--bg-color); color: var(--text-primary);
-            font-family: var(--font-main); transition: all 0.3s ease; overflow: hidden;
+            font-family: var(--font-main); transition: background 0.3s ease;
+            overflow: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        #app { padding: 20px; height: 100vh; overflow-y: auto; padding-bottom: 150px; }
+        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 200px; }
 
-        .header { text-align: center; margin-bottom: 30px; padding-top: 20px; }
-        .brand-title {
-            font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; 
-            letter-spacing: 2px; text-transform: uppercase;
-            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728);
-            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        [data-theme="light"] .brand-title {
-            background: linear-gradient(to right, #003366, #4da6ff, #003366);
-            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-        }
-
-        /* --- СЕТКА КАРТОЧЕК --- */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .header { margin-bottom: 24px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* --- СЕТКА --- */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         .card {
-            background: var(--card-bg); 
-            border: var(--border-width) solid var(--border-color); 
-            border-radius: var(--card-radius); 
-            padding: var(--card-padding); 
-            height: 130px; 
-            position: relative; 
+            background: var(--card-bg);
+            border-radius: var(--card-radius);
+            padding: 16px;
+            position: relative;
+            height: 140px;
             overflow: hidden;
-            display: flex; flex-direction: column; justify-content: flex-start;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-soft);
+            display: flex; flex-direction: column; justify-content: space-between;
         }
-        .card.large { grid-column: span 2; height: 110px; }
-        .card:active { transform: scale(0.97); }
+        .card:active { transform: scale(0.96); }
+        .card.large { grid-column: span 2; height: 120px; flex-direction: row; align-items: center; }
 
-        .card-content { position: relative; z-index: 2; width: 100%; pointer-events: none; }
-        
-        .card-title { 
-            font-family: var(--font-main); 
-            font-size: var(--title-size); 
-            font-weight: var(--title-weight); 
-            text-transform: var(--title-case);
-            line-height: 1.3; margin-bottom: 4px;
-        }
-        .card-desc { font-size: 11px; color: var(--text-secondary); opacity: 0.8; }
+        .card-text { position: relative; z-index: 2; max-width: 100%; }
+        .card-title { font-size: 15px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+        .card-sub { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
 
-        .card-watermark {
-            position: absolute; 
-            right: var(--icon-pos-right); 
-            bottom: var(--icon-pos-bottom); 
-            width: var(--icon-size); 
-            height: var(--icon-size);
-            color: var(--icon-color); 
-            opacity: var(--icon-opacity);
+        /* --- 3D ОБЪЕКТ (EMOJI PROXY) --- */
+        .icon-3d {
+            font-size: var(--icon-size);
+            line-height: 1;
+            position: absolute;
+            right: 10px; bottom: 10px;
+            z-index: 1;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); /* Тень для объема */
             transition: all 0.4s ease;
-            z-index: 1; pointer-events: none;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+            transform-origin: center center;
         }
+
+        /* --- ВАРИАНТЫ СТИЛЕЙ --- */
+
+        /* 1. CLEAN 3D (База) */
+        .v-clean .icon-3d { right: 12px; bottom: 12px; transform: scale(1.1); }
+
+        /* 2. VKUSVILL (Цветные пятна) */
+        .v-blob .card::before {
+            content: ''; position: absolute; right: -20px; bottom: -20px;
+            width: 100px; height: 100px; border-radius: 50%;
+            background: var(--accent-color); opacity: 0.15; filter: blur(20px);
+            transition: background 0.3s;
+        }
+        .v-blob .icon-3d { right: 10px; bottom: 10px; transform: rotate(-5deg); }
+
+        /* 3. DELIVERY (Карточка в карточке) */
+        .v-delivery .card { background: var(--bg-color); border: 1px solid rgba(128,128,128,0.1); }
+        .v-delivery .card::after {
+            content: ''; position: absolute; right: 10px; bottom: 10px;
+            width: 60px; height: 60px; background: var(--card-bg);
+            border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        [data-theme="dark"] .v-delivery .card::after { background: #2C2C2E; }
+        .v-delivery .icon-3d { right: 18px; bottom: 18px; font-size: 40px; z-index: 3; }
+
+        /* 4. GLASS SHELF (Полка) */
+        .v-glass .card { background: linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.1); }
+        [data-theme="light"] .v-glass .card { background: #FFF; border: 1px solid rgba(0,0,0,0.05); }
+        .v-glass .icon-3d { 
+            bottom: 15px; right: 15px; 
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.3)); transform: translateY(-5px);
+        }
+
+        /* 5. NEON GLOW (Свечение) */
+        .v-neon .icon-3d { 
+            filter: drop-shadow(0 0 15px var(--accent-color)); 
+            opacity: 0.9;
+        }
+
+        /* 6. FLOATING (Парящие) */
+        .v-float .icon-3d {
+            bottom: 25px; right: 15px;
+            transform: rotate(10deg) scale(1.2);
+            filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
+        }
+
+        /* 7. BIG CROP (Абстракция) */
+        .v-crop .icon-3d {
+            font-size: 140px; right: -30px; bottom: -40px; opacity: 0.8;
+            transform: rotate(-15deg);
+            filter: blur(0.5px);
+        }
+        .v-crop .card-text { background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 8px; backdrop-filter: blur(4px); display: inline-block; }
+        [data-theme="light"] .v-crop .card-text { background: rgba(255,255,255,0.6); }
+
+        /* 8. SOFT CLAY (Матовый) */
+        .v-clay .card { box-shadow: inset 0 0 20px rgba(0,0,0,0.05); }
+        .v-clay .icon-3d { filter: contrast(0.8) brightness(1.1) drop-shadow(0 5px 5px rgba(0,0,0,0.2)); }
+
+        /* 9. PERSPECTIVE (Наклон) */
+        .v-persp .icon-3d {
+            transform: perspective(100px) rotateX(10deg) rotateY(-10deg) scale(1.1);
+            right: 15px; bottom: 15px;
+        }
+
+        /* 10. MINIMAL COLOR (Тонировка) */
+        .v-mono .icon-3d {
+            filter: sepia(1) hue-rotate(10deg) saturate(2); /* Золотистый оттенок */
+        }
+        [data-theme="light"] .v-mono .icon-3d { filter: sepia(1) hue-rotate(190deg) saturate(3); /* Синий оттенок */ }
+
+
+        /* --- ПАНЕЛЬ --- */
+        .panel {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(20, 20, 22, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px 24px 0 0;
+            padding: 20px; z-index: 100;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+        }
+        [data-theme="light"] .panel { background: rgba(255, 255, 255, 0.95); border-top: 1px solid rgba(0,0,0,0.1); }
+
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .panel-title { font-weight: 700; font-size: 14px; text-transform: uppercase; }
         
-        /* --- ПАНЕЛЬ УПРАВЛЕНИЯ --- */
-        .fitting-room {
-            position: fixed; top: 0; right: 0; bottom: 0; width: 280px;
-            background: rgba(15, 15, 17, 0.98); border-left: 1px solid rgba(255,255,255,0.1);
-            z-index: 9999; padding: 20px; display: flex; flex-direction: column;
-            box-shadow: -10px 0 40px rgba(0,0,0,0.5); overflow-y: auto;
-        }
-        [data-theme="light"] .fitting-room { background: rgba(255, 255, 255, 0.98); border-left: 1px solid rgba(0,0,0,0.1); }
-
-        .fr-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
-        
-        .theme-toggle {
-            display: flex; align-items: center; justify-content: space-between;
-            background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 20px; cursor: pointer;
-        }
-        [data-theme="light"] .theme-toggle { background: rgba(0,0,0,0.05); }
-        
-        .variant-list { display: flex; flex-direction: column; gap: 6px; }
-        .variant-btn {
-            padding: 12px; border-radius: 8px; background: transparent; border: 1px solid transparent;
-            color: var(--text-secondary); text-align: left; cursor: pointer; font-size: 12px;
-            transition: all 0.2s;
-        }
-        .variant-btn:hover { background: rgba(255,255,255,0.05); }
-        [data-theme="light"] .variant-btn:hover { background: rgba(0,0,0,0.05); }
-        
-        .variant-btn.active { 
-            background: var(--accent-color); color: #fff; border-color: transparent; font-weight: 600;
+        .theme-btn {
+            background: var(--card-bg); border: 1px solid rgba(128,128,128,0.2);
+            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            color: var(--text-primary); cursor: pointer;
         }
 
-        /* --- ВАРИАНТЫ СТИЛЕЙ (CSS CLASSES) --- */
-        
-        /* 1. ORIGINAL */
-        .v-original { --font-main: 'Montserrat'; --icon-opacity: 0.25; }
-        
-        /* 2. EDITORIAL (SERIF) */
-        .v-editorial { 
-            --font-main: 'Playfair Display'; --title-case: none; --title-size: 18px; --title-weight: 700;
-            --icon-opacity: 0.15; --card-radius: 4px;
+        .variants-scroll {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
         }
-        
-        /* 3. SWISS CLEAN (INTER) */
-        .v-swiss {
-            --font-main: 'Inter'; --title-case: none; --title-weight: 800; --title-size: 16px;
-            --icon-pos-right: 16px; --icon-pos-bottom: 16px; --icon-size: 40px; --icon-opacity: 1;
-        }
+        .variants-scroll::-webkit-scrollbar { display: none; }
 
-        /* 4. TECH / CYBER */
-        .v-tech {
-            --font-main: 'JetBrains Mono'; --title-case: uppercase; --title-size: 12px;
-            --card-radius: 0px; --border-width: 1px; --icon-opacity: 0.4;
+        .v-btn {
+            flex: 0 0 auto; width: 70px; height: 70px;
+            background: var(--card-bg); border-radius: 16px;
+            border: 2px solid transparent;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 9px; font-weight: 600; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s;
         }
+        .v-btn.active { border-color: var(--accent-color); color: var(--text-primary); background: rgba(128,128,128,0.1); }
+        .v-preview { font-size: 24px; margin-bottom: 4px; }
 
-        /* 5. LUXURY MINIMAL */
-        .v-luxury {
-            --font-main: 'Tenor Sans'; --title-case: uppercase; --title-size: 14px; --title-weight: 400;
-            --icon-size: 30px; --icon-pos-right: 18px; --icon-pos-bottom: 18px; --icon-opacity: 1;
-            --card-bg: transparent; /* Прозрачные карточки */
-        }
-
-        /* 6. BRUTALIST */
-        .v-brutal {
-            --font-main: 'Oswald'; --title-size: 22px; --title-case: uppercase;
-            --card-radius: 6px; --border-width: 2px; --icon-opacity: 1; --icon-size: 40px;
-        }
-
-        /* 7. BIG BACKGROUND */
-        .v-bigbg {
-            --font-main: 'Montserrat'; --icon-size: 140px; --icon-pos-right: -20px; --icon-pos-bottom: -20px;
-            --icon-opacity: 0.06; 
-        }
-
-        /* 8. CENTERED APP STYLE */
-        .v-centered .card { align-items: center; text-align: center; justify-content: center; padding-top: 30px; }
-        .v-centered {
-            --icon-pos-right: 50%; --icon-pos-bottom: 50%; 
-            --icon-size: 40px; --icon-opacity: 1;
-        }
-        /* JS поправит transform для центрирования */
-
-        /* 9. LEFT ALIGNED ROW */
-        .v-row .card { flex-direction: row; align-items: center; gap: 15px; }
-        .v-row {
-            --icon-pos-right: auto; --icon-pos-bottom: auto; /* Reset absolute */
-            --icon-size: 32px; --icon-opacity: 1;
-        }
-        
-        /* 10. GLASS */
-        .v-glass {
-            --card-bg: rgba(255,255,255,0.05); --card-radius: 24px;
-            --icon-opacity: 0.3;
-        }
-
-        @media (max-width: 768px) {
-            .fitting-room { width: 100%; height: 40vh; top: auto; bottom: 0; border-radius: 20px 20px 0 0; border-top: 1px solid var(--border-color); border-left: none; }
-            #app { padding-bottom: 45vh; }
-        }
     </style>
 </head>
 <body data-theme="dark">
 
 <div id="app">
-    <header class="header">
-        <div class="brand-title">КИНОЦЕХ</div>
-    </header>
+    <div class="header">
+        <div class="brand">КИНОЦЕХ</div>
+    </div>
 
-    <div id="card-container" class="menu-grid v-original">
-        <!-- КАРТОЧКИ ГЕНЕРИРУЮТСЯ JS -->
+    <!-- СЕТКА КАРТОЧЕК -->
+    <div id="grid" class="grid v-clean">
+        <!-- 1. ПРАВИЛА -->
+        <div class="card large">
+            <div class="card-text">
+                <div class="card-title">Правила группы</div>
+                <div class="card-sub">Обязательно к прочтению</div>
+            </div>
+            <!-- 3D Объект: Свиток / Папка -->
+            <div class="icon-3d">📜</div> 
+        </div>
+
+        <!-- 2. ОБЪЯВЛЕНИЕ -->
+        <div class="card">
+            <div class="card-text">
+                <div class="card-title">Разместить<br>объявление</div>
+            </div>
+            <!-- 3D Объект: Лист с карандашом -->
+            <div class="icon-3d">📝</div>
+        </div>
+
+        <!-- 3. РЕКЛАМА -->
+        <div class="card">
+            <div class="card-text">
+                <div class="card-title">Разместить<br>рекламу</div>
+            </div>
+            <!-- 3D Объект: Мегафон -->
+            <div class="icon-3d">📢</div>
+        </div>
+
+        <!-- 4. БРИГАДИРЫ -->
+        <div class="card" style="opacity: 0.7;">
+            <div class="card-text">
+                <div class="card-title">Проверенные<br>бригадиры</div>
+                <div class="card-sub" style="margin-top:4px;">Скоро</div>
+            </div>
+            <!-- 3D Объект: Щит / Каска -->
+            <div class="icon-3d">🛡️</div>
+        </div>
+
+        <!-- 5. СТАТЬИ -->
+        <div class="card" style="opacity: 0.7;">
+            <div class="card-text">
+                <div class="card-title">Полезные<br>статьи</div>
+                <div class="card-sub" style="margin-top:4px;">Скоро</div>
+            </div>
+            <!-- 3D Объект: Книги / Лампа -->
+            <div class="icon-3d">📚</div>
+        </div>
     </div>
 </div>
 
-<div class="fitting-room">
-    <div class="fr-title">Примерочная 2.0</div>
-    <div class="theme-toggle" onclick="toggleTheme()">
-        <span style="font-size:12px; font-weight:600;">Режим: <span id="theme-name">Ночь</span></span>
-        <div style="width:16px; height:16px; background:var(--accent-color); border-radius:50%;"></div>
+<!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+<div class="panel">
+    <div class="panel-header">
+        <div class="panel-title">Стиль 3D (Clay)</div>
+        <button class="theme-btn" onclick="toggleTheme()">День / Ночь</button>
     </div>
-    <div class="fr-title" style="margin-top:10px; font-size:11px; opacity:0.5;">Выберите стиль:</div>
-    <div class="variant-list" id="variant-list"></div>
+    <div class="variants-scroll">
+        <!-- Кнопки генерируются JS -->
+    </div>
 </div>
 
 <script>
-    // --- БАЗА ДАННЫХ ВАРИАНТОВ ---
-    // Каждый вариант определяет: CSS класс контейнера, Набор иконок (SVG paths)
-    
-    // SVG PATHS (Разные стили иконок)
-    const ICONS = {
-        line: { // Тонкие линии (Оригинал)
-            rules: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>',
-            post: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line>',
-            ads: '<path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>',
-            brig: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline>',
-            art: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>'
-        },
-        solid: { // Залитые (Тяжелые)
-            rules: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="currentColor" stroke="none"/>',
-            post: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 16H9v-2h2v-2h2v2h2v2h-2v2h-2v-2z" fill="currentColor" stroke="none"/>',
-            ads: '<path d="M21 11l-18-5v12l18-5zm-9.4 5.8c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3z" fill="currentColor" stroke="none"/>',
-            brig: '<path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="currentColor" stroke="none"/>',
-            art: '<path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="currentColor" stroke="none"/>'
-        },
-        geometric: { // Угловатые / Техно
-            rules: '<polygon points="14 2 14 8 20 8 20 22 4 22 4 2 14 2" fill="none" stroke="currentColor" stroke-width="1.5"></polygon><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor"></line>',
-            post: '<rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"></rect><path d="M12 8v8m-4-4h8" stroke="currentColor" stroke-width="1.5"></path>',
-            ads: '<polygon points="2 10 20 4 20 18 2 12 2 10" fill="none" stroke="currentColor" stroke-width="1.5"></polygon>',
-            brig: '<path d="M12 22 L20 12 V4 L12 1 L4 4 V12 Z" fill="none" stroke="currentColor" stroke-width="1.5"></path>',
-            art: '<rect x="4" y="4" width="7" height="16" stroke="currentColor" fill="none"></rect><rect x="13" y="4" width="7" height="16" stroke="currentColor" fill="none"></rect>'
-        },
-        soft: { // Мягкие / Скругленные
-            rules: '<rect x="5" y="3" width="14" height="18" rx="4" stroke="currentColor" stroke-width="2" fill="none"></rect><line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>',
-            post: '<rect x="5" y="3" width="14" height="18" rx="4" stroke="currentColor" stroke-width="2" fill="none"></rect><circle cx="16" cy="18" r="4" fill="currentColor"></circle>',
-            ads: '<path d="M4 10c0-2 1.5-3.5 3.5-4l11-2.5a1 1 0 0 1 1.2 1.2l-2.5 11a3.5 3.5 0 0 1-4 3.5h-3a2 2 0 0 1-2-2v-3" stroke="currentColor" stroke-width="2" fill="none"></path>',
-            brig: '<path d="M12 21c4-2 7-6 7-11V6l-7-3-7 3v4c0 5 3 9 7 11z" stroke="currentColor" stroke-width="2" fill="none"></path>',
-            art: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" stroke-width="2" fill="none"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" stroke-width="2" fill="none"></path>'
-        },
-        abstract: { // Абстрактные символы
-            rules: '<rect x="4" y="4" width="6" height="6" fill="currentColor"></rect><rect x="14" y="4" width="6" height="6" stroke="currentColor"></rect><rect x="4" y="14" width="6" height="6" stroke="currentColor"></rect><rect x="14" y="14" width="6" height="6" fill="currentColor"></rect>',
-            post: '<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"></circle><path d="M12 7v10M7 12h10" stroke="currentColor" stroke-width="1.5"></path>',
-            ads: '<path d="M2 20 L22 4" stroke="currentColor" stroke-width="2"></path><circle cx="18" cy="8" r="3" fill="currentColor"></circle>',
-            brig: '<circle cx="12" cy="8" r="4" stroke="currentColor"></circle><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" fill="none"></path>',
-            art: '<rect x="4" y="4" width="16" height="16" stroke="currentColor" stroke-width="1.5" fill="none"></rect><line x1="4" y1="4" x2="20" y2="20" stroke="currentColor"></line>'
-        }
-    };
-
-    const VARIANTS = [
-        { name: "1. Original (Line)", class: "v-original", icons: "line" },
-        { name: "2. Editorial Serif (Elegant)", class: "v-editorial", icons: "line" },
-        { name: "3. Swiss Bold (Solid)", class: "v-swiss", icons: "solid" },
-        { name: "4. Cyber Tech (Geometric)", class: "v-tech", icons: "geometric" },
-        { name: "5. Luxury Minimal (Small)", class: "v-luxury", icons: "solid" },
-        { name: "6. Brutalist (Heavy)", class: "v-brutal", icons: "solid" },
-        { name: "7. Soft UI (Rounded)", class: "v-original", icons: "soft" }, // Original layout, soft icons
-        { name: "8. Big Watermark (Faded)", class: "v-bigbg", icons: "line" },
-        { name: "9. Centered App Style", class: "v-centered", icons: "solid" },
-        { name: "10. List View (Row)", class: "v-row", icons: "line" },
-        { name: "11. Abstract Art", class: "v-editorial", icons: "abstract" },
-        { name: "12. Glassmorphism", class: "v-glass", icons: "soft" },
-        { name: "13. Blueprint (Dashed)", class: "v-tech", icons: "geometric" }, // Tech layout + geo icons
-        { name: "14. Gold Standard", class: "v-editorial", icons: "solid" },
-        { name: "15. Modern Clean (Inter)", class: "v-swiss", icons: "line" },
-        { name: "16. Heavy Outline", class: "v-brutal", icons: "geometric" },
-        { name: "17. Friendly (Soft)", class: "v-original", icons: "soft" },
-        { name: "18. Magazine (Serif+Solid)", class: "v-editorial", icons: "solid" },
-        { name: "19. Digital (Mono+Line)", class: "v-tech", icons: "line" },
-        { name: "20. Icon Focus (Big)", class: "v-centered", icons: "line" }
+    const variants = [
+        { id: 'v-clean', name: 'Clean 3D', icon: '✨' },
+        { id: 'v-blob', name: 'VkusVill', icon: '🎨' },
+        { id: 'v-delivery', name: 'Delivery', icon: '🍱' },
+        { id: 'v-glass', name: 'Glass', icon: '🧊' },
+        { id: 'v-neon', name: 'Neon', icon: '💡' },
+        { id: 'v-float', name: 'Floating', icon: '🎈' },
+        { id: 'v-crop', name: 'Big Crop', icon: '📐' },
+        { id: 'v-clay', name: 'Matte', icon: '🗿' },
+        { id: 'v-persp', name: 'Angle', icon: '📐' },
+        { id: 'v-mono', name: 'Color', icon: '🎭' },
     ];
 
-    // --- РЕНДЕР ---
-    const container = document.getElementById('card-container');
-    const list = document.getElementById('variant-list');
+    const grid = document.getElementById('grid');
+    const scrollContainer = document.querySelector('.variants-scroll');
 
-    function renderCards(variantIndex) {
-        const v = VARIANTS[variantIndex];
-        const iconSet = ICONS[v.icons];
-        
-        // Сброс классов
-        container.className = `menu-grid ${v.class}`;
-        
-        // Особая логика для "Centered" (трансформация иконки)
-        let iconStyle = '';
-        if (v.class === 'v-centered') {
-            iconStyle = 'transform: translate(50%, 50%);';
-        } else if (v.class === 'v-row') {
-            iconStyle = 'position: relative; right: auto; bottom: auto; order: -1;';
-        }
-
-        // Генерация HTML
-        container.innerHTML = `
-            <div class="card large">
-                <div class="card-content">
-                    <div class="card-title">Правила группы</div>
-                    <div class="card-desc">Обязательно к ознакомлению</div>
-                </div>
-                <div class="card-watermark" style="${iconStyle}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${iconSet.rules}</svg>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title">Разместить объявление</div>
-                </div>
-                <div class="card-watermark" style="${iconStyle}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${iconSet.post}</svg>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title">Разместить рекламу</div>
-                </div>
-                <div class="card-watermark" style="${iconStyle}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${iconSet.ads}</svg>
-                </div>
-            </div>
-
-            <div class="card" style="opacity:0.6;">
-                <div class="card-content">
-                    <div class="card-title">Проверенные бригадиры</div>
-                </div>
-                <div class="card-watermark" style="${iconStyle}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${iconSet.brig}</svg>
-                </div>
-            </div>
-
-            <div class="card" style="opacity:0.6;">
-                <div class="card-content">
-                    <div class="card-title">Полезные статьи</div>
-                </div>
-                <div class="card-watermark" style="${iconStyle}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${iconSet.art}</svg>
-                </div>
-            </div>
-        `;
-    }
-
-    function init() {
-        // Генерация кнопок
-        VARIANTS.forEach((v, i) => {
-            const btn = document.createElement('div');
-            btn.className = `variant-btn ${i === 0 ? 'active' : ''}`;
-            btn.textContent = v.name;
-            btn.onclick = () => {
-                document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                renderCards(i);
-            };
-            list.appendChild(btn);
-        });
-
-        renderCards(0);
-    }
+    // Генерация кнопок
+    variants.forEach((v, index) => {
+        const btn = document.createElement('div');
+        btn.className = `v-btn ${index === 0 ? 'active' : ''}`;
+        btn.innerHTML = `<div class="v-preview">${v.icon}</div><div>${v.name}</div>`;
+        btn.onclick = () => {
+            // Смена класса сетки
+            grid.className = `grid ${v.id}`;
+            // Активная кнопка
+            document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        };
+        scrollContainer.appendChild(btn);
+    });
 
     function toggleTheme() {
         const body = document.body;
-        const label = document.getElementById('theme-name');
-        if (body.getAttribute('data-theme') === 'dark') {
-            body.setAttribute('data-theme', 'light');
-            label.textContent = 'День';
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            label.textContent = 'Ночь';
-        }
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
     }
-
-    init();
-
 </script>
+
 </body>
 </html>
