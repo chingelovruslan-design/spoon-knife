@@ -232,33 +232,33 @@
 </div>
 
 <script>
-    // --- БАЗА КАРТИНОК (Fluent 3D) ---
+    // --- БАЗА КАРТИНОК (CDN JSDelivr - Стабильные ссылки) ---
     const assets = {
         // ВАРИАНТ 1: ЛЮДИ (ПРОФЕССИИ)
         people: {
-            rules: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Professions/Woman%20Teacher.png", // Учитель (Правила)
-            post: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Person/Person%20Raising%20Hand.png", // Хочу сказать (Объявление)
-            ads: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Person/Woman%20Genie.png", // Магия/Джинн (Реклама)
-            brig: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Professions/Construction%20Worker.png", // Рабочий (Бригадир)
-            art: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/People/Professions/Woman%20Student.png" // Студент (Статьи)
+            rules: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/People/Professions/Woman%20Teacher.png", 
+            post: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/People/Person/Person%20Raising%20Hand.png", 
+            ads: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/People/Person/Woman%20Genie.png", 
+            brig: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/People/Professions/Construction%20Worker.png", 
+            art: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/People/Professions/Woman%20Student.png"
         },
         
         // ВАРИАНТ 2: РУКИ (ЖЕСТЫ)
         hands: {
-            rules: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Writing%20Hand.png", // Пишущая рука
-            post: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Hand%20with%20Index%20Finger%20and%20Thumb%20Crossed.png", // Жест "Деньги/Внимание"
-            ads: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Clapping%20Hands.png", // Аплодисменты
-            brig: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Handshake.png", // Рукопожатие
-            art: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Ok%20Hand.png" // ОК
+            rules: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Hand%20gestures/Writing%20Hand.png",
+            post: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Hand%20gestures/Hand%20with%20Index%20Finger%20and%20Thumb%20Crossed.png",
+            ads: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Hand%20gestures/Clapping%20Hands.png",
+            brig: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Hand%20gestures/Handshake.png",
+            art: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Hand%20gestures/Ok%20Hand.png"
         },
         
         // ВАРИАНТ 3: ПРЕДМЕТЫ (КЛАССИКА)
         objects: {
-            rules: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Scroll.png",
-            post: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Memo.png",
-            ads: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Megaphone.png",
-            brig: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png",
-            art: "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Books.png"
+            rules: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Objects/Scroll.png",
+            post: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Objects/Memo.png",
+            ads: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Objects/Megaphone.png",
+            brig: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Objects/Shield.png",
+            art: "https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Animated-Fluent-Emojis/Emojis/Objects/Books.png"
         }
     };
 
@@ -271,7 +271,7 @@
         // 2. Получаем набор
         const set = assets[conceptName];
         
-        // 3. Обновляем картинки с анимацией перезагрузки
+        // 3. Обновляем картинки
         updateImage('img-rules', set.rules);
         updateImage('img-post', set.post);
         updateImage('img-ads', set.ads);
@@ -291,13 +291,13 @@
         
         setTimeout(() => {
             img.src = src;
-            // Ждем загрузки (или просто тайм-аут для эффекта)
+            // Ждем загрузки
             img.onload = () => {
                 img.classList.add('visible');
             };
-            // На случай если картинка в кеше и onload не сработает
-            setTimeout(() => img.classList.add('visible'), 50);
-        }, 200);
+            // Страховка
+            setTimeout(() => img.classList.add('visible'), 100);
+        }, 150);
     }
 
     function toggleTheme() {
@@ -309,7 +309,7 @@
         }
     }
 
-    // Инициализация (Запуск первой концепции)
+    // Инициализация
     window.onload = () => {
         const firstBtn = document.querySelector('.concept-btn.active');
         setConcept('people', firstBtn);
