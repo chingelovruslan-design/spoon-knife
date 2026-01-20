@@ -2,1099 +2,453 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- viewport-fit=cover и запрет масштабирования -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | App</title>
+    <title>КИНОЦЕХ | Примерочная</title>
     
-    <!-- 1. TELEGRAM API -->
+    <!-- TELEGRAM API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- 2. ШРИФТЫ -->
+    <!-- ШРИФТЫ -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- ПЕРЕМЕННЫЕ --- */
+        /* --- ПЕРЕМЕННЫЕ (ОРИГИНАЛ) --- */
         :root {
             --font-display: 'Montserrat', sans-serif; 
             --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-            /* ФИЗИКА */
             --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
             --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1); 
-            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1); 
-            
-            /* ТАЙМИНГИ */
             --duration-base: 0.3s;
-            --duration-page: 0.45s;
-
-            /* Z-INDEX LAYERS */
-            --z-noise: 0;
-            --z-home: 10;
-            --z-header: 20;
-            --z-page: 30;
-            --z-nav: 40;
-            --z-footer: 50;
-            --z-toast: 100;
-            --z-loader: 9999;
-
-            /* DARK THEME */
+            
+            /* DARK THEME (DEFAULT) */
             --bg-color: #0F0F11;
-            --spotlight-color: rgba(255, 255, 255, 0.12); 
             --card-bg: rgba(255, 255, 255, 0.04);
             --card-locked-bg: rgba(255, 255, 255, 0.02);
             --card-active-bg: rgba(255, 255, 255, 0.08);
             --border-color: rgba(255, 255, 255, 0.08);
-            
-            /* ТОЛСТОЕ СТЕКЛО (БЛИК) */
             --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
-            
-            /* ТЕНИ (GOLD GLOW) */
             --card-shadow: var(--glass-highlight), 0 12px 40px -12px rgba(212, 175, 55, 0.15);
-            
             --text-primary: #F2F2F2;
             --text-secondary: #9CA3AF;
             --text-locked: #52525b;
             --accent-color: #D4AF37; 
-            --nav-bg: rgba(15, 15, 17, 0.75); 
-            --nav-bg-lite: #0F0F11; /* Solid color for Lite Mode */
-            --warn-bg: rgba(245, 158, 11, 0.08);
-            --warn-border: rgba(245, 158, 11, 0.3);
-            --warn-text: #F59E0B;
-            --danger-bg: rgba(220, 38, 38, 0.08);
-            --danger-border: rgba(220, 38, 38, 0.3);
-            --danger-text: #EF4444;
             --icon-color: #D4AF37;
             --icon-opacity: 0.25; 
             --icon-locked-color: #D4AF37;
             --icon-locked-opacity: 0.08;
-            --selection-bg: rgba(212, 175, 55, 0.3);
-            
-            --skeleton-base: #1c1c1e;
-            --skeleton-highlight: #2c2c2e;
         }
 
         /* LIGHT THEME */
         [data-theme="light"] {
             --bg-color: #F2F2F7;
-            --spotlight-color: rgba(0, 51, 102, 0.05);
             --card-bg: #FFFFFF;
             --card-locked-bg: #F5F5F7;
             --card-active-bg: #FFFFFF;
             --border-color: rgba(0, 51, 102, 0.15);
-            
             --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 1), inset 0 0 0 1px rgba(0,0,0,0.02);
-            
-            /* ТЕНИ (BLUE GLOW) */
             --card-shadow: var(--glass-highlight), 0 12px 30px -10px rgba(0, 51, 102, 0.15);
-            
             --text-primary: #1C1C1E;
             --text-secondary: #636366;
             --text-locked: #8E8E93;
             --accent-color: #003366; 
-            --nav-bg: rgba(255, 255, 255, 0.75);
-            --nav-bg-lite: #F2F2F7; /* Solid color for Lite Mode */
-            --warn-bg: rgba(255, 149, 0, 0.1);
-            --warn-border: rgba(255, 149, 0, 0.3);
-            --warn-text: #D47600;
-            --danger-bg: rgba(255, 59, 48, 0.1);
-            --danger-border: rgba(255, 59, 48, 0.3);
-            --danger-text: #D70015;
             --icon-color: #003366;
             --icon-opacity: 0.25;
             --icon-locked-color: #003366;
             --icon-locked-opacity: 0.08;
-            --selection-bg: rgba(0, 51, 102, 0.2);
-            
-            --skeleton-base: #e5e5ea;
-            --skeleton-highlight: #f2f2f7;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        
-        /* УСКОРЕННЫЕ ТРАНЗИШЕНЫ */
-        html, body, .page, .card, .nav-bar, .sticky-footer, .btn, .accordion-header, .accordion-content, .custom-alert, .step-card, .glass-card {
-            transition: 
-                background-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                border-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                fill var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                stroke var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        html, body { height: 100dvh; overflow: hidden; background-color: var(--bg-color); }
-        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            position: fixed; 
-            top: 0; left: 0; width: 100%;
             margin: 0; padding: 0; 
+            background-color: var(--bg-color);
             color: var(--text-primary);
             font-family: var(--font-body);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            user-select: none; -webkit-user-select: none;
-            font-variant-numeric: tabular-nums;
-            overscroll-behavior: none; 
+            overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* УЛУЧШЕННЫЙ ШУМ (OVERLAY) */
-        .noise-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: var(--z-noise); opacity: 0.04; 
-            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII=");
-            background-repeat: repeat;
-            mix-blend-mode: overlay; 
-        }
-        /* LITE MODE: Отключаем шум */
-        .lite-mode .noise-overlay { display: none; }
-
-        /* ЖИВОЙ СВЕТ */
-        @keyframes breathe {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-        }
-
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60vh;
-            background: radial-gradient(circle at 50% -10%, var(--spotlight-color) 0%, transparent 70%);
-            pointer-events: none; z-index: var(--z-noise); 
-            animation: breathe 8s ease-in-out infinite;
-            will-change: opacity, transform;
-        }
-        /* LITE MODE: Отключаем анимацию фона */
-        .lite-mode body::before { animation: none; opacity: 0.5; }
-
-        #app { position: relative; width: 100%; height: 100%; overflow: hidden; perspective: 1000px; }
-        ::-webkit-scrollbar { display: none; }
-        ::selection { background: var(--selection-bg); color: inherit; }
-
-        /* --- СКЕЛЕТОН --- */
-        #skeleton-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color); z-index: var(--z-loader);
-            padding: 20px; padding-top: max(20px, env(safe-area-inset-top));
-            display: flex; flex-direction: column;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
-        #skeleton-loader.hidden { opacity: 0; visibility: hidden; }
+        /* --- СТРУКТУРА --- */
+        #app { padding: 20px; height: 100vh; overflow-y: auto; }
         
-        .sk-header { height: 40px; width: 60%; background: var(--skeleton-base); border-radius: 8px; margin: 20px auto 30px; position: relative; overflow: hidden; }
-        .sk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .sk-card { height: 130px; background: var(--skeleton-base); border-radius: 18px; position: relative; overflow: hidden; }
-        .sk-card.large { grid-column: span 2; height: 110px; }
-        
-        .sk-header::after, .sk-card::after {
-            content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
-            transform: translateX(-100%);
-            background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.05) 20%, rgba(255, 255, 255, 0.1) 60%, rgba(255, 255, 255, 0));
-            animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer { 100% { transform: translateX(100%); } }
-
-        /* --- СТРАНИЦЫ --- */
-        .page {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding-bottom: 140px; 
-            background-color: var(--bg-color);
-            transition: transform var(--duration-page) var(--ease-smooth), filter var(--duration-page) ease, opacity var(--duration-page) ease, background-color var(--duration-base) ease;
-            z-index: var(--z-page); 
-            overscroll-behavior-y: contain; 
-            will-change: transform, filter;
-            transform: translateZ(0); /* GPU Hack */
-            backface-visibility: hidden; 
-        }
-        #page-home { z-index: var(--z-home); }
-        
-        /* 3D ГЛУБИНА (ПАРАЛЛАКС) */
-        .page.behind { 
-            transform: scale(0.92) translateX(-15%); 
-            filter: brightness(0.6) blur(2px); 
-            border-radius: 20px; 
-            overflow: hidden; 
-            pointer-events: none;
-        }
-        /* LITE MODE: Убираем Blur, оставляем только затемнение (спасает от лагов при возврате) */
-        .lite-mode .page.behind { filter: brightness(0.6); }
-        
-        .sub-page { transform: translateX(100%); }
-        .sub-page.active { transform: translateX(0); }
-
-        /* --- ШАПКА --- */
-        .header {
-            padding: 20px 20px 10px; padding-top: max(20px, env(safe-area-inset-top)); 
-            display: flex; flex-direction: column; align-items: center; position: relative; z-index: var(--z-header);
-        }
-
-        .theme-toggle {
-            position: absolute; top: max(20px, env(safe-area-inset-top)); right: 20px;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-primary); overflow: hidden; 
-            transition: transform 0.3s var(--ease-spring), background-color var(--duration-base) ease, border-color var(--duration-base) ease;
-            box-shadow: var(--glass-highlight);
-        }
-        .theme-toggle::after { content: ''; position: absolute; top: -15px; left: -15px; right: -15px; bottom: -15px; }
-        .theme-toggle:active, .theme-toggle.active-state { transform: scale(0.85); }
-        .theme-icon { position: absolute; transition: all 0.4s var(--ease-spring); }
-        #icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
-        #icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
-        [data-theme="light"] #icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
-        [data-theme="light"] #icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
-
-        /* БРЕНД */
+        .header { text-align: center; margin-bottom: 30px; padding-top: 20px; }
         .brand-title {
             font-family: var(--font-display); font-size: 30px; font-weight: 800; 
-            letter-spacing: 2px; 
-            text-transform: uppercase; margin-top: 20px; margin-bottom: 4px;
-            background: linear-gradient(to right, #bf953f 0%, #fcf6ba 20%, #b38728 40%, #fbf5b7 60%, #aa771c 80%, #bf953f 100%);
-            background-size: 200% auto;
+            letter-spacing: 2px; text-transform: uppercase;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728);
             -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-            animation: shine 6s linear infinite; 
-            will-change: background-position;
-            transition: all 0.3s ease;
         }
-        /* LITE MODE: Статичный градиент без анимации */
-        .lite-mode .brand-title { animation: none; background: linear-gradient(to bottom, #fcf6ba, #bf953f); -webkit-background-clip: text; background-clip: text; }
-
         [data-theme="light"] .brand-title {
-            background: linear-gradient(to right, #003366 0%, #4da6ff 20%, #003366 40%, #4da6ff 60%, #003366 100%);
-            background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        /* LITE MODE LIGHT: Статичный градиент */
-        .lite-mode[data-theme="light"] .brand-title { animation: none; background: linear-gradient(to bottom, #4da6ff, #003366); -webkit-background-clip: text; background-clip: text; }
-
-        @keyframes shine { to { background-position: 200% center; } }
-
-        .brand-subtitle {
-            font-family: var(--font-display); font-size: 10px; color: var(--accent-color); opacity: 0.9;
-            text-transform: uppercase; letter-spacing: 3px; font-weight: 600;
+            background: linear-gradient(to right, #003366, #4da6ff, #003366);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        /* --- КАРТОЧКИ --- */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 16px; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 100px; }
+        
         .card {
             background: var(--card-bg); border: 1px solid var(--border-color); 
             box-shadow: var(--card-shadow);
-            border-radius: 18px; padding: 18px; height: 130px; position: relative; overflow: hidden; cursor: pointer;
-            transition: transform 0.2s var(--ease-spring), background-color var(--duration-base) ease, border-color var(--duration-base) ease, box-shadow var(--duration-base) ease;
-            animation: fadeInUp 0.5s var(--ease-out-expo) backwards; backface-visibility: hidden;
-            will-change: transform;
-            transform: translateZ(0);
+            border-radius: 18px; padding: 18px; height: 130px; position: relative; overflow: hidden;
+            transition: all 0.3s var(--ease-spring);
         }
-        
-        .card:nth-child(1) { animation-delay: 0.05s; }
-        .card:nth-child(2) { animation-delay: 0.1s; }
-        .card:nth-child(3) { animation-delay: 0.15s; }
-        .card:nth-child(4) { animation-delay: 0.2s; }
-        .card:nth-child(5) { animation-delay: 0.25s; }
-        
-        .card:active, .card.active-state { transform: scale(0.97); background: var(--card-active-bg); border-color: var(--accent-color); transition-duration: 0.1s; }
-        
         .card.large { grid-column: span 2; height: 110px; }
+        .card.locked { background: var(--card-locked-bg); border-color: transparent; box-shadow: none; }
         
-        .card-content { 
-            position: relative; z-index: 2; width: 100%; pointer-events: none;
-            opacity: 0; animation: fadeInContent 0.4s ease forwards; animation-delay: 0.2s;
-        }
-        @keyframes fadeInContent { to { opacity: 1; } }
-
-        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.35; max-width: 95%; text-transform: uppercase; letter-spacing: 0.5px; }
-        .card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; font-weight: 500; letter-spacing: 0.2px; }
+        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; position: relative; z-index: 2; text-transform: uppercase; }
+        .card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; position: relative; z-index: 2; }
+        
+        /* --- ВОДЯНОЙ ЗНАК (ИКОНКА) --- */
         .card-watermark {
             position: absolute; right: 8px; bottom: 8px; width: 55px; height: 55px;
             color: var(--icon-color); opacity: var(--icon-opacity);
             transition: transform 0.4s var(--ease-spring), opacity 0.3s ease, color 0.6s ease; 
             z-index: 1; pointer-events: none;
         }
-        .card:active .card-watermark, .card.active-state .card-watermark { transform: scale(1.1) rotate(-8deg); opacity: calc(var(--icon-opacity) + 0.15); }
-        
-        .card.locked { background: var(--card-locked-bg); border-color: transparent; box-shadow: none; cursor: default; }
-        .card.locked:active, .card.locked.active-state { transform: scale(0.96); } 
-        .card.locked .card-title { color: var(--text-locked); }
         .card.locked .card-watermark { color: var(--icon-locked-color); opacity: var(--icon-locked-opacity); }
         
-        .badge-soon {
-            position: absolute; bottom: 12px; left: 12px; background: var(--bg-color); 
-            border: 1px solid var(--border-color); padding: 4px 7px; border-radius: 6px;
-            font-size: 9px; font-weight: 800; color: var(--text-locked); z-index: 3; text-transform: uppercase; opacity: 0.8;
-        }
+        /* Анимация при нажатии (симуляция) */
+        .card:active { transform: scale(0.97); }
+        .card:active .card-watermark { transform: scale(1.1) rotate(-8deg); opacity: calc(var(--icon-opacity) + 0.15); }
 
-        /* --- DEVELOPER CREDITS --- */
-        .dev-credits {
-            text-align: center;
-            font-family: var(--font-display);
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            opacity: 0.4;
-            letter-spacing: 0.5px;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        /* --- ВНУТРЕННИЕ СТРАНИЦЫ --- */
-        .nav-bar {
-            display: flex; align-items: center; padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); 
-            position: sticky; top: 0; background: var(--nav-bg);
-            backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-            z-index: var(--z-nav); border-bottom: 1px solid var(--border-color);
-        }
-        /* LITE MODE: Убираем блюр, ставим непрозрачный фон */
-        .lite-mode .nav-bar { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--nav-bg-lite); opacity: 0.96; }
-
-        @supports not (backdrop-filter: blur(20px)) { 
-            .nav-bar, .sticky-footer { background: var(--bg-color); opacity: 0.98; } 
-        }
-        
-        .btn-back {
-            background: none; border: none; color: var(--text-primary);
-            display: flex; align-items: center; font-size: 15px; cursor: pointer; padding: 0;
-            font-family: var(--font-display); font-weight: 600; position: relative; transition: opacity 0.2s ease;
-        }
-        .btn-back::after { content: ''; position: absolute; top: -15px; left: -15px; right: -25px; bottom: -15px; }
-        .btn-back:active, .btn-back.active-state { opacity: 0.6; }
-        .btn-back svg { width: 20px; height: 20px; margin-right: 6px; }
-        .page-intro { padding: 24px 20px; border-bottom: 1px solid var(--border-color); }
-        .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
-        .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
-
-        /* --- АККОРДЕОН --- */
-        .accordion-item { position: relative; }
-        .accordion-item::after {
-            content: ''; position: absolute; bottom: 0; left: 20px; right: 20px; height: 1px;
-            background: linear-gradient(to right, transparent, var(--border-color) 10%, var(--border-color) 90%, transparent);
-        }
-        .accordion-header {
-            width: 100%; background: none; border: none; padding: 22px 20px;
-            display: flex; align-items: center; justify-content: space-between;
-            text-align: left; cursor: pointer; position: relative; transition: background-color 0.2s ease;
-        }
-        .accordion-header:active, .accordion-header.active-state { background: var(--card-active-bg); }
-        .acc-title-group { display: flex; align-items: center; gap: 14px; }
-        .acc-icon { width: 22px; height: 22px; color: var(--accent-color); flex-shrink: 0; }
-        .acc-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 1px; }
-        .acc-chevron { width: 18px; height: 18px; color: var(--text-secondary); transition: transform 0.3s var(--ease-spring), color 0.3s ease; }
-        .accordion-item.active .acc-chevron { transform: rotate(180deg); }
-        .accordion-item.active .acc-title { color: var(--accent-color); }
-        .accordion-content {
-            max-height: 0; overflow: hidden; 
-            transition: max-height 0.4s var(--ease-smooth), background-color 0.4s ease;
-            background: rgba(0,0,0,0.015);
-        }
-        
-        /* --- КОНТЕНТ --- */
-        .content-inner { 
-            padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; 
-            font-variant-numeric: tabular-nums;
-        }
-        .content-inner > * {
-            opacity: 0; animation: fadeInUp 0.4s ease forwards;
-        }
-        .content-inner > *:nth-child(1) { animation-delay: 0.05s; }
-        .content-inner > *:nth-child(2) { animation-delay: 0.1s; }
-        .content-inner > *:nth-child(3) { animation-delay: 0.15s; }
-        .content-inner > *:nth-child(4) { animation-delay: 0.2s; }
-        .content-inner > *:nth-child(5) { animation-delay: 0.25s; }
-
-        .content-inner strong { color: var(--text-primary); }
-        .content-inner ul { padding-left: 20px; margin-bottom: 16px; list-style: none; }
-        .content-inner li { margin-bottom: 8px; position: relative; }
-        .content-inner li::before { content: '—'; position: absolute; left: -20px; color: var(--accent-color); font-weight: 700; }
-
-        /* --- НОВЫЕ СТИЛИ ДЛЯ "FLAT CARDS" (Разместить объявление) --- */
-        .ad-intro { font-size: 14px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 24px; }
-        .ad-section-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; text-transform: uppercase; margin: 30px 0 20px; color: var(--text-primary); letter-spacing: 0.5px; }
-        
-        .steps-wrapper { display: flex; flex-direction: column; gap: 12px; }
-        .step-card { 
-            background: var(--card-bg); 
-            border: 1px solid var(--border-color); 
-            padding: 20px; 
-            border-radius: 16px; 
-            transition: background-color 0.3s ease, border-color 0.3s ease; 
-        }
-        .step-card:active { background: var(--card-active-bg); }
-        
-        .step-card-title { 
-            font-family: var(--font-display); 
-            font-weight: 700; 
-            font-size: 15px; 
-            color: var(--accent-color); 
-            margin-bottom: 8px; 
-            display: block; 
-        }
-        .step-card-desc { font-size: 14px; line-height: 1.55; color: var(--text-secondary); }
-        
-        .ad-sub-list { margin-top: 12px; padding-left: 0; list-style: none; }
-        .ad-sub-list li { position: relative; padding-left: 16px; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); }
-        .ad-sub-list li::before { content: '—'; position: absolute; left: 0; color: var(--accent-color); }
-        .ad-sub-list strong { color: var(--text-primary); font-weight: 600; }
-
-        .important-block { margin-top: 32px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
-        .important-block strong { color: var(--text-primary); display: block; margin-bottom: 8px; font-family: var(--font-display); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
-
-        /* --- ALERTS --- */
-        .custom-alert { border-radius: 12px; padding: 14px 16px; margin: 18px 0; display: flex; gap: 12px; align-items: flex-start; }
-        .alert-icon-box { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
-        .alert-body { flex: 1; }
-        .alert-title { display: block; font-weight: 700; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .alert-text { font-size: 13px; opacity: 0.95; line-height: 1.45; }
-        .alert-warning { background: var(--warn-bg); border: 1px solid var(--warn-border); }
-        .alert-warning .alert-title, .alert-warning .alert-icon-box { color: var(--warn-text); }
-        .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); }
-        .alert-danger .alert-title, .alert-danger .alert-icon-box { color: var(--danger-text); }
-
-        /* --- НОВЫЕ СТИЛИ ДЛЯ РЕКЛАМЫ (GLASS PANELS) --- */
-        .glass-alert {
-            background: rgba(220, 38, 38, 0.08); 
-            border: 1px solid rgba(220, 38, 38, 0.2);
-            padding: 16px;
-            border-radius: 16px;
-            margin: 24px 0;
-        }
-        [data-theme="light"] .glass-alert {
-            background: rgba(255, 59, 48, 0.1);
-            border-color: rgba(255, 59, 48, 0.2);
-        }
-        .glass-alert-title {
-            color: var(--danger-text);
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            display: block;
-        }
-        .glass-card {
-            background: var(--card-bg);
-            box-shadow: var(--glass-highlight);
-            padding: 18px;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        /* LITE MODE: Без блюра */
-        .lite-mode .glass-card { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--card-bg); }
-
-        .glass-card-title {
-            font-family: var(--font-display);
-            font-weight: 700;
-            font-size: 13px;
-            color: var(--accent-color);
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            display: block;
-        }
-        .glass-card-desc {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        /* --- FOOTER --- */
-        .sticky-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 16px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            background: var(--nav-bg);
-            backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-top: 1px solid var(--border-color); display: flex; gap: 10px; z-index: var(--z-footer);
-        }
-        /* LITE MODE: Убираем блюр */
-        .lite-mode .sticky-footer { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--nav-bg-lite); opacity: 0.96; }
-
-        .btn {
-            flex: 1; height: 42px; border-radius: 12px; border: none;
-            font-family: var(--font-display); font-weight: 600; font-size: 14px; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; 
-            cursor: pointer; 
-            box-shadow: var(--glass-highlight);
-            position: relative; overflow: hidden; padding: 0; 
-            transition: transform 0.2s var(--ease-spring), background-color 0.2s ease;
-        }
-        .btn:active, .btn.active-state { transform: scale(0.95); }
-        .btn-primary { background: var(--accent-color); color: #000; }
-        [data-theme="light"] .btn-primary { color: #FFF; } 
-        .btn-primary::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.6), transparent);
-            transform: skewX(-25deg); mix-blend-mode: overlay; animation: shimmer-anim 6s infinite linear; pointer-events: none;
-        }
-        @keyframes shimmer-anim { 0% { left: -100%; } 35% { left: 200%; } 100% { left: 200%; } }
-        .btn-secondary { background: var(--card-active-bg); color: var(--text-primary); border: 1px solid var(--border-color); }
-        .btn svg { display: block; width: 20px; height: 20px; flex-shrink: 0; }
-
-        /* --- TOAST --- */
-        .toast-container {
-            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
-            z-index: var(--z-toast); pointer-events: none;
-            display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;
-        }
-        .toast {
-            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px);
-            color: #FFF; padding: 10px 20px; border-radius: 50px;
-            font-size: 12px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            opacity: 0; transform: translateY(10px) scale(0.95);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* --- ПАНЕЛЬ ПРИМЕРОЧНОЙ --- */
+        .fitting-room {
+            position: fixed; top: 20px; right: 20px; bottom: 20px; width: 260px;
+            background: rgba(15, 15, 17, 0.95);
             border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            z-index: 9999;
+            padding: 20px;
+            display: flex; flex-direction: column;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            overflow-y: auto;
         }
-        /* LITE MODE: Без блюра */
-        .lite-mode .toast { backdrop-filter: none; background: #1C1C1E; }
+        [data-theme="light"] .fitting-room {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0,0,0,0.1);
+        }
 
-        [data-theme="light"] .toast { background: rgba(0,0,0,0.8); }
-        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+        .fr-header {
+            font-family: var(--font-display); font-weight: 700; font-size: 14px;
+            margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
+        }
 
+        .fr-toggle-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; background: var(--card-active-bg); padding: 10px; border-radius: 12px;
+        }
+        .fr-label { font-size: 12px; font-weight: 600; }
+        
+        /* Стилизованный свитч */
+        .theme-switch {
+            position: relative; width: 50px; height: 26px; background: #333; border-radius: 20px; cursor: pointer;
+            transition: background 0.3s;
+        }
+        [data-theme="light"] .theme-switch { background: #e5e5ea; }
+        .theme-switch::after {
+            content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+            background: #fff; border-radius: 50%; transition: transform 0.3s var(--ease-spring);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        [data-theme="light"] .theme-switch::after { transform: translateX(24px); }
+
+        .style-list { display: flex; flex-direction: column; gap: 8px; }
+        .style-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; border-radius: 10px; cursor: pointer;
+            transition: background 0.2s; border: 1px solid transparent;
+        }
+        .style-option:hover { background: var(--card-active-bg); }
+        .style-option.active { 
+            background: var(--card-active-bg); 
+            border-color: var(--accent-color); 
+        }
+        
+        .radio-circle {
+            width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--text-secondary);
+            position: relative; flex-shrink: 0;
+        }
+        .style-option.active .radio-circle { border-color: var(--accent-color); }
+        .style-option.active .radio-circle::after {
+            content: ''; position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px;
+            background: var(--accent-color); border-radius: 50%;
+        }
+        
+        .opt-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+        .opt-desc { font-size: 10px; color: var(--text-secondary); display: block; }
+
+        /* Адаптив для мобильных (панель вниз) */
+        @media (max-width: 768px) {
+            .fitting-room {
+                top: auto; bottom: 0; left: 0; right: 0; width: 100%; height: 35vh;
+                border-radius: 20px 20px 0 0; border-top: 1px solid var(--border-color);
+            }
+            #app { padding-bottom: 40vh; }
+        }
     </style>
 </head>
-<body ontouchstart="">
+<body data-theme="dark">
 
-<!-- NOISE OVERLAY -->
-<div class="noise-overlay"></div>
+<div id="app">
+    <header class="header">
+        <div class="brand-title">КИНОЦЕХ</div>
+    </header>
 
-<!-- СКЕЛЕТОН -->
-<div id="skeleton-loader">
-    <div class="sk-header"></div>
-    <div class="sk-grid">
-        <div class="sk-card large"></div>
-        <div class="sk-card"></div>
-        <div class="sk-card"></div>
-        <div class="sk-card"></div>
-        <div class="sk-card"></div>
+    <div class="menu-grid">
+        <!-- 1. ПРАВИЛА -->
+        <div class="card large" id="card-rules">
+            <div class="card-title">Правила группы</div>
+            <div class="card-desc">Обязательно к ознакомлению</div>
+            <div class="card-watermark" id="icon-rules"></div>
+        </div>
+
+        <!-- 2. ОБЪЯВЛЕНИЕ -->
+        <div class="card" id="card-post">
+            <div class="card-title">Разместить объявление</div>
+            <div class="card-watermark" id="icon-post"></div>
+        </div>
+
+        <!-- 3. РЕКЛАМА -->
+        <div class="card" id="card-ads">
+            <div class="card-title">Разместить рекламу</div>
+            <div class="card-watermark" id="icon-ads"></div>
+        </div>
+
+        <!-- 4. БРИГАДИРЫ -->
+        <div class="card locked" id="card-brigadiers">
+            <div class="card-title">Проверенные бригадиры</div>
+            <div class="card-watermark" id="icon-brigadiers"></div>
+        </div>
+
+        <!-- 5. СТАТЬИ -->
+        <div class="card locked" id="card-articles">
+            <div class="card-title">Полезные статьи</div>
+            <div class="card-watermark" id="icon-articles"></div>
+        </div>
     </div>
 </div>
 
-<div id="app">
-
-    <!-- ГЛАВНАЯ -->
-    <div id="page-home" class="page">
-        <header class="header">
-            <!-- КНОПКА ТЕМЫ -->
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Сменить тему">
-                <svg id="icon-moon" class="theme-icon" style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                <svg id="icon-sun" class="theme-icon" style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            </button>
-
-            <div id="brand-title" class="brand-title">КИНОЦЕХ</div>
-            <div class="brand-subtitle">ВЕРСИЯ 3.4</div>
-        </header>
-
-        <div class="menu-grid">
-            <div class="card large" onclick="openPage('page-rules')">
-                <div class="card-content">
-                    <div class="card-title">Правила группы</div>
-                    <div class="card-desc">Обязательно к ознакомлению</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                </div>
-            </div>
-
-            <div class="card" onclick="openPage('page-post-ad')">
-                <div class="card-content">
-                    <div class="card-title">Разместить объявление</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                </div>
-            </div>
-
-            <div class="card" onclick="openPage('page-place-ads')">
-                <div class="card-content">
-                    <div class="card-title">Разместить рекламу</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
-                </div>
-            </div>
-
-            <div class="card locked" onclick="handleLockedClick(this, 'Раздел находится в разработке')">
-                <span class="badge-soon">Скоро</span>
-                <div class="card-content">
-                    <div class="card-title">Проверенные бригадиры</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <polyline points="9 12 11 14 15 10"></polyline>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="card locked" onclick="handleLockedClick(this, 'Скоро появятся полезные статьи')">
-                <span class="badge-soon">Скоро</span>
-                <div class="card-content">
-                    <div class="card-title">Полезные статьи</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- DEVELOPER CREDITS -->
-        <div class="dev-credits">
-            © 2022–2026 KINOCEKH. Dev by Ruslan
-        </div>
-
+<!-- ПАНЕЛЬ ПРИМЕРОЧНОЙ -->
+<div class="fitting-room">
+    <div class="fr-header">Примерочная</div>
+    
+    <div class="fr-toggle-row" onclick="toggleTheme()">
+        <span class="fr-label">Тема: <span id="theme-label">Ночь</span></span>
+        <div class="theme-switch"></div>
     </div>
 
-    <!-- СТРАНИЦА: ПРАВИЛА -->
-    <div id="page-rules" class="page sub-page">
-        <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-rules')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Назад
-            </button>
-        </div>
-
-        <div class="page-intro">
-            <p><strong>Премиум-платформа для индустрии.</strong></p>
-            <p>Заказчики находят исполнителей, Актеры и АМС — проекты. Чтобы всем было комфортно, за порядком следит Модератор и автоматическая система.</p>
-        </div>
-
-        <div class="accordion">
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        <span class="acc-title">1. Модерация и Доступ</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>1.1. Регламент вступления</strong><br>
-                        Группа работает в закрытом режиме. Заявки рассматриваются вручную (до 24 часов). Пустые аккаунты отклоняются.</p>
-                        <p><strong>1.2. Техническая защита</strong><br>
-                        При вступлении возможность писать временно отключена (фильтр от спамеров).</p>
-                        <p><strong>1.4. Ссылки и Безопасность</strong><br>
-                        Подозрительные ссылки блокируются ботом.</p>
-                        <p><strong>1.5. «Анти-Бегунок»</strong><br>
-                        Частый выход и вход (более 4-х раз) — автоматический бан.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="10" cy="7" r="4"></circle>
-                            <path d="M10.3 15H7a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="17" cy="17" r="3"></circle>
-                            <line x1="21" y1="21" x2="19" y2="19"></line>
-                        </svg>
-                        <span class="acc-title">2. Для Бригадиров</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>2.1. Оформление объявления</strong><br>
-                        Указывайте сразу: Город, Дату, Проект, Типаж, Занятость, Гонорар. Если позиция закрыта — удалите пост.</p>
-                        <p><strong>2.2. Гонорары (Москва)</strong><br>
-                        Минимум: от 2500₽ / смена.</p>
-                        <div class="custom-alert alert-warning">
-                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                            <div class="alert-body">
-                                <span class="alert-title">Исключение (Москва):</span>
-                                <span class="alert-text">2000₽ допускается только за короткую смену (до 6 часов). Злоупотребление наказывается.</span>
-                            </div>
-                        </div>
-                        <p><strong>2.3. Неизвестный гонорар</strong><br>
-                        Пишите «По договоренности». Фразы без конкретики удаляются.</p>
-                        <p><strong>2.5. Запрет на перегон трафика</strong><br>
-                        Запрещено принуждать подписываться на каналы через автоответчик или ЛС.</p>
-                        <div class="custom-alert alert-danger">
-                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></div>
-                            <div class="alert-body">
-                                <span class="alert-title">Санкция:</span>
-                                <span class="alert-text">Полное закрытие доступа.</span>
-                            </div>
-                        </div>
-                        <p><strong>2.6. ЗАПРЕТЫ</strong><br>
-                        Эскорт, порнография, крипто-схемы.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10c0-4.4 3.6-8 8-8s8 3.6 8 8a8 8 0 0 1-8 8c-4.4 0-8-3.6-8-8z"></path><path d="M14 14a2 2 0 0 1 2 2"></path><path d="M10 14a2 2 0 0 0-2 2"></path><path d="M10 10h.01"></path><path d="M14 10h.01"></path><path d="M12 18a3 3 0 0 0 3-3"></path></svg>
-                        <span class="acc-title">3. Для Актеров и АМС</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>3.1. Чистота чата</strong><br>
-                        Не пишите «Я отправил» в общий чат. Заявки — строго по контактам.</p>
-                        <p><strong>3.2. Черный список</strong><br>
-                        Невыход, пьянство, агрессия, шантаж — бан.</p>
-                        <p><strong>3.3. Конфликты</strong><br>
-                        Споры решаются в группе «Разбор полетов», а не в общем чате.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="fr-header" style="margin-top: 10px; border:none; padding:0;">Стиль иконок</div>
+    <div class="style-list" id="style-list">
+        <!-- Генерируется JS -->
     </div>
-
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ (FLAT CARDS) -->
-    <div id="page-post-ad" class="page sub-page">
-        <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-post-ad')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Назад
-            </button>
-        </div>
-        
-        <div class="content-inner">
-            <p class="ad-intro">
-                Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
-            </p>
-
-            <div class="ad-section-title">
-                🔍 Процедура верификации
-            </div>
-
-            <div class="steps-wrapper">
-                <!-- ШАГ 1 -->
-                <div class="step-card">
-                    <span class="step-card-title">1. Напишите Админу</span>
-                    <div class="step-card-desc">Свяжитесь с модератором для начала проверки.</div>
-                </div>
-
-                <!-- ШАГ 2 -->
-                <div class="step-card">
-                    <span class="step-card-title">2. Подготовьте материалы</span>
-                    <div class="step-card-desc">
-                        Отправьте текст поста, который планируете опубликовать.
-                        <ul class="ad-sub-list">
-                            <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
-                            <li>Для кино/сериалов: вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
-                            <li>Для рекламы, рилсов, контента для соцсетей: ссылку на официальный канал заказчика, техническое задание, примеры ранее реализованных проектов.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- ШАГ 3 -->
-                <div class="step-card">
-                    <span class="step-card-title">3. Проверка профиля</span>
-                    <div class="step-card-desc">
-                        Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
-                    </div>
-                </div>
-            </div>
-
-            <!-- ВАЖНО -->
-            <div class="important-block">
-                <strong>Важно:</strong>
-                Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.<br>
-                Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.
-            </div>
-
-            <!-- АНТИФРОД -->
-            <div class="custom-alert alert-danger">
-                <div class="alert-icon-box">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-                <div class="alert-body">
-                    <span class="alert-title">Антифрод-правило</span>
-                    <span class="alert-text">
-                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ (ОБНОВЛЕННАЯ: GLASS PANELS) -->
-    <div id="page-place-ads" class="page sub-page">
-        <div class="nav-bar">
-            <button class="btn-back" onclick="closePage('page-place-ads')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                Назад
-            </button>
-        </div>
-        <div class="page-intro">
-            <p><strong>Реклама и Сотрудничество</strong></p>
-            <p>Условия размещения коммерческих постов.</p>
-        </div>
-        <div class="content-inner">
-            <p>Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения о размещении рекламы, соответствующей тематике группы.</p>
-            <p>Для согласования условий публикации, уточнения формата и сроков необходимо обратиться к администратору. Мы обеспечиваем цивилизованный подход к сотрудничеству и помогаем донести ваше предложение до целевой аудитории.</p>
-            
-            <div class="glass-alert">
-                <span class="glass-alert-title">Важно:</span>
-                <ul style="margin:0; padding-left:16px; font-size:13px; color:var(--text-secondary);">
-                    <li>Размещение рекламы без предварительного согласования запрещено и влечёт за собой бан.</li>
-                    <li>Решение о публикации принимается администрацией на основе соответствия правилам группы.</li>
-                </ul>
-            </div>
-
-            <div class="ad-section-title">Направления, которые мы не продвигаем:</div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">1. Нецелевая тематика</span>
-                <div class="glass-card-desc">Предложения, не связанные с кинопроизводством, кастингами, творческими или техническими услугами для киноиндустрии.</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">2. Личный пиар</span>
-                <div class="glass-card-desc">Публикации, направленные исключительно на самопрезентацию («ищу работу», «смотрите моё портфолио», «готов к проектам»).</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">3. Рисковые и финансовые услуги</span>
-                <div class="glass-card-desc">Реклама криптовалют, трейдинга, инвестиций, букмекерских контор, азартных игр, микрофинансовых организаций и схожих сервисов.</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">4. Сомнительные или нелегитимные проекты</span>
-                <div class="glass-card-desc">Любые предложения, нарушающие законодательство РФ или этические нормы сообщества.</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ФУТЕР -->
-    <div class="sticky-footer">
-        <button class="btn btn-primary" onclick="window.open('https://t.me/boost/kinocekh', '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
-            Boost
-        </button>
-        <button class="btn btn-secondary" onclick="window.open('https://t.me/kinocekhadmin', '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            Админ
-        </button>
-    </div>
-
-    <!-- КОНТЕЙНЕР ДЛЯ УВЕДОМЛЕНИЙ -->
-    <div id="toast-container" class="toast-container"></div>
-
 </div>
 
 <script>
-    // --- ИНИЦИАЛИЗАЦИЯ TELEGRAM ---
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-
-    // --- АВТО-ОПРЕДЕЛЕНИЕ ПРОИЗВОДИТЕЛЬНОСТИ (LITE MODE) ---
-    function initPerformance() {
-        // 1. Проверка на режим энергосбережения
-        const isLowPower = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        
-        // 2. Проверка на iPhone X (разрешение 375x812, pixel ratio 3)
-        const isIPhoneX = (window.screen.height === 812 && window.screen.width === 375 && window.devicePixelRatio === 3);
-        
-        // 3. Проверка на Android (часто проблемы с backdrop-filter)
-        const isAndroid = /Android/i.test(navigator.userAgent);
-
-        // Если совпало что-то из списка - включаем Lite Mode
-        if (isLowPower || isIPhoneX || isAndroid) {
-            document.body.classList.add('lite-mode');
-            console.log('Lite Mode Activated: Performance Optimized');
-        }
-    }
-
-    // ПЕРЕХВАТ КНОПКИ "НАЗАД" (ANDROID)
-    tg.BackButton.onClick(() => {
-        const activePage = document.querySelector('.sub-page.active');
-        if (activePage) {
-            closePage(activePage.id);
-        } else {
-            tg.close();
-        }
-    });
-
-    // --- SKELETON LOADER (СИНХРОНИЗАЦИЯ ШРИФТОВ) ---
-    window.addEventListener('load', () => {
-        initPerformance(); // Запускаем проверку производительности
-        
-        const skeleton = document.getElementById('skeleton-loader');
-        
-        // Ждем загрузку шрифта Montserrat
-        document.fonts.ready.then(() => {
-            skeleton.classList.add('hidden');
-            setTimeout(() => { skeleton.style.display = 'none'; }, 500);
-        });
-        
-        initTouchPhysics();
-        restoreState(); 
-        checkConnection(); 
-        initTheme();
-    });
-
-    // --- TOUCH PHYSICS (Только визуал) ---
-    function initTouchPhysics() {
-        const interactives = document.querySelectorAll('.card, .btn, .accordion-header, .theme-toggle, .btn-back, .step-card, .glass-card');
-        interactives.forEach(el => {
-            el.addEventListener('touchstart', () => {
-                el.classList.add('active-state');
-            }, { passive: true });
-            el.addEventListener('touchend', () => {
-                setTimeout(() => { el.classList.remove('active-state'); }, 150);
-            }, { passive: true });
-            el.addEventListener('touchcancel', () => { el.classList.remove('active-state'); }, { passive: true });
-        });
-    }
-
-    // --- СВАЙП НАЗАД ---
-    let touchStartX = 0;
-    document.addEventListener('touchstart', e => { 
-        touchStartX = e.changedTouches[0].screenX; 
-    }, {passive: true});
+    // --- ДАННЫЕ ИКОНОК (10 ВАРИАНТОВ) ---
+    // SVG paths для каждого типа карточки
     
-    document.addEventListener('touchend', e => {
-        const touchEndX = e.changedTouches[0].screenX;
-        // Если свайп слева направо больше 100px
-        if (touchEndX - touchStartX > 100) { 
-            const activePage = document.querySelector('.sub-page.active');
-            if (activePage) {
-                closePage(activePage.id);
+    const iconsDB = {
+        // 1. ОРИГИНАЛ (Тонкие линии)
+        original: {
+            name: "1. Оригинал",
+            desc: "Тонкий контур (1px), минимализм",
+            attrs: 'fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"',
+            paths: {
+                rules: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>',
+                post: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line>',
+                ads: '<path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>',
+                brigadiers: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline>',
+                articles: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>'
+            }
+        },
+        // 2. ЖИРНЫЙ (Bold)
+        bold: {
+            name: "2. Жирный акцент",
+            desc: "Толщина 2px, более заметные",
+            attrs: 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"',
+            paths: {
+                rules: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line>',
+                post: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line>',
+                ads: '<path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>',
+                brigadiers: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline>',
+                articles: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>'
+            }
+        },
+        // 3. ЗАЛИВКА (Solid)
+        solid: {
+            name: "3. Заливка (Solid)",
+            desc: "Полностью закрашенные фигуры",
+            attrs: 'fill="currentColor" stroke="none"',
+            paths: {
+                rules: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>',
+                post: '<path d="M13 9h5.5L13 3.5V9zM6 2h8l6 6v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm5 14H9v-2h2v-2h2v2h2v2h-2v2h-2v-2z"/>',
+                ads: '<path d="M21 11l-18-5v12l18-5zm-9.4 5.8c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3z"/>',
+                brigadiers: '<path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>',
+                articles: '<path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>'
+            }
+        },
+        // 4. МЯГКИЙ (Soft)
+        soft: {
+            name: "4. Мягкий стиль",
+            desc: "Скругленные углы, дружелюбный вид",
+            attrs: 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"',
+            paths: {
+                rules: '<rect x="5" y="3" width="14" height="18" rx="4"></rect><line x1="9" y1="8" x2="15" y2="8"></line><line x1="9" y1="12" x2="15" y2="12"></line><line x1="9" y1="16" x2="13" y2="16"></line>',
+                post: '<rect x="5" y="3" width="14" height="18" rx="4"></rect><line x1="12" y1="10" x2="12" y2="14"></line><line x1="10" y1="12" x2="14" y2="12"></line>',
+                ads: '<path d="M4 10c0-2 1.5-3.5 3.5-4l11-2.5a1 1 0 0 1 1.2 1.2l-2.5 11a3.5 3.5 0 0 1-4 3.5h-3a2 2 0 0 1-2-2v-3"></path>',
+                brigadiers: '<path d="M12 21c4-2 7-6 7-11V6l-7-3-7 3v4c0 5 3 9 7 11z"></path><path d="M9 11l2 2 4-4"></path>',
+                articles: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>'
+            }
+        },
+        // 5. ТЕХНО (Tech)
+        tech: {
+            name: "5. Техно / Чертеж",
+            desc: "Острые углы, разрывы линий",
+            attrs: 'fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="square" stroke-linejoin="miter"',
+            paths: {
+                rules: '<polygon points="14 2 14 8 20 8 20 22 4 22 4 2 14 2"></polygon><line x1="8" y1="12" x2="16" y2="12"></line><line x1="8" y1="16" x2="16" y2="16"></line>',
+                post: '<polygon points="14 2 14 8 20 8 20 22 4 22 4 2 14 2"></polygon><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line>',
+                ads: '<polygon points="2 10 20 4 20 18 2 12 2 10"></polygon><circle cx="8" cy="11" r="2"></circle>',
+                brigadiers: '<path d="M12 22 L20 12 V4 L12 1 L4 4 V12 Z"></path><polyline points="8 11 11 14 16 9"></polyline>',
+                articles: '<rect x="4" y="4" width="16" height="16"></rect><line x1="12" y1="4" x2="12" y2="20"></line><line x1="4" y1="12" x2="20" y2="12"></line>'
+            }
+        },
+        // 6. ДВОЙНОЙ (Duotone Line)
+        duotone: {
+            name: "6. Двойной контур",
+            desc: "Эффект объема линиями",
+            attrs: 'fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"',
+            paths: {
+                rules: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8"></path><line x1="16" y1="13" x2="8" y2="13"></line>',
+                post: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M10 12h4m-2-2v4" stroke-width="2"></path>',
+                ads: '<path d="M3 11l18-5v12L3 14v-3z"></path><path d="M7 11a2 2 0 1 1-4 0"></path>',
+                brigadiers: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 18s5-3 5-7V6"></path>',
+                articles: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path><line x1="12" y1="7" x2="12" y2="21"></line>'
+            }
+        },
+        // 7. ГИБРИД (Fill + Stroke)
+        hybrid: {
+            name: "7. Гибрид (Fill+Line)",
+            desc: "Полупрозрачная заливка + контур",
+            attrs: 'fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"',
+            paths: {
+                rules: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>',
+                post: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M12 11v6m-3-3h6" stroke-width="2"></path>',
+                ads: '<path d="M3 11l18-5v12L3 14v-3z"></path>',
+                brigadiers: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline>',
+                articles: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>'
+            }
+        },
+        // 8. МИНИМАЛИЗМ
+        minimal: {
+            name: "8. Минимализм",
+            desc: "Только суть формы, без деталей",
+            attrs: 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"',
+            paths: {
+                rules: '<rect x="6" y="2" width="12" height="20" rx="2"></rect><line x1="10" y1="6" x2="14" y2="6"></line>',
+                post: '<rect x="6" y="2" width="12" height="20" rx="2"></rect><line x1="12" y1="10" x2="12" y2="14"></line><line x1="10" y1="12" x2="14" y2="12"></line>',
+                ads: '<path d="M2 12l18-6v12L2 12z"></path>',
+                brigadiers: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>',
+                articles: '<path d="M4 6h16M4 12h16M4 18h10"></path>'
+            }
+        },
+        // 9. ПУНКТИР (Dashed)
+        dashed: {
+            name: "9. Пунктир (Draft)",
+            desc: "Эффект наброска",
+            attrs: 'fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2" stroke-linecap="round"',
+            paths: {
+                rules: '<rect x="5" y="3" width="14" height="18" rx="2"></rect><line x1="9" y1="12" x2="15" y2="12"></line>',
+                post: '<rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M12 10v4m-2-2h4"></path>',
+                ads: '<path d="M3 11l18-5v12L3 14v-3z"></path>',
+                brigadiers: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>',
+                articles: '<path d="M2 6s4-1 6 2 6-2 10 0"></path><path d="M2 12s4-1 6 2 6-2 10 0"></path><path d="M2 18s4-1 6 2 6-2 10 0"></path>'
+            }
+        },
+        // 10. ТЯЖЕЛЫЙ ЛЮКС (Heavy)
+        heavy: {
+            name: "10. Тяжелый люкс",
+            desc: "Толстый контур + заливка",
+            attrs: 'fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"',
+            paths: {
+                rules: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>',
+                post: '<rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M12 8v8m-4-4h8" stroke="currentColor" stroke-width="3"></path>',
+                ads: '<path d="M22 12L2 5v14l20-7z"></path>',
+                brigadiers: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>',
+                articles: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>'
             }
         }
-    }, {passive: true});
+    };
 
-    // --- ОБРАБОТКА ЗАКРЫТЫХ РАЗДЕЛОВ ---
-    function handleLockedClick(card, message) {
-        if (tg.HapticFeedback) {
-            tg.HapticFeedback.notificationOccurred('error');
-        }
-        showToast(message);
-    }
-
-    // --- TOAST ---
-    function showToast(message) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        container.appendChild(toast);
-        requestAnimationFrame(() => { toast.classList.add('show'); });
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => { toast.remove(); }, 300);
-        }, 2000);
-    }
-
-    // --- УМНЫЕ УВЕДОМЛЕНИЯ (ИНТЕРНЕТ) ---
-    function checkConnection() {
-        window.addEventListener('offline', () => {
-            showToast('Нет соединения с интернетом');
-        });
-        window.addEventListener('online', () => {
-            showToast('Соединение восстановлено');
+    // --- ЛОГИКА ПРИМЕРОЧНОЙ ---
+    
+    function renderStyleList() {
+        const list = document.getElementById('style-list');
+        Object.keys(iconsDB).forEach((key, index) => {
+            const style = iconsDB[key];
+            const item = document.createElement('div');
+            item.className = `style-option ${index === 0 ? 'active' : ''}`;
+            item.onclick = () => applyStyle(key, item);
+            item.innerHTML = `
+                <div class="radio-circle"></div>
+                <div>
+                    <div class="opt-name">${style.name}</div>
+                    <span class="opt-desc">${style.desc}</span>
+                </div>
+            `;
+            list.appendChild(item);
         });
     }
 
-    // --- THEME (СИСТЕМНАЯ + РУЧНАЯ) ---
-    function initTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            if (savedTheme === 'light') document.body.setAttribute('data-theme', 'light');
-        } else {
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                document.body.setAttribute('data-theme', 'light');
+    function applyStyle(key, element) {
+        // 1. UI Update
+        document.querySelectorAll('.style-option').forEach(el => el.classList.remove('active'));
+        if(element) element.classList.add('active');
+
+        // 2. Apply Icons
+        const styleData = iconsDB[key];
+        const targets = {
+            rules: document.getElementById('icon-rules'),
+            post: document.getElementById('icon-post'),
+            ads: document.getElementById('icon-ads'),
+            brigadiers: document.getElementById('icon-brigadiers'),
+            articles: document.getElementById('icon-articles')
+        };
+
+        for (const [type, container] of Object.entries(targets)) {
+            if (container && styleData.paths[type]) {
+                // Создаем SVG
+                container.innerHTML = `
+                    <svg viewBox="0 0 24 24" ${styleData.attrs}>
+                        ${styleData.paths[type]}
+                    </svg>
+                `;
             }
         }
     }
 
     function toggleTheme() {
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
         const body = document.body;
-        if (body.getAttribute('data-theme') === 'light') {
-            body.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'dark');
-        } else {
+        const label = document.getElementById('theme-label');
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        
+        if (isDark) {
             body.setAttribute('data-theme', 'light');
-            localStorage.setItem('theme', 'light');
-        }
-    }
-
-    // --- NAVIGATION & MEMORY (ПАМЯТЬ СКРОЛЛА) ---
-    const scrollPositions = {}; 
-
-    function openPage(pageId) {
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-        const page = document.getElementById(pageId);
-        const home = document.getElementById('page-home');
-        
-        if (tg.BackButton) tg.BackButton.show();
-
-        home.classList.add('behind');
-        page.classList.add('active');
-        
-        if (scrollPositions[pageId]) {
-            page.scrollTop = scrollPositions[pageId];
+            label.textContent = 'День';
         } else {
-            page.scrollTop = 0;
-        }
-        
-        localStorage.setItem('lastPage', pageId);
-    }
-
-    function closePage(pageId) { 
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-
-        const page = document.getElementById(pageId);
-        const home = document.getElementById('page-home');
-        
-        scrollPositions[pageId] = page.scrollTop;
-
-        if (tg.BackButton) tg.BackButton.hide();
-
-        page.classList.remove('active');
-        setTimeout(() => {
-            home.classList.remove('behind');
-        }, 50);
-        
-        localStorage.removeItem('lastPage');
-    }
-
-    function restoreState() {
-        const lastPageId = localStorage.getItem('lastPage');
-        if (lastPageId) {
-            const page = document.getElementById(lastPageId);
-            const home = document.getElementById('page-home');
-            if (page && home) {
-                if (tg.BackButton) tg.BackButton.show();
-                home.classList.add('behind');
-                page.classList.add('active');
-            }
+            body.setAttribute('data-theme', 'dark');
+            label.textContent = 'Ночь';
         }
     }
 
-    // --- ACCORDION ---
-    function toggleAccordion(header) {
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    // --- INIT ---
+    window.onload = () => {
+        renderStyleList();
+        applyStyle('original'); // Default
+    };
 
-        const item = header.parentElement;
-        const content = item.querySelector('.accordion-content');
-        const isActive = item.classList.contains('active');
-        
-        document.querySelectorAll('.accordion-item').forEach(accItem => {
-            accItem.classList.remove('active');
-            accItem.querySelector('.accordion-content').style.maxHeight = null;
-        });
-
-        if (!isActive) {
-            item.classList.add('active');
-            content.style.maxHeight = content.scrollHeight + "px";
-        }
-    }
 </script>
-
 </body>
 </html>
