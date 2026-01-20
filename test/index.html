@@ -3,191 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | 3D Fitting Room</title>
+    <title>КИНОЦЕХ | Custom Graphics</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- БАЗА --- */
         :root {
-            --font-main: 'Montserrat', sans-serif;
-            --bg-color: #121214;
+            --bg-color: #0F0F11;
+            --card-bg: rgba(255, 255, 255, 0.04);
             --text-primary: #FFFFFF;
             --text-secondary: #9aa0a6;
-            --card-bg: #1C1C1E;
-            --accent-color: #D4AF37; /* Золото */
-            --accent-gradient: linear-gradient(135deg, #D4AF37, #F2D06B);
-            
-            /* Параметры для 3D вариантов */
-            --card-radius: 24px;
-            --icon-size: 60px;
-            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.5);
+            --accent-main: #D4AF37; /* Золото */
+            --accent-light: #F2D06B;
+            --accent-dark: #8a701e;
+            --card-border: 1px solid rgba(255,255,255,0.08);
         }
 
         [data-theme="light"] {
             --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
             --text-primary: #000000;
             --text-secondary: #6e6e73;
-            --card-bg: #FFFFFF;
-            --accent-color: #007AFF; /* Синий */
-            --accent-gradient: linear-gradient(135deg, #007AFF, #5AC8FA);
-            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.15);
+            --accent-main: #007AFF; /* Синий */
+            --accent-light: #5AC8FA;
+            --accent-dark: #0040DD;
+            --card-border: 1px solid rgba(0,0,0,0.05);
         }
 
         body {
             margin: 0; padding: 0; background: var(--bg-color); color: var(--text-primary);
-            font-family: var(--font-main); transition: background 0.3s ease;
-            overflow: hidden; -webkit-font-smoothing: antialiased;
+            font-family: 'Montserrat', sans-serif; overflow: hidden; transition: background 0.3s ease;
         }
 
-        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 200px; }
+        #app { padding: 20px; height: 100vh; overflow-y: auto; padding-bottom: 220px; }
 
-        .header { margin-bottom: 24px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        
-        /* --- СЕТКА --- */
+        .header { text-align: center; margin-bottom: 30px; padding-top: 10px; }
+        .brand { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; }
+
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        
+
         .card {
-            background: var(--card-bg);
-            border-radius: var(--card-radius);
-            padding: 16px;
-            position: relative;
-            height: 140px;
-            overflow: hidden;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: var(--shadow-soft);
+            background: var(--card-bg); border: var(--card-border);
+            border-radius: 20px; padding: 18px; height: 140px;
+            position: relative; overflow: hidden;
             display: flex; flex-direction: column; justify-content: space-between;
+            transition: transform 0.2s;
         }
-        .card:active { transform: scale(0.96); }
         .card.large { grid-column: span 2; height: 120px; flex-direction: row; align-items: center; }
+        .card:active { transform: scale(0.98); }
 
-        .card-text { position: relative; z-index: 2; max-width: 100%; }
-        .card-title { font-size: 15px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
-        .card-sub { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+        .card-info { position: relative; z-index: 2; pointer-events: none; }
+        .card-title { font-size: 15px; font-weight: 700; text-transform: uppercase; line-height: 1.3; margin-bottom: 4px; }
+        .card-desc { font-size: 11px; color: var(--text-secondary); }
 
-        /* --- 3D ОБЪЕКТ (EMOJI PROXY) --- */
-        .icon-3d {
-            font-size: var(--icon-size);
-            line-height: 1;
-            position: absolute;
-            right: 10px; bottom: 10px;
-            z-index: 1;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); /* Тень для объема */
-            transition: all 0.4s ease;
-            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-            transform-origin: center center;
+        /* КОНТЕЙНЕР ДЛЯ ГРАФИКИ */
+        .icon-box {
+            position: absolute; right: 10px; bottom: 10px;
+            width: 70px; height: 70px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s ease;
         }
+        .card.large .icon-box { right: 20px; bottom: auto; top: 50%; transform: translateY(-50%); }
 
-        /* --- ВАРИАНТЫ СТИЛЕЙ --- */
-
-        /* 1. CLEAN 3D (База) */
-        .v-clean .icon-3d { right: 12px; bottom: 12px; transform: scale(1.1); }
-
-        /* 2. VKUSVILL (Цветные пятна) */
-        .v-blob .card::before {
-            content: ''; position: absolute; right: -20px; bottom: -20px;
-            width: 100px; height: 100px; border-radius: 50%;
-            background: var(--accent-color); opacity: 0.15; filter: blur(20px);
-            transition: background 0.3s;
-        }
-        .v-blob .icon-3d { right: 10px; bottom: 10px; transform: rotate(-5deg); }
-
-        /* 3. DELIVERY (Карточка в карточке) */
-        .v-delivery .card { background: var(--bg-color); border: 1px solid rgba(128,128,128,0.1); }
-        .v-delivery .card::after {
-            content: ''; position: absolute; right: 10px; bottom: 10px;
-            width: 60px; height: 60px; background: var(--card-bg);
-            border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        [data-theme="dark"] .v-delivery .card::after { background: #2C2C2E; }
-        .v-delivery .icon-3d { right: 18px; bottom: 18px; font-size: 40px; z-index: 3; }
-
-        /* 4. GLASS SHELF (Полка) */
-        .v-glass .card { background: linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.1); }
-        [data-theme="light"] .v-glass .card { background: #FFF; border: 1px solid rgba(0,0,0,0.05); }
-        .v-glass .icon-3d { 
-            bottom: 15px; right: 15px; 
-            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.3)); transform: translateY(-5px);
-        }
-
-        /* 5. NEON GLOW (Свечение) */
-        .v-neon .icon-3d { 
-            filter: drop-shadow(0 0 15px var(--accent-color)); 
-            opacity: 0.9;
-        }
-
-        /* 6. FLOATING (Парящие) */
-        .v-float .icon-3d {
-            bottom: 25px; right: 15px;
-            transform: rotate(10deg) scale(1.2);
-            filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
-        }
-
-        /* 7. BIG CROP (Абстракция) */
-        .v-crop .icon-3d {
-            font-size: 140px; right: -30px; bottom: -40px; opacity: 0.8;
-            transform: rotate(-15deg);
-            filter: blur(0.5px);
-        }
-        .v-crop .card-text { background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 8px; backdrop-filter: blur(4px); display: inline-block; }
-        [data-theme="light"] .v-crop .card-text { background: rgba(255,255,255,0.6); }
-
-        /* 8. SOFT CLAY (Матовый) */
-        .v-clay .card { box-shadow: inset 0 0 20px rgba(0,0,0,0.05); }
-        .v-clay .icon-3d { filter: contrast(0.8) brightness(1.1) drop-shadow(0 5px 5px rgba(0,0,0,0.2)); }
-
-        /* 9. PERSPECTIVE (Наклон) */
-        .v-persp .icon-3d {
-            transform: perspective(100px) rotateX(10deg) rotateY(-10deg) scale(1.1);
-            right: 15px; bottom: 15px;
-        }
-
-        /* 10. MINIMAL COLOR (Тонировка) */
-        .v-mono .icon-3d {
-            filter: sepia(1) hue-rotate(10deg) saturate(2); /* Золотистый оттенок */
-        }
-        [data-theme="light"] .v-mono .icon-3d { filter: sepia(1) hue-rotate(190deg) saturate(3); /* Синий оттенок */ }
-
+        /* SVG STYLES */
+        svg { width: 100%; height: 100%; transition: all 0.3s ease; }
 
         /* --- ПАНЕЛЬ --- */
         .panel {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(20, 20, 22, 0.95);
+            background: rgba(15, 15, 17, 0.98); border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 20px; z-index: 100; border-radius: 24px 24px 0 0;
             backdrop-filter: blur(20px);
-            border-radius: 24px 24px 0 0;
-            padding: 20px; z-index: 100;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
-        [data-theme="light"] .panel { background: rgba(255, 255, 255, 0.95); border-top: 1px solid rgba(0,0,0,0.1); }
+        [data-theme="light"] .panel { background: rgba(255, 255, 255, 0.98); border-top: 1px solid rgba(0,0,0,0.1); }
 
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .panel-title { font-weight: 700; font-size: 14px; text-transform: uppercase; }
+        .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         
-        .theme-btn {
-            background: var(--card-bg); border: 1px solid rgba(128,128,128,0.2);
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-            color: var(--text-primary); cursor: pointer;
+        .theme-switch {
+            background: var(--card-bg); border: 1px solid rgba(128,128,128,0.3);
+            padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer;
         }
 
-        .variants-scroll {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .variants-scroll::-webkit-scrollbar { display: none; }
-
-        .v-btn {
-            flex: 0 0 auto; width: 70px; height: 70px;
-            background: var(--card-bg); border-radius: 16px;
-            border: 2px solid transparent;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 9px; font-weight: 600; color: var(--text-secondary);
+        .style-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+        .style-btn {
+            flex: 0 0 auto; padding: 10px 16px; border-radius: 12px;
+            background: var(--card-bg); border: 1px solid transparent;
+            font-size: 11px; font-weight: 600; color: var(--text-secondary);
             cursor: pointer; transition: all 0.2s;
         }
-        .v-btn.active { border-color: var(--accent-color); color: var(--text-primary); background: rgba(128,128,128,0.1); }
-        .v-preview { font-size: 24px; margin-bottom: 4px; }
+        .style-btn.active { background: var(--accent-main); color: #fff; border-color: transparent; }
 
     </style>
 </head>
@@ -198,99 +104,207 @@
         <div class="brand">КИНОЦЕХ</div>
     </div>
 
-    <!-- СЕТКА КАРТОЧЕК -->
-    <div id="grid" class="grid v-clean">
+    <div class="grid">
         <!-- 1. ПРАВИЛА -->
         <div class="card large">
-            <div class="card-text">
+            <div class="card-info">
                 <div class="card-title">Правила группы</div>
-                <div class="card-sub">Обязательно к прочтению</div>
+                <div class="card-desc">Обязательно к ознакомлению</div>
             </div>
-            <!-- 3D Объект: Свиток / Папка -->
-            <div class="icon-3d">📜</div> 
+            <div class="icon-box" id="icon-rules"></div>
         </div>
 
         <!-- 2. ОБЪЯВЛЕНИЕ -->
         <div class="card">
-            <div class="card-text">
+            <div class="card-info">
                 <div class="card-title">Разместить<br>объявление</div>
             </div>
-            <!-- 3D Объект: Лист с карандашом -->
-            <div class="icon-3d">📝</div>
+            <div class="icon-box" id="icon-post"></div>
         </div>
 
         <!-- 3. РЕКЛАМА -->
         <div class="card">
-            <div class="card-text">
+            <div class="card-info">
                 <div class="card-title">Разместить<br>рекламу</div>
             </div>
-            <!-- 3D Объект: Мегафон -->
-            <div class="icon-3d">📢</div>
+            <div class="icon-box" id="icon-ads"></div>
         </div>
 
         <!-- 4. БРИГАДИРЫ -->
-        <div class="card" style="opacity: 0.7;">
-            <div class="card-text">
+        <div class="card" style="opacity:0.7">
+            <div class="card-info">
                 <div class="card-title">Проверенные<br>бригадиры</div>
-                <div class="card-sub" style="margin-top:4px;">Скоро</div>
+                <div class="card-desc">Скоро</div>
             </div>
-            <!-- 3D Объект: Щит / Каска -->
-            <div class="icon-3d">🛡️</div>
+            <div class="icon-box" id="icon-brig"></div>
         </div>
 
         <!-- 5. СТАТЬИ -->
-        <div class="card" style="opacity: 0.7;">
-            <div class="card-text">
+        <div class="card" style="opacity:0.7">
+            <div class="card-info">
                 <div class="card-title">Полезные<br>статьи</div>
-                <div class="card-sub" style="margin-top:4px;">Скоро</div>
+                <div class="card-desc">Скоро</div>
             </div>
-            <!-- 3D Объект: Книги / Лампа -->
-            <div class="icon-3d">📚</div>
+            <div class="icon-box" id="icon-art"></div>
         </div>
     </div>
 </div>
 
-<!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
 <div class="panel">
     <div class="panel-header">
-        <div class="panel-title">Стиль 3D (Clay)</div>
-        <button class="theme-btn" onclick="toggleTheme()">День / Ночь</button>
+        <div class="panel-title">Кастомная графика</div>
+        <button class="theme-switch" onclick="toggleTheme()">День / Ночь</button>
     </div>
-    <div class="variants-scroll">
-        <!-- Кнопки генерируются JS -->
-    </div>
+    <div class="style-scroll" id="style-list"></div>
 </div>
 
 <script>
-    const variants = [
-        { id: 'v-clean', name: 'Clean 3D', icon: '✨' },
-        { id: 'v-blob', name: 'VkusVill', icon: '🎨' },
-        { id: 'v-delivery', name: 'Delivery', icon: '🍱' },
-        { id: 'v-glass', name: 'Glass', icon: '🧊' },
-        { id: 'v-neon', name: 'Neon', icon: '💡' },
-        { id: 'v-float', name: 'Floating', icon: '🎈' },
-        { id: 'v-crop', name: 'Big Crop', icon: '📐' },
-        { id: 'v-clay', name: 'Matte', icon: '🗿' },
-        { id: 'v-persp', name: 'Angle', icon: '📐' },
-        { id: 'v-mono', name: 'Color', icon: '🎭' },
-    ];
+    // --- ГЕНЕРАТОР SVG (БЕЗ ЭМОДЗИ) ---
+    
+    // Базовые формы (Paths)
+    const SHAPES = {
+        rules: `<path d="M16 2H8C6.9 2 6 2.9 6 4V20C6 21.1 6.9 22 8 22H18C19.1 22 20 21.1 20 20V6L16 2Z" /><path d="M14 2V8H20" />`,
+        post: `<path d="M14 4H6V20H18V8M14 4L18 8" /><circle cx="16" cy="18" r="5" /><path d="M16 15V21M13 18H19" />`,
+        ads: `<path d="M4 10V14H8L13 19V5L8 10H4Z" /><path d="M17 7C19 9 19 15 17 17" /><path d="M15.5 9C16.5 10 16.5 14 15.5 15" />`,
+        brig: `<path d="M12 2L4 5V11C4 16.5 7.4 21.5 12 23C16.6 21.5 20 16.5 20 11V5L12 2Z" /><path d="M9 12L11 14L15 10" />`,
+        art: `<path d="M4 6V20C4 20 8 19 12 19C16 19 20 20 20 20V6C20 6 16 5 12 5C8 5 4 6 4 6Z" /><path d="M12 5V19" />`
+    };
 
-    const grid = document.getElementById('grid');
-    const scrollContainer = document.querySelector('.variants-scroll');
+    // Стили отрисовки (Defs + Attributes)
+    const STYLES = {
+        // 1. GLASSMORPHISM
+        glass: {
+            name: "1. Glass",
+            defs: `
+                <linearGradient id="gradGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--accent-light);stop-opacity:0.4" />
+                    <stop offset="100%" style="stop-color:var(--accent-main);stop-opacity:0.1" />
+                </linearGradient>
+                <filter id="blurGlass"><feGaussianBlur in="SourceGraphic" stdDeviation="1" /></filter>
+            `,
+            attrs: `fill="url(#gradGlass)" stroke="var(--accent-main)" stroke-width="1" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));"`
+        },
+        // 2. GOLD GRADIENT (3D)
+        gold: {
+            name: "2. Gold 3D",
+            defs: `
+                <linearGradient id="gradGold" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--accent-light);stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:var(--accent-main);stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:var(--accent-dark);stop-opacity:1" />
+                </linearGradient>
+            `,
+            attrs: `fill="url(#gradGold)" stroke="none" style="filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3)); transform: scale(1.1);"`
+        },
+        // 3. SOFT CLAY (ВкусВилл стиль)
+        clay: {
+            name: "3. Soft Clay",
+            defs: `
+                <filter id="clayShadow">
+                    <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.2"/>
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur"/>
+                    <feOffset in="blur" dx="1" dy="1" result="offsetBlur"/>
+                    <feSpecularLighting in="blur" surfaceScale="5" specularConstant=".75" specularExponent="20" lighting-color="#fff" result="specOut">
+                        <fePointLight x="-5000" y="-10000" z="20000"/>
+                    </feSpecularLighting>
+                    <feComposite in="specOut" in2="SourceAlpha" operator="in" result="specOut"/>
+                    <feComposite in="SourceGraphic" in2="specOut" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="litPaint"/>
+                </filter>
+            `,
+            attrs: `fill="var(--accent-main)" stroke="none" style="filter: url(#clayShadow);"`
+        },
+        // 4. NEON LINE
+        neon: {
+            name: "4. Neon",
+            defs: ``,
+            attrs: `fill="none" stroke="var(--accent-main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px var(--accent-main));"`
+        },
+        // 5. DUOTONE
+        duotone: {
+            name: "5. Duotone",
+            defs: ``,
+            attrs: `fill="var(--accent-main)" fill-opacity="0.2" stroke="var(--accent-main)" stroke-width="2" stroke-linejoin="round"`
+        },
+        // 6. PAPER CRAFT
+        paper: {
+            name: "6. Paper",
+            defs: ``,
+            attrs: `fill="var(--card-bg)" stroke="var(--accent-main)" stroke-width="1" style="filter: drop-shadow(2px 4px 0px var(--accent-dark));"`
+        },
+        // 7. TECH OUTLINE
+        tech: {
+            name: "7. Tech",
+            defs: `<pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="var(--accent-main)" opacity="0.3"/></pattern>`,
+            attrs: `fill="url(#grid)" stroke="var(--accent-main)" stroke-width="1.5" stroke-dasharray="4 2"`
+        },
+        // 8. SOLID FLAT
+        flat: {
+            name: "8. Solid Flat",
+            defs: ``,
+            attrs: `fill="var(--accent-main)" stroke="none"`
+        },
+        // 9. BUBBLE
+        bubble: {
+            name: "9. Bubble",
+            defs: `
+                <radialGradient id="gradBubble" cx="30%" cy="30%" r="70%">
+                    <stop offset="0%" style="stop-color:#fff;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:var(--accent-main);stop-opacity:0.4" />
+                </radialGradient>
+            `,
+            attrs: `fill="url(#gradBubble)" stroke="var(--accent-light)" stroke-width="0.5"`
+        },
+        // 10. LUXURY STROKE
+        luxury: {
+            name: "10. Luxury",
+            defs: `
+                <linearGradient id="gradLux" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--accent-light)" />
+                    <stop offset="50%" style="stop-color:#fff" />
+                    <stop offset="100%" style="stop-color:var(--accent-main)" />
+                </linearGradient>
+            `,
+            attrs: `fill="none" stroke="url(#gradLux)" stroke-width="1.5" style="filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));"`
+        }
+    };
 
-    // Генерация кнопок
-    variants.forEach((v, index) => {
-        const btn = document.createElement('div');
-        btn.className = `v-btn ${index === 0 ? 'active' : ''}`;
-        btn.innerHTML = `<div class="v-preview">${v.icon}</div><div>${v.name}</div>`;
-        btn.onclick = () => {
-            // Смена класса сетки
-            grid.className = `grid ${v.id}`;
-            // Активная кнопка
-            document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    // --- РЕНДЕР ---
+    function renderIcons(styleKey) {
+        const style = STYLES[styleKey];
+        const targets = {
+            rules: document.getElementById('icon-rules'),
+            post: document.getElementById('icon-post'),
+            ads: document.getElementById('icon-ads'),
+            brig: document.getElementById('icon-brig'),
+            art: document.getElementById('icon-art')
         };
-        scrollContainer.appendChild(btn);
+
+        for (const [key, container] of Object.entries(targets)) {
+            const path = SHAPES[key];
+            container.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <defs>${style.defs}</defs>
+                    <g ${style.attrs}>
+                        ${path}
+                    </g>
+                </svg>
+            `;
+        }
+    }
+
+    // --- ИНИЦИАЛИЗАЦИЯ ---
+    const styleList = document.getElementById('style-list');
+    
+    Object.keys(STYLES).forEach((key, index) => {
+        const btn = document.createElement('div');
+        btn.className = `style-btn ${index === 1 ? 'active' : ''}`; // Gold по умолчанию
+        btn.textContent = STYLES[key].name;
+        btn.onclick = () => {
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderIcons(key);
+        };
+        styleList.appendChild(btn);
     });
 
     function toggleTheme() {
@@ -298,7 +312,10 @@
         const isDark = body.getAttribute('data-theme') === 'dark';
         body.setAttribute('data-theme', isDark ? 'light' : 'dark');
     }
-</script>
 
+    // Старт с Gold 3D
+    renderIcons('gold');
+
+</script>
 </body>
 </html>
