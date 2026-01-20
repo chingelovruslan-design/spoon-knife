@@ -3,172 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | Custom 3D Render</title>
+    <title>КИНОЦЕХ | 3D Fitting Room</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=block" rel="stylesheet">
     
     <style>
+        /* --- БАЗА --- */
         :root {
-            --bg-color: #0F0F11;
-            --card-bg: #1C1C1E;
+            --font-main: 'Montserrat', sans-serif;
+            --bg-color: #121214;
             --text-primary: #FFFFFF;
             --text-secondary: #9aa0a6;
-            --accent: #D4AF37;
+            --card-bg: #1C1C1E;
+            --accent-color: #D4AF37; /* Золото */
+            --accent-gradient: linear-gradient(135deg, #D4AF37, #F2D06B);
             
-            /* Настройки 3D материала (меняются JS) */
-            --mat-gradient: linear-gradient(135deg, #FFD700, #B8860B);
-            --mat-shadow: 0 10px 20px rgba(0,0,0,0.4);
-            --mat-border: none;
-            --mat-filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));
-            --mat-inset: inset 2px 2px 5px rgba(255,255,255,0.4), inset -2px -2px 5px rgba(0,0,0,0.2);
+            /* Параметры для 3D вариантов */
+            --card-radius: 24px;
+            --icon-size: 60px;
+            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.5);
         }
 
         [data-theme="light"] {
             --bg-color: #F2F2F7;
-            --card-bg: #FFFFFF;
             --text-primary: #000000;
             --text-secondary: #6e6e73;
-            --accent: #007AFF;
+            --card-bg: #FFFFFF;
+            --accent-color: #007AFF; /* Синий */
+            --accent-gradient: linear-gradient(135deg, #007AFF, #5AC8FA);
+            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.15);
         }
 
         body {
             margin: 0; padding: 0; background: var(--bg-color); color: var(--text-primary);
-            font-family: 'Montserrat', sans-serif; overflow: hidden; transition: background 0.3s ease;
+            font-family: var(--font-main); transition: background 0.3s ease;
+            overflow: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 220px; }
+        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 200px; }
 
-        .header { margin-bottom: 24px; padding-top: 10px; }
-        .brand { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-        .card {
-            background: var(--card-bg); border-radius: 24px; padding: 18px; height: 150px;
-            position: relative; overflow: hidden;
-            display: flex; flex-direction: column; justify-content: space-between;
-            transition: transform 0.2s;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        .card.large { grid-column: span 2; height: 130px; flex-direction: row; align-items: center; }
-        .card:active { transform: scale(0.97); }
-
-        .card-info { position: relative; z-index: 2; pointer-events: none; max-width: 60%; }
-        .card.large .card-info { max-width: 70%; }
-        .card-title { font-size: 16px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
-        .card-desc { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
-
-        /* --- КОНТЕЙНЕР 3D ОБЪЕКТА --- */
-        .scene-3d {
-            position: absolute; right: 10px; bottom: 10px;
-            width: 80px; height: 80px;
-            perspective: 600px;
-            pointer-events: none;
-            transition: all 0.4s ease;
-        }
-        .card.large .scene-3d { right: 20px; bottom: auto; top: 50%; transform: translateY(-50%); width: 90px; height: 90px; }
-
-        /* --- CSS 3D SHAPES (КОНСТРУКТОР) --- */
-        .shape {
-            position: absolute;
-            background: var(--mat-gradient);
-            box-shadow: var(--mat-shadow);
-            border: var(--mat-border);
-            filter: var(--mat-filter);
-        }
+        .header { margin-bottom: 24px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* Внутренние тени для объема (Clay effect) */
-        .clay-surface {
-            box-shadow: var(--mat-inset);
+        /* --- СЕТКА --- */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--card-radius);
+            padding: 16px;
+            position: relative;
+            height: 140px;
+            overflow: hidden;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: var(--shadow-soft);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .card:active { transform: scale(0.96); }
+        .card.large { grid-column: span 2; height: 120px; flex-direction: row; align-items: center; }
+
+        .card-text { position: relative; z-index: 2; max-width: 100%; }
+        .card-title { font-size: 15px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
+        .card-sub { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+
+        /* --- 3D ОБЪЕКТ (EMOJI PROXY) --- */
+        .icon-3d {
+            font-size: var(--icon-size);
+            line-height: 1;
+            position: absolute;
+            right: 10px; bottom: 10px;
+            z-index: 1;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); /* Тень для объема */
+            transition: all 0.4s ease;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+            transform-origin: center center;
         }
 
-        /* 1. DOCUMENT (Правила) */
-        .doc-base {
-            width: 50px; height: 65px; top: 10px; left: 15px;
-            border-radius: 8px; transform: rotate(-10deg);
+        /* --- ВАРИАНТЫ СТИЛЕЙ --- */
+
+        /* 1. CLEAN 3D (База) */
+        .v-clean .icon-3d { right: 12px; bottom: 12px; transform: scale(1.1); }
+
+        /* 2. VKUSVILL (Цветные пятна) */
+        .v-blob .card::before {
+            content: ''; position: absolute; right: -20px; bottom: -20px;
+            width: 100px; height: 100px; border-radius: 50%;
+            background: var(--accent-color); opacity: 0.15; filter: blur(20px);
+            transition: background 0.3s;
         }
-        .doc-line {
-            position: absolute; left: 10px; height: 4px; background: rgba(255,255,255,0.3); border-radius: 2px;
+        .v-blob .icon-3d { right: 10px; bottom: 10px; transform: rotate(-5deg); }
+
+        /* 3. DELIVERY (Карточка в карточке) */
+        .v-delivery .card { background: var(--bg-color); border: 1px solid rgba(128,128,128,0.1); }
+        .v-delivery .card::after {
+            content: ''; position: absolute; right: 10px; bottom: 10px;
+            width: 60px; height: 60px; background: var(--card-bg);
+            border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
-        .doc-corner {
-            position: absolute; top: 0; right: 0; width: 15px; height: 15px;
-            background: rgba(0,0,0,0.2); border-bottom-left-radius: 8px;
+        [data-theme="dark"] .v-delivery .card::after { background: #2C2C2E; }
+        .v-delivery .icon-3d { right: 18px; bottom: 18px; font-size: 40px; z-index: 3; }
+
+        /* 4. GLASS SHELF (Полка) */
+        .v-glass .card { background: linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.1); }
+        [data-theme="light"] .v-glass .card { background: #FFF; border: 1px solid rgba(0,0,0,0.05); }
+        .v-glass .icon-3d { 
+            bottom: 15px; right: 15px; 
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.3)); transform: translateY(-5px);
         }
 
-        /* 2. PENCIL & PAPER (Объявление) */
-        .paper-sheet {
-            width: 45px; height: 55px; top: 15px; left: 10px;
-            border-radius: 6px; transform: rotate(5deg);
-        }
-        .pencil-body {
-            width: 10px; height: 60px; top: 5px; left: 45px;
-            border-radius: 5px; transform: rotate(25deg);
-            background: var(--accent); filter: brightness(1.2);
+        /* 5. NEON GLOW (Свечение) */
+        .v-neon .icon-3d { 
+            filter: drop-shadow(0 0 15px var(--accent-color)); 
+            opacity: 0.9;
         }
 
-        /* 3. MEGAPHONE (Реклама) */
-        .mega-cone {
-            width: 0; height: 0; top: 25px; left: 35px;
-            border-top: 20px solid transparent;
-            border-bottom: 20px solid transparent;
-            border-right: 40px solid var(--accent);
-            transform: rotate(-15deg); filter: var(--mat-filter);
-        }
-        /* Костыль для CSS конуса - используем border, но для Clay лучше div */
-        .mega-body {
-            width: 40px; height: 30px; top: 25px; left: 10px;
-            border-radius: 8px 4px 4px 8px; transform: rotate(-15deg);
-        }
-        .mega-mouth {
-            width: 15px; height: 40px; top: 20px; left: 45px;
-            border-radius: 50%; transform: rotate(-15deg);
-            background: rgba(255,255,255,0.2);
+        /* 6. FLOATING (Парящие) */
+        .v-float .icon-3d {
+            bottom: 25px; right: 15px;
+            transform: rotate(10deg) scale(1.2);
+            filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
         }
 
-        /* 4. SHIELD (Бригадиры) */
-        .shield-shape {
-            width: 50px; height: 60px; top: 10px; left: 15px;
-            border-radius: 0 0 25px 25px;
-            transform: rotate(0deg);
+        /* 7. BIG CROP (Абстракция) */
+        .v-crop .icon-3d {
+            font-size: 140px; right: -30px; bottom: -40px; opacity: 0.8;
+            transform: rotate(-15deg);
+            filter: blur(0.5px);
         }
-        .shield-inner {
-            position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
-            border-radius: 0 0 15px 15px; background: rgba(0,0,0,0.1);
+        .v-crop .card-text { background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 8px; backdrop-filter: blur(4px); display: inline-block; }
+        [data-theme="light"] .v-crop .card-text { background: rgba(255,255,255,0.6); }
+
+        /* 8. SOFT CLAY (Матовый) */
+        .v-clay .card { box-shadow: inset 0 0 20px rgba(0,0,0,0.05); }
+        .v-clay .icon-3d { filter: contrast(0.8) brightness(1.1) drop-shadow(0 5px 5px rgba(0,0,0,0.2)); }
+
+        /* 9. PERSPECTIVE (Наклон) */
+        .v-persp .icon-3d {
+            transform: perspective(100px) rotateX(10deg) rotateY(-10deg) scale(1.1);
+            right: 15px; bottom: 15px;
         }
 
-        /* 5. BOOK (Статьи) */
-        .book-cover {
-            width: 50px; height: 60px; top: 10px; left: 15px;
-            border-radius: 4px 8px 8px 4px;
-            transform: rotate(-5deg);
+        /* 10. MINIMAL COLOR (Тонировка) */
+        .v-mono .icon-3d {
+            filter: sepia(1) hue-rotate(10deg) saturate(2); /* Золотистый оттенок */
         }
-        .book-spine {
-            position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
-            background: rgba(0,0,0,0.2); border-radius: 4px 0 0 4px;
-        }
+        [data-theme="light"] .v-mono .icon-3d { filter: sepia(1) hue-rotate(190deg) saturate(3); /* Синий оттенок */ }
+
 
         /* --- ПАНЕЛЬ --- */
         .panel {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(20, 20, 22, 0.98); border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 20px; z-index: 100; border-radius: 24px 24px 0 0;
+            background: rgba(20, 20, 22, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px 24px 0 0;
+            padding: 20px; z-index: 100;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
         }
-        [data-theme="light"] .panel { background: #FFF; border-top: 1px solid rgba(0,0,0,0.1); }
+        [data-theme="light"] .panel { background: rgba(255, 255, 255, 0.95); border-top: 1px solid rgba(0,0,0,0.1); }
 
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; }
-        .theme-btn { padding: 6px 12px; border-radius: 20px; background: rgba(128,128,128,0.2); border:none; font-weight:600; cursor: pointer; color: inherit; }
-
-        .scroll-wrap { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
-        .mat-btn {
-            flex: 0 0 auto; width: 80px; height: 60px; border-radius: 12px;
-            background: #2C2C2E; border: 2px solid transparent;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 700; color: #FFF; cursor: pointer;
-            text-align: center; padding: 5px;
+        .panel-title { font-weight: 700; font-size: 14px; text-transform: uppercase; }
+        
+        .theme-btn {
+            background: var(--card-bg); border: 1px solid rgba(128,128,128,0.2);
+            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            color: var(--text-primary); cursor: pointer;
         }
-        .mat-btn.active { border-color: var(--accent); }
+
+        .variants-scroll {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .variants-scroll::-webkit-scrollbar { display: none; }
+
+        .v-btn {
+            flex: 0 0 auto; width: 70px; height: 70px;
+            background: var(--card-bg); border-radius: 16px;
+            border: 2px solid transparent;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 9px; font-weight: 600; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .v-btn.active { border-color: var(--accent-color); color: var(--text-primary); background: rgba(128,128,128,0.1); }
+        .v-preview { font-size: 24px; margin-bottom: 4px; }
 
     </style>
 </head>
@@ -179,233 +198,107 @@
         <div class="brand">КИНОЦЕХ</div>
     </div>
 
-    <div class="grid">
+    <!-- СЕТКА КАРТОЧЕК -->
+    <div id="grid" class="grid v-clean">
         <!-- 1. ПРАВИЛА -->
         <div class="card large">
-            <div class="card-info">
+            <div class="card-text">
                 <div class="card-title">Правила группы</div>
-                <div class="card-desc">Обязательно к ознакомлению</div>
+                <div class="card-sub">Обязательно к прочтению</div>
             </div>
-            <div class="scene-3d">
-                <div class="shape doc-base clay-surface">
-                    <div class="doc-line" style="top:15px; width:30px;"></div>
-                    <div class="doc-line" style="top:25px; width:20px;"></div>
-                    <div class="doc-line" style="top:35px; width:25px;"></div>
-                    <div class="doc-corner"></div>
-                </div>
-            </div>
+            <!-- 3D Объект: Свиток / Папка -->
+            <div class="icon-3d">📜</div> 
         </div>
 
         <!-- 2. ОБЪЯВЛЕНИЕ -->
         <div class="card">
-            <div class="card-info">
+            <div class="card-text">
                 <div class="card-title">Разместить<br>объявление</div>
             </div>
-            <div class="scene-3d">
-                <div class="shape paper-sheet clay-surface"></div>
-                <div class="shape pencil-body clay-surface"></div>
-            </div>
+            <!-- 3D Объект: Лист с карандашом -->
+            <div class="icon-3d">📝</div>
         </div>
 
         <!-- 3. РЕКЛАМА -->
         <div class="card">
-            <div class="card-info">
+            <div class="card-text">
                 <div class="card-title">Разместить<br>рекламу</div>
             </div>
-            <div class="scene-3d">
-                <div class="shape mega-body clay-surface"></div>
-                <div class="shape mega-mouth clay-surface"></div>
-            </div>
+            <!-- 3D Объект: Мегафон -->
+            <div class="icon-3d">📢</div>
         </div>
 
         <!-- 4. БРИГАДИРЫ -->
-        <div class="card" style="opacity:0.8">
-            <div class="card-info">
+        <div class="card" style="opacity: 0.7;">
+            <div class="card-text">
                 <div class="card-title">Проверенные<br>бригадиры</div>
-                <div class="card-desc">Скоро</div>
+                <div class="card-sub" style="margin-top:4px;">Скоро</div>
             </div>
-            <div class="scene-3d">
-                <div class="shape shield-shape clay-surface">
-                    <div class="shield-inner"></div>
-                </div>
-            </div>
+            <!-- 3D Объект: Щит / Каска -->
+            <div class="icon-3d">🛡️</div>
         </div>
 
         <!-- 5. СТАТЬИ -->
-        <div class="card" style="opacity:0.8">
-            <div class="card-info">
+        <div class="card" style="opacity: 0.7;">
+            <div class="card-text">
                 <div class="card-title">Полезные<br>статьи</div>
-                <div class="card-desc">Скоро</div>
+                <div class="card-sub" style="margin-top:4px;">Скоро</div>
             </div>
-            <div class="scene-3d">
-                <div class="shape book-cover clay-surface">
-                    <div class="book-spine"></div>
-                </div>
-            </div>
+            <!-- 3D Объект: Книги / Лампа -->
+            <div class="icon-3d">📚</div>
         </div>
     </div>
 </div>
 
+<!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
 <div class="panel">
     <div class="panel-header">
-        <div class="panel-title">Материал 3D (CSS Render)</div>
+        <div class="panel-title">Стиль 3D (Clay)</div>
         <button class="theme-btn" onclick="toggleTheme()">День / Ночь</button>
     </div>
-    <div class="scroll-wrap" id="mat-list"></div>
+    <div class="variants-scroll">
+        <!-- Кнопки генерируются JS -->
+    </div>
 </div>
 
 <script>
-    // --- ВАРИАНТЫ МАТЕРИАЛОВ (CSS Variables) ---
-    const MATERIALS = [
-        {
-            name: "1. VkusVill Clay",
-            style: `
-                --mat-gradient: linear-gradient(135deg, #F2F2F7, #E5E5EA);
-                --mat-shadow: 0 8px 16px rgba(0,0,0,0.15);
-                --mat-filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
-                --mat-inset: inset 4px 4px 10px rgba(255,255,255,1), inset -4px -4px 10px rgba(0,0,0,0.05);
-            `,
-            darkStyle: `
-                --mat-gradient: linear-gradient(135deg, #3A3A3C, #2C2C2E);
-                --mat-inset: inset 2px 2px 5px rgba(255,255,255,0.1), inset -2px -2px 5px rgba(0,0,0,0.3);
-            `
-        },
-        {
-            name: "2. Gold Bullion",
-            style: `
-                --mat-gradient: linear-gradient(135deg, #FFD700, #DAA520, #8B4513);
-                --mat-shadow: 0 10px 25px rgba(218, 165, 32, 0.3);
-                --mat-filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
-                --mat-inset: inset 0 0 20px rgba(255,215,0,0.5), inset 2px 2px 2px rgba(255,255,255,0.8);
-            `
-        },
-        {
-            name: "3. Yandex Gloss",
-            style: `
-                --mat-gradient: linear-gradient(135deg, #FFCC00, #FF9900);
-                --mat-shadow: 0 10px 20px rgba(255, 153, 0, 0.3);
-                --mat-filter: contrast(1.1);
-                --mat-inset: inset 5px 5px 10px rgba(255,255,255,0.6), inset -2px -2px 5px rgba(0,0,0,0.1);
-            `
-        },
-        {
-            name: "4. Matte Plastic",
-            style: `
-                --mat-gradient: linear-gradient(135deg, #48484A, #1C1C1E);
-                --mat-shadow: 0 15px 30px rgba(0,0,0,0.4);
-                --mat-filter: none;
-                --mat-inset: inset 1px 1px 2px rgba(255,255,255,0.1);
-            `,
-            lightStyle: `
-                --mat-gradient: linear-gradient(135deg, #007AFF, #0056b3);
-                --mat-inset: inset 2px 2px 5px rgba(255,255,255,0.3);
-            `
-        },
-        {
-            name: "5. Glassmorphism",
-            style: `
-                --mat-gradient: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
-                --mat-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-                --mat-border: 1px solid rgba(255, 255, 255, 0.18);
-                --mat-filter: backdrop-filter: blur(4px);
-                --mat-inset: none;
-            `
-        },
-        {
-            name: "6. Neon Cyber",
-            style: `
-                --mat-gradient: #000;
-                --mat-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
-                --mat-border: 2px solid var(--accent);
-                --mat-filter: brightness(1.5);
-                --mat-inset: none;
-            `
-        },
-        {
-            name: "7. Soft Pastel",
-            style: `
-                --mat-gradient: linear-gradient(135deg, #FF9A9E, #FECFEF);
-                --mat-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
-                --mat-filter: none;
-                --mat-inset: inset 3px 3px 6px rgba(255,255,255,0.8);
-            `
-        },
-        {
-            name: "8. Deep Space",
-            style: `
-                --mat-gradient: linear-gradient(135deg, #2b5876, #4e4376);
-                --mat-shadow: 0 10px 20px rgba(0,0,0,0.5);
-                --mat-filter: contrast(1.2);
-                --mat-inset: inset 1px 1px 2px rgba(255,255,255,0.2);
-            `
-        },
-        {
-            name: "9. Holographic",
-            style: `
-                --mat-gradient: linear-gradient(135deg, #E0C3FC, #8EC5FC);
-                --mat-shadow: 0 10px 20px rgba(142, 197, 252, 0.3);
-                --mat-filter: hue-rotate(15deg);
-                --mat-inset: inset 2px 2px 5px rgba(255,255,255,0.9);
-            `
-        },
-        {
-            name: "10. Pure White",
-            style: `
-                --mat-gradient: #FFFFFF;
-                --mat-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                --mat-filter: none;
-                --mat-inset: inset -5px -5px 10px rgba(0,0,0,0.05);
-            `
-        }
+    const variants = [
+        { id: 'v-clean', name: 'Clean 3D', icon: '✨' },
+        { id: 'v-blob', name: 'VkusVill', icon: '🎨' },
+        { id: 'v-delivery', name: 'Delivery', icon: '🍱' },
+        { id: 'v-glass', name: 'Glass', icon: '🧊' },
+        { id: 'v-neon', name: 'Neon', icon: '💡' },
+        { id: 'v-float', name: 'Floating', icon: '🎈' },
+        { id: 'v-crop', name: 'Big Crop', icon: '📐' },
+        { id: 'v-clay', name: 'Matte', icon: '🗿' },
+        { id: 'v-persp', name: 'Angle', icon: '📐' },
+        { id: 'v-mono', name: 'Color', icon: '🎭' },
     ];
 
-    const list = document.getElementById('mat-list');
-    const root = document.documentElement;
-
-    function applyMaterial(index) {
-        const mat = MATERIALS[index];
-        const isDark = document.body.getAttribute('data-theme') === 'dark';
-        
-        // Выбираем стиль (учитывая темную тему, если есть спец настройки)
-        let styleString = mat.style;
-        if (isDark && mat.darkStyle) styleString = mat.darkStyle;
-        if (!isDark && mat.lightStyle) styleString = mat.lightStyle;
-
-        // Парсим строку стилей и применяем к root
-        styleString.split(';').forEach(rule => {
-            if (rule.trim()) {
-                const [prop, val] = rule.split(':');
-                if (prop && val) root.style.setProperty(prop.trim(), val.trim());
-            }
-        });
-    }
+    const grid = document.getElementById('grid');
+    const scrollContainer = document.querySelector('.variants-scroll');
 
     // Генерация кнопок
-    MATERIALS.forEach((m, i) => {
+    variants.forEach((v, index) => {
         const btn = document.createElement('div');
-        btn.className = `mat-btn ${i === 0 ? 'active' : ''}`;
-        btn.textContent = m.name;
+        btn.className = `v-btn ${index === 0 ? 'active' : ''}`;
+        btn.innerHTML = `<div class="v-preview">${v.icon}</div><div>${v.name}</div>`;
         btn.onclick = () => {
-            document.querySelectorAll('.mat-btn').forEach(b => b.classList.remove('active'));
+            // Смена класса сетки
+            grid.className = `grid ${v.id}`;
+            // Активная кнопка
+            document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            applyMaterial(i);
         };
-        list.appendChild(btn);
+        scrollContainer.appendChild(btn);
     });
 
     function toggleTheme() {
         const body = document.body;
         const isDark = body.getAttribute('data-theme') === 'dark';
         body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        
-        // Переприменяем текущий материал, так как он может зависеть от темы
-        const activeIndex = Array.from(document.querySelectorAll('.mat-btn')).findIndex(b => b.classList.contains('active'));
-        applyMaterial(activeIndex !== -1 ? activeIndex : 0);
     }
-
-    // Init
-    applyMaterial(0);
-
 </script>
+
 </body>
 </html>
