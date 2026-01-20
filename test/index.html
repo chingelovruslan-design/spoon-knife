@@ -3,139 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KINOCEKH | Simple Fitting</title>
+    <title>KINOCEKH | Night Color Fitting</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- БАЗА --- */
+        /* --- БАЗА (DARK ONLY) --- */
         :root {
             --font-main: 'Montserrat', sans-serif;
-            
-            /* DARK THEME */
             --bg-color: #0F0F11;
             --text-primary: #FFFFFF;
             --text-secondary: #9aa0a6;
             
-            /* КАРТОЧКИ (Без стекла, просто чистый цвет) */
+            /* СЖАТЫЕ КАРТОЧКИ */
             --card-bg: #1C1C1E;
             --card-border: #2C2C2E;
-            --card-shadow: none; /* Убрали тени */
             
-            --accent-color: #D4AF37;
-        }
-
-        [data-theme="light"] {
-            --bg-color: #F2F2F7;
-            --text-primary: #000000;
-            --text-secondary: #6e6e73;
-            
-            --card-bg: #FFFFFF;
-            --card-border: #E5E5EA;
-            
-            --accent-color: #007AFF;
+            /* Цвет акцента (меняется JS) */
+            --accent-color: #D4AF37; 
         }
 
         body {
             margin: 0; padding: 0; background: var(--bg-color); color: var(--text-primary);
-            font-family: var(--font-main); transition: background 0.2s ease;
+            font-family: var(--font-main);
             overflow: hidden; -webkit-font-smoothing: antialiased;
         }
 
         #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 220px; }
 
-        .header { margin-bottom: 24px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .header { margin-bottom: 20px; padding-top: 10px; }
+        .brand { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #FFF; }
+        .subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
 
-        /* --- СЕТКА --- */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* --- СЕТКА (КОМПАКТНАЯ) --- */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 18px;
+            border-radius: 18px; /* Чуть меньше радиус */
+            padding: 16px;       /* Меньше отступы */
             position: relative;
-            height: 140px;
+            height: 115px;       /* УМЕНЬШИЛ ВЫСОТУ (было 140) */
             overflow: hidden;
-            /* Убрали анимации при появлении */
             display: flex; flex-direction: column; justify-content: space-between;
         }
-        .card:active { opacity: 0.8; } /* Простое нажатие */
-        .card.large { grid-column: span 2; height: 110px; flex-direction: row; align-items: center; }
+        .card.large { grid-column: span 2; height: 100px; flex-direction: row; align-items: center; }
 
         .card-text { position: relative; z-index: 2; max-width: 100%; }
-        .card-title { font-size: 15px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; text-transform: uppercase; }
-        .card-sub { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+        .card-title { font-size: 14px; font-weight: 700; line-height: 1.25; margin-bottom: 4px; text-transform: uppercase; }
+        .card-sub { font-size: 10px; color: var(--text-secondary); font-weight: 500; }
 
-        /* --- ИКОНКИ (СТАТИКА) --- */
-        .static-icon {
+        /* --- ИКОНКИ (FLAT) --- */
+        .flat-icon {
             position: absolute;
-            right: 10px; bottom: 10px;
-            width: 80px; height: 80px;
+            right: 8px; bottom: 8px; /* Прижал ближе к краю */
+            width: 65px; height: 65px; /* Чуть уменьшил (было 80) */
             object-fit: contain;
             z-index: 1;
-            /* Никаких анимаций и фильтров */
             pointer-events: none;
+            transition: filter 0.3s ease;
         }
         
-        /* Специфика для Notion стиля (инверсия в темной теме) */
-        .notion-mode .static-icon { filter: invert(1); opacity: 0.8; }
-        [data-theme="light"] .notion-mode .static-icon { filter: none; opacity: 1; }
+        /* --- ФИЛЬТРЫ ЦВЕТОВ (CSS MAGIC) --- */
+        /* Исходник синий. Крутим Hue, чтобы получить другие цвета */
+        
+        /* 1. ЗОЛОТО (Под бренд) */
+        .color-gold .flat-icon { filter: hue-rotate(155deg) saturate(1.5) brightness(1.1); }
+        
+        /* 2. БЕЛЫЙ (Монохром) */
+        .color-white .flat-icon { filter: grayscale(1) brightness(1.5); }
+        
+        /* 3. НЕОН (Голубой, но ярче) */
+        .color-neon .flat-icon { filter: brightness(1.3) drop-shadow(0 0 5px rgba(0,122,255,0.5)); }
+        
+        /* 4. МЯТА (Зеленый) */
+        .color-mint .flat-icon { filter: hue-rotate(290deg) brightness(1.2); }
+        
+        /* 5. КОРАЛЛ (Оранжевый) */
+        .color-coral .flat-icon { filter: hue-rotate(130deg) saturate(1.2); }
+
 
         /* --- ПАНЕЛЬ ВЫБОРА --- */
         .panel {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: var(--card-bg);
-            border-top: 1px solid var(--card-border);
+            background: #151517;
+            border-top: 1px solid #2C2C2E;
             border-radius: 24px 24px 0 0;
             padding: 20px; z-index: 100;
             padding-bottom: calc(20px + env(safe-area-inset-bottom));
         }
 
-        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .panel-title { font-weight: 700; font-size: 14px; text-transform: uppercase; color: var(--text-secondary); }
+        .panel-header { margin-bottom: 15px; text-align: center; }
+        .panel-title { font-weight: 700; font-size: 13px; text-transform: uppercase; color: var(--text-secondary); }
         
-        .theme-btn {
-            background: var(--bg-color); border: 1px solid var(--card-border);
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-            color: var(--text-primary); cursor: pointer;
-        }
-
-        .concept-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        
-        .concept-btn {
-            background: var(--bg-color); border: 1px solid transparent;
-            border-radius: 12px; padding: 12px 5px;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
-            cursor: pointer;
-        }
-        .concept-btn.active { 
-            border-color: var(--accent-color); 
-            background: rgba(128,128,128,0.1);
+        .colors-scroll {
+            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px;
+            justify-content: center;
         }
         
-        .c-emoji { font-size: 20px; }
-        .c-name { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .color-btn {
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer; position: relative;
+            background-color: #2C2C2E;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+        .color-btn.active { border-color: #FFF; transform: scale(1.1); }
+        
+        /* Индикаторы цвета кнопок */
+        .btn-gold { background: linear-gradient(135deg, #FFD700, #B8860B); color: #000; }
+        .btn-white { background: #E5E5EA; color: #000; }
+        .btn-neon { background: #007AFF; color: #FFF; }
+        .btn-mint { background: #00C853; color: #FFF; }
+        .btn-coral { background: #FF6B6B; color: #FFF; }
 
     </style>
 </head>
-<body data-theme="dark">
+<body>
 
 <div id="app">
     <div class="header">
         <div class="brand">КИНОЦЕХ</div>
+        <div class="subtitle">Night Mode Fitting</div>
     </div>
 
-    <div class="grid" id="main-grid">
+    <!-- СЕТКА (Класс color-gold меняется JS) -->
+    <div class="grid color-gold" id="main-grid">
         <!-- 1. ПРАВИЛА -->
         <div class="card large">
             <div class="card-text">
                 <div class="card-title">Правила группы</div>
                 <div class="card-sub">Обязательно к прочтению</div>
             </div>
-            <img id="img-rules" src="" class="static-icon" alt="Rules">
+            <img src="https://img.icons8.com/fluency/96/rules.png" class="flat-icon" alt="Rules">
         </div>
 
         <!-- 2. ОБЪЯВЛЕНИЕ -->
@@ -143,7 +146,7 @@
             <div class="card-text">
                 <div class="card-title">Разместить<br>объявление</div>
             </div>
-            <img id="img-post" src="" class="static-icon" alt="Post">
+            <img src="https://img.icons8.com/fluency/96/create-new.png" class="flat-icon" alt="Post">
         </div>
 
         <!-- 3. РЕКЛАМА -->
@@ -151,7 +154,7 @@
             <div class="card-text">
                 <div class="card-title">Разместить<br>рекламу</div>
             </div>
-            <img id="img-ads" src="" class="static-icon" alt="Ads">
+            <img src="https://img.icons8.com/fluency/96/megaphone.png" class="flat-icon" alt="Ads">
         </div>
 
         <!-- 4. БРИГАДИРЫ -->
@@ -160,7 +163,7 @@
                 <div class="card-title">Проверенные<br>бригадиры</div>
                 <div class="card-sub" style="margin-top:4px;">Скоро</div>
             </div>
-            <img id="img-brig" src="" class="static-icon" alt="Brigadiers">
+            <img src="https://img.icons8.com/fluency/96/security-checked.png" class="flat-icon" alt="Brigadiers">
         </div>
 
         <!-- 5. СТАТЬИ -->
@@ -169,115 +172,58 @@
                 <div class="card-title">Полезные<br>статьи</div>
                 <div class="card-sub" style="margin-top:4px;">Скоро</div>
             </div>
-            <img id="img-art" src="" class="static-icon" alt="Articles">
+            <img src="https://img.icons8.com/fluency/96/reading.png" class="flat-icon" alt="Articles">
         </div>
     </div>
 </div>
 
-<!-- ПАНЕЛЬ ВЫБОРА -->
+<!-- ПАНЕЛЬ ВЫБОРА ЦВЕТА -->
 <div class="panel">
     <div class="panel-header">
-        <div class="panel-title">Выберите стиль</div>
-        <button class="theme-btn" onclick="toggleTheme()">День / Ночь</button>
+        <div class="panel-title">Цвет иконок (Ночь)</div>
     </div>
     
-    <div class="concept-grid">
-        <!-- ВАРИАНТ 1: APPLE (Классика) -->
-        <div class="concept-btn active" onclick="setConcept('apple', this)">
-            <span class="c-emoji">🍎</span>
-            <span class="c-name">Apple (Static)</span>
-        </div>
+    <div class="colors-scroll">
+        <!-- ЗОЛОТО -->
+        <div class="color-btn btn-gold active" onclick="setColor('color-gold', this)">👑</div>
         
-        <!-- ВАРИАНТ 2: NOTION (Скетч) -->
-        <div class="concept-btn" onclick="setConcept('notion', this)">
-            <span class="c-emoji">✏️</span>
-            <span class="c-name">Notion (Sketch)</span>
-        </div>
+        <!-- БЕЛЫЙ -->
+        <div class="color-btn btn-white" onclick="setColor('color-white', this)">⚪</div>
         
-        <!-- ВАРИАНТ 3: FLAT (Вектор) -->
-        <div class="concept-btn" onclick="setConcept('flat', this)">
-            <span class="c-emoji">🎨</span>
-            <span class="c-name">Flat (Simple)</span>
-        </div>
+        <!-- НЕОН -->
+        <div class="color-btn btn-neon" onclick="setColor('color-neon', this)">🔵</div>
+        
+        <!-- МЯТА -->
+        <div class="color-btn btn-mint" onclick="setColor('color-mint', this)">🟢</div>
+        
+        <!-- КОРАЛЛ -->
+        <div class="color-btn btn-coral" onclick="setColor('color-coral', this)">🔴</div>
     </div>
 </div>
 
 <script>
-    // --- БАЗА КАРТИНОК (Статика) ---
-    const assets = {
-        // 1. APPLE STYLE (Чистые, понятные, без анимации)
-        apple: {
-            rules: "https://em-content.zobj.net/source/apple/391/scroll_1f4dc.png",
-            post: "https://em-content.zobj.net/source/apple/391/memo_1f4dd.png",
-            ads: "https://em-content.zobj.net/source/apple/391/megaphone_1f4e3.png",
-            brig: "https://em-content.zobj.net/source/apple/391/shield_1f6e1-fe0f.png",
-            art: "https://em-content.zobj.net/source/apple/391/books_1f4da.png"
-        },
-        
-        // 2. NOTION STYLE (Черно-белые скетчи)
-        notion: {
-            rules: "https://img.icons8.com/ios/100/rules.png",
-            post: "https://img.icons8.com/ios/100/create-new.png",
-            ads: "https://img.icons8.com/ios/100/megaphone.png",
-            brig: "https://img.icons8.com/ios/100/security-checked.png",
-            art: "https://img.icons8.com/ios/100/reading.png"
-        },
-        
-        // 3. FLAT STYLE (Плоский цвет)
-        flat: {
-            rules: "https://img.icons8.com/fluency/96/rules.png",
-            post: "https://img.icons8.com/fluency/96/create-new.png",
-            ads: "https://img.icons8.com/fluency/96/megaphone.png",
-            brig: "https://img.icons8.com/fluency/96/security-checked.png",
-            art: "https://img.icons8.com/fluency/96/reading.png"
-        }
-    };
-
-    function setConcept(conceptName, btnElement) {
-        // 1. Кнопки
-        document.querySelectorAll('.concept-btn').forEach(b => b.classList.remove('active'));
-        btnElement.classList.add('active');
-
-        // 2. Режим Notion (для инверсии цвета)
+    function setColor(colorClass, btn) {
+        // 1. Меняем класс сетки
         const grid = document.getElementById('main-grid');
-        if (conceptName === 'notion') {
-            grid.classList.add('notion-mode');
-        } else {
-            grid.classList.remove('notion-mode');
-        }
-
-        // 3. Обновляем картинки
-        const set = assets[conceptName];
-        document.getElementById('img-rules').src = set.rules;
-        document.getElementById('img-post').src = set.post;
-        document.getElementById('img-ads').src = set.ads;
-        document.getElementById('img-brig').src = set.brig;
-        document.getElementById('img-art').src = set.art;
+        grid.className = `grid ${colorClass}`;
         
+        // 2. Активная кнопка
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // 3. Вибрация
         if(window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.selectionChanged();
         }
     }
 
-    function toggleTheme() {
-        const body = document.body;
-        const isDark = body.getAttribute('data-theme') === 'dark';
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        if(window.Telegram && Telegram.WebApp.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-        }
+    // Инициализация
+    if(window.Telegram) {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+        Telegram.WebApp.setBackgroundColor('#0F0F11');
+        Telegram.WebApp.setHeaderColor('#0F0F11');
     }
-
-    // Старт
-    window.onload = () => {
-        const firstBtn = document.querySelector('.concept-btn.active');
-        setConcept('apple', firstBtn);
-        
-        if(window.Telegram) {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
-        }
-    };
 </script>
 
 </body>
