@@ -3,195 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | 3D Fitting Room</title>
+    <title>KINOCEKH | Premium 3D Fitting</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- БАЗА --- */
+        /* --- НАСТРОЙКИ ПАЛИТРЫ --- */
         :root {
             --font-main: 'Montserrat', sans-serif;
-            --bg-color: #121214;
-            --text-primary: #FFFFFF;
-            --text-secondary: #9aa0a6;
-            --card-bg: #1C1C1E;
-            --accent-color: #D4AF37; /* Золото */
-            --accent-gradient: linear-gradient(135deg, #D4AF37, #F2D06B);
             
-            /* Параметры для 3D вариантов */
-            --card-radius: 24px;
-            --icon-size: 60px;
-            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.5);
+            /* DARK THEME (DEFAULT) */
+            --bg-color: #0F0F11;
+            --card-bg: #18181A;
+            --text-primary: #FFFFFF;
+            --text-secondary: #8E8E93;
+            
+            /* Цвета 3D объектов (Dark) */
+            --icon-main: #D4AF37;       /* Золото */
+            --icon-light: #F2D06B;      /* Светлое золото */
+            --icon-dark: #8A7120;       /* Темное золото */
+            --icon-shadow: rgba(0,0,0,0.5);
+            
+            --accent-glow: rgba(212, 175, 55, 0.3);
+            --border-color: rgba(255,255,255,0.08);
         }
 
         [data-theme="light"] {
             --bg-color: #F2F2F7;
-            --text-primary: #000000;
-            --text-secondary: #6e6e73;
             --card-bg: #FFFFFF;
-            --accent-color: #007AFF; /* Синий */
-            --accent-gradient: linear-gradient(135deg, #007AFF, #5AC8FA);
-            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.15);
+            --text-primary: #000000;
+            --text-secondary: #6E6E73;
+            
+            /* Цвета 3D объектов (Light) */
+            --icon-main: #007AFF;       /* Синий */
+            --icon-light: #5AC8FA;      /* Голубой */
+            --icon-dark: #0055B3;       /* Темно-синий */
+            --icon-shadow: rgba(0, 51, 102, 0.2);
+            
+            --accent-glow: rgba(0, 122, 255, 0.2);
+            --border-color: rgba(0,0,0,0.05);
         }
 
         body {
             margin: 0; padding: 0; background: var(--bg-color); color: var(--text-primary);
-            font-family: var(--font-main); transition: background 0.3s ease;
+            font-family: var(--font-main); transition: background 0.4s ease, color 0.4s ease;
             overflow: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 200px; }
+        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 220px; box-sizing: border-box; }
 
         .header { margin-bottom: 24px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .brand { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        
+        .brand { 
+            font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; 
+            background: linear-gradient(135deg, var(--icon-main), var(--icon-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
         /* --- СЕТКА --- */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; transition: all 0.3s ease; }
         
         .card {
             background: var(--card-bg);
-            border-radius: var(--card-radius);
-            padding: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 20px;
             position: relative;
-            height: 140px;
+            height: 150px;
             overflow: hidden;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: var(--shadow-soft);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             display: flex; flex-direction: column; justify-content: space-between;
+            cursor: pointer;
         }
-        .card:active { transform: scale(0.96); }
         .card.large { grid-column: span 2; height: 120px; flex-direction: row; align-items: center; }
+        
+        .card-text { position: relative; z-index: 2; max-width: 100%; transition: transform 0.3s ease; }
+        .card-title { font-size: 16px; font-weight: 700; line-height: 1.2; margin-bottom: 6px; }
+        .card-sub { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
 
-        .card-text { position: relative; z-index: 2; max-width: 100%; }
-        .card-title { font-size: 15px; font-weight: 700; line-height: 1.2; margin-bottom: 4px; }
-        .card-sub { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
-
-        /* --- 3D ОБЪЕКТ (EMOJI PROXY) --- */
-        .icon-3d {
-            font-size: var(--icon-size);
-            line-height: 1;
+        /* --- 3D SVG ICONS (Векторная графика) --- */
+        .svg-icon {
             position: absolute;
-            right: 10px; bottom: 10px;
+            right: -10px; bottom: -10px;
+            width: 100px; height: 100px;
             z-index: 1;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); /* Тень для объема */
-            transition: all 0.4s ease;
-            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-            transform-origin: center center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 10px 15px var(--icon-shadow));
+        }
+        
+        /* Градиенты внутри SVG (ссылаемся на CSS переменные) */
+        .stop-main { stop-color: var(--icon-main); transition: stop-color 0.4s; }
+        .stop-light { stop-color: var(--icon-light); transition: stop-color 0.4s; }
+        .stop-dark { stop-color: var(--icon-dark); transition: stop-color 0.4s; }
+
+        /* --- ВАРИАНТЫ СТИЛЕЙ (CSS CLASSES) --- */
+
+        /* 1. CLEAN (База) */
+        .v-clean .card { box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .v-clean .svg-icon { transform: scale(1); right: -5px; bottom: -5px; }
+
+        /* 2. GLASS (Стекломорфизм) */
+        .v-glass .card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        [data-theme="light"] .v-glass .card { background: rgba(255,255,255,0.6); border: 1px solid rgba(0,0,0,0.05); }
+        .v-glass .svg-icon { opacity: 0.9; filter: drop-shadow(0 15px 20px var(--icon-shadow)) blur(0.5px); }
+
+        /* 3. NEON (Свечение) */
+        .v-neon .card { border-color: var(--accent-glow); overflow: visible; }
+        .v-neon .svg-icon { 
+            filter: drop-shadow(0 0 15px var(--icon-main)); 
+            transform: scale(1.05);
+        }
+        .v-neon .card-title { text-shadow: 0 0 10px var(--accent-glow); }
+
+        /* 4. VKUSVILL (Органические пятна) */
+        .v-vkus .card { overflow: hidden; background: var(--card-bg); }
+        .v-vkus .card::before {
+            content: ''; position: absolute; right: -30px; bottom: -30px;
+            width: 140px; height: 140px; border-radius: 50%;
+            background: var(--icon-main); opacity: 0.1;
+            filter: blur(30px); transition: background 0.4s;
+        }
+        .v-vkus .svg-icon { transform: rotate(-5deg) scale(1.1); right: 5px; bottom: 5px; }
+
+        /* 5. FLOAT (Левитация) */
+        @keyframes floatY { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .v-float .svg-icon { 
+            animation: floatY 4s ease-in-out infinite; 
+            filter: drop-shadow(0 25px 15px var(--icon-shadow));
+            bottom: 10px; right: 10px;
         }
 
-        /* --- ВАРИАНТЫ СТИЛЕЙ --- */
-
-        /* 1. CLEAN 3D (База) */
-        .v-clean .icon-3d { right: 12px; bottom: 12px; transform: scale(1.1); }
-
-        /* 2. VKUSVILL (Цветные пятна) */
-        .v-blob .card::before {
-            content: ''; position: absolute; right: -20px; bottom: -20px;
-            width: 100px; height: 100px; border-radius: 50%;
-            background: var(--accent-color); opacity: 0.15; filter: blur(20px);
-            transition: background 0.3s;
+        /* 6. CLAY (Матовый пластик) */
+        .v-clay .card { 
+            background: var(--bg-color);
+            box-shadow: inset 5px 5px 10px rgba(0,0,0,0.2), inset -5px -5px 10px rgba(255,255,255,0.05);
+            border: none;
         }
-        .v-blob .icon-3d { right: 10px; bottom: 10px; transform: rotate(-5deg); }
-
-        /* 3. DELIVERY (Карточка в карточке) */
-        .v-delivery .card { background: var(--bg-color); border: 1px solid rgba(128,128,128,0.1); }
-        .v-delivery .card::after {
-            content: ''; position: absolute; right: 10px; bottom: 10px;
-            width: 60px; height: 60px; background: var(--card-bg);
-            border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        [data-theme="light"] .v-clay .card {
+            box-shadow: inset 5px 5px 10px rgba(163,177,198,0.3), inset -5px -5px 10px rgba(255,255,255,0.8);
         }
-        [data-theme="dark"] .v-delivery .card::after { background: #2C2C2E; }
-        .v-delivery .icon-3d { right: 18px; bottom: 18px; font-size: 40px; z-index: 3; }
+        .v-clay .svg-icon { filter: drop-shadow(5px 5px 10px var(--icon-shadow)); }
 
-        /* 4. GLASS SHELF (Полка) */
-        .v-glass .card { background: linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.1); }
-        [data-theme="light"] .v-glass .card { background: #FFF; border: 1px solid rgba(0,0,0,0.05); }
-        .v-glass .icon-3d { 
-            bottom: 15px; right: 15px; 
-            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.3)); transform: translateY(-5px);
+        /* 7. BIG CROP (Крупный план) */
+        .v-crop .svg-icon {
+            width: 180px; height: 180px;
+            right: -40px; bottom: -50px;
+            opacity: 0.2; transform: rotate(15deg);
         }
+        .v-crop .card:hover .svg-icon { opacity: 0.4; transform: rotate(0deg); }
+        .v-crop .card-text { font-size: 1.1em; }
 
-        /* 5. NEON GLOW (Свечение) */
-        .v-neon .icon-3d { 
-            filter: drop-shadow(0 0 15px var(--accent-color)); 
-            opacity: 0.9;
+        /* 8. STROKE (Комикс/Поп-арт) */
+        .v-stroke .card { border: 2px solid var(--text-primary); box-shadow: 4px 4px 0 var(--text-primary); border-radius: 16px; }
+        .v-stroke .svg-icon { filter: drop-shadow(2px 2px 0 var(--text-primary)); }
+
+        /* 9. PERSPECTIVE (3D наклон) */
+        .v-persp { perspective: 1000px; }
+        .v-persp .card { 
+            transform: rotateX(5deg); 
+            box-shadow: 0 15px 30px -10px rgba(0,0,0,0.3);
         }
+        .v-persp .svg-icon { transform: translateZ(20px) scale(1.1); }
 
-        /* 6. FLOATING (Парящие) */
-        .v-float .icon-3d {
-            bottom: 25px; right: 15px;
-            transform: rotate(10deg) scale(1.2);
-            filter: drop-shadow(0 20px 15px rgba(0,0,0,0.4));
-        }
-
-        /* 7. BIG CROP (Абстракция) */
-        .v-crop .icon-3d {
-            font-size: 140px; right: -30px; bottom: -40px; opacity: 0.8;
-            transform: rotate(-15deg);
-            filter: blur(0.5px);
-        }
-        .v-crop .card-text { background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 8px; backdrop-filter: blur(4px); display: inline-block; }
-        [data-theme="light"] .v-crop .card-text { background: rgba(255,255,255,0.6); }
-
-        /* 8. SOFT CLAY (Матовый) */
-        .v-clay .card { box-shadow: inset 0 0 20px rgba(0,0,0,0.05); }
-        .v-clay .icon-3d { filter: contrast(0.8) brightness(1.1) drop-shadow(0 5px 5px rgba(0,0,0,0.2)); }
-
-        /* 9. PERSPECTIVE (Наклон) */
-        .v-persp .icon-3d {
-            transform: perspective(100px) rotateX(10deg) rotateY(-10deg) scale(1.1);
-            right: 15px; bottom: 15px;
-        }
-
-        /* 10. MINIMAL COLOR (Тонировка) */
-        .v-mono .icon-3d {
-            filter: sepia(1) hue-rotate(10deg) saturate(2); /* Золотистый оттенок */
-        }
-        [data-theme="light"] .v-mono .icon-3d { filter: sepia(1) hue-rotate(190deg) saturate(3); /* Синий оттенок */ }
+        /* 10. MINIMAL (Минимализм) */
+        .v-min .card { background: transparent; border: 1px solid var(--border-color); }
+        .v-min .svg-icon { opacity: 0.8; transform: scale(0.8); right: 0; bottom: 0; }
+        .v-min .card-title { font-weight: 500; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; }
 
 
-        /* --- ПАНЕЛЬ --- */
+        /* --- ПАНЕЛЬ УПРАВЛЕНИЯ --- */
         .panel {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(20, 20, 22, 0.95);
-            backdrop-filter: blur(20px);
+            background: rgba(20, 20, 22, 0.9);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-radius: 24px 24px 0 0;
             padding: 20px; z-index: 100;
             border-top: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
         }
-        [data-theme="light"] .panel { background: rgba(255, 255, 255, 0.95); border-top: 1px solid rgba(0,0,0,0.1); }
+        [data-theme="light"] .panel { background: rgba(255, 255, 255, 0.9); border-top: 1px solid rgba(0,0,0,0.1); }
 
         .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .panel-title { font-weight: 700; font-size: 14px; text-transform: uppercase; }
+        .panel-title { font-weight: 700; font-size: 14px; text-transform: uppercase; color: var(--text-secondary); }
         
-        .theme-btn {
-            background: var(--card-bg); border: 1px solid rgba(128,128,128,0.2);
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
-            color: var(--text-primary); cursor: pointer;
+        .theme-toggle {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;
+            color: var(--text-primary); cursor: pointer; display: flex; align-items: center; gap: 6px;
+            transition: transform 0.2s;
         }
+        .theme-toggle:active { transform: scale(0.95); }
 
         .variants-scroll {
-            display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;
-            -webkit-overflow-scrolling: touch;
+            display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch; scroll-behavior: smooth;
         }
         .variants-scroll::-webkit-scrollbar { display: none; }
 
         .v-btn {
             flex: 0 0 auto; width: 70px; height: 70px;
-            background: var(--card-bg); border-radius: 16px;
+            background: var(--card-bg); border-radius: 18px;
             border: 2px solid transparent;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 9px; font-weight: 600; color: var(--text-secondary);
+            font-size: 10px; font-weight: 600; color: var(--text-secondary);
             cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .v-btn.active { border-color: var(--accent-color); color: var(--text-primary); background: rgba(128,128,128,0.1); }
-        .v-preview { font-size: 24px; margin-bottom: 4px; }
+        .v-btn.active { 
+            border-color: var(--icon-main); 
+            color: var(--text-primary); 
+            background: var(--bg-color);
+            transform: translateY(-2px);
+        }
+        .v-preview { font-size: 20px; margin-bottom: 6px; filter: grayscale(1); transition: filter 0.2s; }
+        .v-btn.active .v-preview { filter: grayscale(0); }
 
     </style>
 </head>
 <body data-theme="dark">
+
+<!-- SVG DEFINITIONS (Градиенты) -->
+<svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="gradMain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop class="stop-light" offset="0%" />
+      <stop class="stop-main" offset="50%" />
+      <stop class="stop-dark" offset="100%" />
+    </linearGradient>
+  </defs>
+</svg>
 
 <div id="app">
     <div class="header">
@@ -200,52 +245,74 @@
 
     <!-- СЕТКА КАРТОЧЕК -->
     <div id="grid" class="grid v-clean">
-        <!-- 1. ПРАВИЛА -->
+        
+        <!-- 1. ПРАВИЛА (3D Щит/Документ) -->
         <div class="card large">
             <div class="card-text">
                 <div class="card-title">Правила группы</div>
                 <div class="card-sub">Обязательно к прочтению</div>
             </div>
-            <!-- 3D Объект: Свиток / Папка -->
-            <div class="icon-3d">📜</div> 
+            <!-- SVG: Shield/Doc -->
+            <svg class="svg-icon" viewBox="0 0 100 100" fill="none">
+                <path d="M50 10 L85 25 V50 C85 70 50 90 50 90 C50 90 15 70 15 50 V25 L50 10 Z" fill="url(#gradMain)" />
+                <path d="M50 25 L70 35 V50 C70 65 50 80 50 80 C50 80 30 65 30 50 V35 L50 25 Z" fill="rgba(255,255,255,0.2)" />
+                <path d="M45 40 L55 50 L45 60" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </div>
 
-        <!-- 2. ОБЪЯВЛЕНИЕ -->
+        <!-- 2. ОБЪЯВЛЕНИЕ (3D Карандаш) -->
         <div class="card">
             <div class="card-text">
                 <div class="card-title">Разместить<br>объявление</div>
             </div>
-            <!-- 3D Объект: Лист с карандашом -->
-            <div class="icon-3d">📝</div>
+            <!-- SVG: Pencil -->
+            <svg class="svg-icon" viewBox="0 0 100 100" fill="none">
+                <rect x="30" y="30" width="40" height="60" rx="5" transform="rotate(-45 50 50)" fill="url(#gradMain)" />
+                <path d="M72 28 L85 15 L95 25 L82 38 Z" fill="var(--text-primary)" opacity="0.8" />
+                <circle cx="20" cy="80" r="5" fill="var(--icon-main)" />
+            </svg>
         </div>
 
-        <!-- 3. РЕКЛАМА -->
+        <!-- 3. РЕКЛАМА (3D Мегафон) -->
         <div class="card">
             <div class="card-text">
                 <div class="card-title">Разместить<br>рекламу</div>
             </div>
-            <!-- 3D Объект: Мегафон -->
-            <div class="icon-3d">📢</div>
+            <!-- SVG: Megaphone -->
+            <svg class="svg-icon" viewBox="0 0 100 100" fill="none">
+                <path d="M20 35 L50 20 V80 L20 65 Z" fill="url(#gradMain)" />
+                <ellipse cx="20" cy="50" rx="8" ry="15" fill="var(--icon-dark)" />
+                <path d="M50 30 L80 10 V90 L50 70" fill="url(#gradMain)" opacity="0.8" />
+                <path d="M85 30 Q95 50 85 70" stroke="var(--icon-main)" stroke-width="3" stroke-linecap="round" />
+            </svg>
         </div>
 
-        <!-- 4. БРИГАДИРЫ -->
-        <div class="card" style="opacity: 0.7;">
+        <!-- 4. БРИГАДИРЫ (3D Звезда/Бейдж) -->
+        <div class="card" style="opacity: 0.8;">
             <div class="card-text">
                 <div class="card-title">Проверенные<br>бригадиры</div>
                 <div class="card-sub" style="margin-top:4px;">Скоро</div>
             </div>
-            <!-- 3D Объект: Щит / Каска -->
-            <div class="icon-3d">🛡️</div>
+            <!-- SVG: Star Badge -->
+            <svg class="svg-icon" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="35" fill="url(#gradMain)" />
+                <circle cx="50" cy="50" r="25" fill="rgba(255,255,255,0.2)" />
+                <path d="M50 35 L54 46 H66 L56 54 L60 65 L50 58 L40 65 L44 54 L34 46 H46 Z" fill="white" />
+            </svg>
         </div>
 
-        <!-- 5. СТАТЬИ -->
-        <div class="card" style="opacity: 0.7;">
+        <!-- 5. СТАТЬИ (3D Лампочка/Идея) -->
+        <div class="card" style="opacity: 0.8;">
             <div class="card-text">
                 <div class="card-title">Полезные<br>статьи</div>
                 <div class="card-sub" style="margin-top:4px;">Скоро</div>
             </div>
-            <!-- 3D Объект: Книги / Лампа -->
-            <div class="icon-3d">📚</div>
+            <!-- SVG: Lightbulb -->
+            <svg class="svg-icon" viewBox="0 0 100 100" fill="none">
+                <path d="M35 20 C35 20 20 35 20 50 C20 65 35 75 40 80 H60 C65 75 80 65 80 50 C80 35 65 20 65 20 Z" fill="url(#gradMain)" />
+                <rect x="40" y="82" width="20" height="10" rx="2" fill="var(--text-secondary)" />
+                <path d="M45 35 L55 45 L45 55" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+            </svg>
         </div>
     </div>
 </div>
@@ -253,8 +320,10 @@
 <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
 <div class="panel">
     <div class="panel-header">
-        <div class="panel-title">Стиль 3D (Clay)</div>
-        <button class="theme-btn" onclick="toggleTheme()">День / Ночь</button>
+        <div class="panel-title" id="style-name">Стиль: Clean 3D</div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <span id="theme-icon">☀️</span> День / Ночь
+        </button>
     </div>
     <div class="variants-scroll">
         <!-- Кнопки генерируются JS -->
@@ -262,41 +331,66 @@
 </div>
 
 <script>
+    // --- КОНФИГУРАЦИЯ СТИЛЕЙ ---
     const variants = [
         { id: 'v-clean', name: 'Clean 3D', icon: '✨' },
-        { id: 'v-blob', name: 'VkusVill', icon: '🎨' },
-        { id: 'v-delivery', name: 'Delivery', icon: '🍱' },
         { id: 'v-glass', name: 'Glass', icon: '🧊' },
         { id: 'v-neon', name: 'Neon', icon: '💡' },
-        { id: 'v-float', name: 'Floating', icon: '🎈' },
+        { id: 'v-vkus', name: 'Organic', icon: '🍏' },
+        { id: 'v-float', name: 'Levitate', icon: '🎈' },
+        { id: 'v-clay', name: 'Clay', icon: '🗿' },
         { id: 'v-crop', name: 'Big Crop', icon: '📐' },
-        { id: 'v-clay', name: 'Matte', icon: '🗿' },
-        { id: 'v-persp', name: 'Angle', icon: '📐' },
-        { id: 'v-mono', name: 'Color', icon: '🎭' },
+        { id: 'v-stroke', name: 'Comic', icon: '🖊️' },
+        { id: 'v-persp', name: 'Angle', icon: '🧊' },
+        { id: 'v-min', name: 'Minimal', icon: '⚪' },
     ];
 
     const grid = document.getElementById('grid');
     const scrollContainer = document.querySelector('.variants-scroll');
+    const styleNameLabel = document.getElementById('style-name');
+    const themeIcon = document.getElementById('theme-icon');
 
-    // Генерация кнопок
+    // --- ГЕНЕРАЦИЯ КНОПОК ---
     variants.forEach((v, index) => {
         const btn = document.createElement('div');
         btn.className = `v-btn ${index === 0 ? 'active' : ''}`;
         btn.innerHTML = `<div class="v-preview">${v.icon}</div><div>${v.name}</div>`;
+        
         btn.onclick = () => {
             // Смена класса сетки
             grid.className = `grid ${v.id}`;
+            styleNameLabel.textContent = `Стиль: ${v.name}`;
+            
             // Активная кнопка
             document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            
+            // Вибрация (если в Telegram)
+            if(window.Telegram && Telegram.WebApp.HapticFeedback) {
+                Telegram.WebApp.HapticFeedback.selectionChanged();
+            }
         };
         scrollContainer.appendChild(btn);
     });
 
+    // --- ПЕРЕКЛЮЧЕНИЕ ТЕМЫ ---
     function toggleTheme() {
         const body = document.body;
         const isDark = body.getAttribute('data-theme') === 'dark';
-        body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        const newTheme = isDark ? 'light' : 'dark';
+        
+        body.setAttribute('data-theme', newTheme);
+        themeIcon.textContent = isDark ? '🌙' : '☀️';
+        
+        if(window.Telegram && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+    }
+    
+    // Инициализация Telegram WebApp
+    if(window.Telegram) {
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
     }
 </script>
 
