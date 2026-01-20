@@ -895,7 +895,6 @@
     // --- УМНАЯ АДАПТАЦИЯ (HYBRID PERFORMANCE) ---
     function initAdaptation() {
         const ua = navigator.userAgent || navigator.vendor || window.opera;
-        const body = document.body;
         let isLite = false;
 
         // 1. Проверка на режим энергосбережения (Универсально)
@@ -915,10 +914,162 @@
 
         // 3. Проверка Android (Xiaomi, Samsung и др.)
         if (/android/i.test(ua)) {
-            // Если ядер меньше 8 - считаем устройство слабым/средним
-            if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 8) {
+            // Если ядер меньше 6 - считаем устройство слабым/средним
+            if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 6) {
                 isLite = true;
             }
             // Дополнительная защита для старых версий Android WebView
             if (/Chrome\/[0-9]{2}/.test(ua)) { // Chrome версии < 100 (старые)
-                 isLite
+                isLite = true;
+            }
+        }
+
+        // ПРИМЕНЕНИЕ РЕЖИМА
+        if (isLite) {
+            document.body.classList.add('lite-mode');
+            console.log('Lite Mode Activated');
+        } else {
+            console.log('High Performance Mode Activated');
+        }
+    }
+
+    // --- НАВИГАЦИЯ ---
+    function openPage(pageId) {
+        const page = document.getElementById(pageId);
+        const home = document.getElementById('page-home');
+        
+        if (page) {
+            page.classList.add('active');
+            home.classList.add('behind');
+            
+            // Вибрация (Haptic)
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+    }
+
+    function closePage(pageId) {
+        const page = document.getElementById(pageId);
+        const home = document.getElementById('page-home');
+        
+        if (page) {
+            page.classList.remove('active');
+            home.classList.remove('behind');
+            
+            // Сброс скролла при закрытии (опционально)
+            setTimeout(() => {
+                page.scrollTop = 0;
+            }, 400);
+        }
+    }
+
+    // --- АККОРДЕОН ---
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+        const isActive = item.classList.contains('active');
+        
+        // Закрываем все остальные (опционально, если нужно поведение "один открыт")
+        document.querySelectorAll('.accordion-item.active').forEach(activeItem => {
+            if (activeItem !== item) {
+                activeItem.classList.remove('active');
+                activeItem.querySelector('.accordion-content').style.maxHeight = null;
+            }
+        });
+
+        if (isActive) {
+            item.classList.remove('active');
+            content.style.maxHeight = null;
+        } else {
+            item.classList.add('active');
+            content.style.maxHeight = content.scrollHeight + "px";
+            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+    }
+
+    // --- ТЕМА (ДЕНЬ / НОЧЬ) ---
+    function toggleTheme() {
+        const body = document.body;
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        
+        body.setAttribute('data-theme', newTheme);
+        
+        // Сохраняем выбор (если нужно, можно в localStorage, но в WebApp лучше просто менять)
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        
+        // Цвет хедера Telegram
+        if (newTheme === 'light') {
+            tg.setHeaderColor('#F2F2F7');
+            tg.setBackgroundColor('#F2F2F7');
+        } else {
+            tg.setHeaderColor('#0F0F11');
+            tg.setBackgroundColor('#0F0F11');
+        }
+    }
+
+    // --- ОБРАБОТКА ЗАКРЫТЫХ КАРТОЧЕК ---
+    function handleLockedClick(card, message) {
+        // Анимация "тряски" или нажатия
+        card.classList.add('active-state');
+        setTimeout(() => card.classList.remove('active-state'), 150);
+        
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+        
+        showToast(message);
+    }
+
+    // --- TOAST NOTIFICATIONS ---
+    function showToast(message) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        
+        container.appendChild(toast);
+        
+        // Анимация появления
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+        
+        // Удаление
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    // --- ЗАПУСК ПРИЛОЖЕНИЯ ---
+    window.onload = function() {
+        // 1. Запускаем адаптацию
+        initAdaptation();
+
+        // 2. Убираем скелетон (Загрузку)
+        // Делаем небольшую задержку, чтобы браузер успел отрисовать стили
+        setTimeout(() => {
+            const loader = document.getElementById('skeleton-loader');
+            if (loader) {
+                loader.classList.add('hidden');
+                // Удаляем из DOM через 0.5 сек, чтобы не мешал кликам
+                setTimeout(() => loader.style.display = 'none', 500);
+            }
+        }, 400); // 400мс задержка для плавности
+    };
+
+    // --- СТРАХОВКА ОТ ЗАВИСАНИЯ (FAILSAFE) ---
+    // Если вдруг window.onload не сработает или скрипт подвиснет,
+    // через 3 секунды принудительно убираем черный экран.
+    setTimeout(() => {
+        const loader = document.getElementById('skeleton-loader');
+        if (loader && !loader.classList.contains('hidden')) {
+            console.warn('Failsafe triggered: Removing loader forcibly.');
+            loader.classList.add('hidden');
+            setTimeout(() => loader.style.display = 'none', 500);
+        }
+    }, 3000);
+
+</script>
+</body>
+</html>
