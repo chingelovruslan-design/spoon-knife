@@ -3,35 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KINOCEKH | 20 Colors Fitting</title>
+    <title>KINOCEKH | Final Check</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- БАЗА (DARK ONLY) --- */
+        /* --- БАЗА --- */
         :root {
             --font-main: 'Montserrat', sans-serif;
+            
+            /* DARK THEME (DEFAULT) */
             --bg-color: #0F0F11;
             --text-primary: #FFFFFF;
             --text-secondary: #9aa0a6;
             
-            /* СЖАТЫЕ КАРТОЧКИ */
             --card-bg: #1C1C1E;
             --card-border: #2C2C2E;
+            
+            /* ФИЛЬТР ДЛЯ НОЧИ (Твой выбор: Night/Slate) */
+            /* Делаем иконки строгими, серо-синими, приглушенными */
+            --icon-filter: hue-rotate(20deg) saturate(0.2) brightness(0.7);
+        }
+
+        /* LIGHT THEME */
+        [data-theme="light"] {
+            --bg-color: #F2F2F7;
+            --text-primary: #000000;
+            --text-secondary: #6e6e73;
+            
+            --card-bg: #FFFFFF;
+            --card-border: #E5E5EA;
+            
+            /* ФИЛЬТР ДЛЯ ДНЯ (Оригинал) */
+            /* Убираем фильтр, чтобы вернуть сочные цвета */
+            --icon-filter: none;
         }
 
         body {
             margin: 0; padding: 0; background: var(--bg-color); color: var(--text-primary);
-            font-family: var(--font-main);
+            font-family: var(--font-main); transition: background 0.3s ease, color 0.3s ease;
             overflow: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 240px; }
+        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 120px; }
 
-        .header { margin-bottom: 20px; padding-top: 10px; }
-        .brand { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #FFF; }
-        .subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+        .header { margin-bottom: 20px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
         /* --- СЕТКА (КОМПАКТНАЯ) --- */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -42,17 +60,19 @@
             border-radius: 18px;
             padding: 16px;
             position: relative;
-            height: 115px; /* КОМПАКТНАЯ ВЫСОТА */
+            height: 115px; /* Компактная высота */
             overflow: hidden;
             display: flex; flex-direction: column; justify-content: space-between;
+            transition: background 0.3s, border-color 0.3s;
         }
+        .card:active { opacity: 0.8; transform: scale(0.98); transition: 0.1s; }
         .card.large { grid-column: span 2; height: 100px; flex-direction: row; align-items: center; }
 
         .card-text { position: relative; z-index: 2; max-width: 100%; }
         .card-title { font-size: 14px; font-weight: 700; line-height: 1.25; margin-bottom: 4px; text-transform: uppercase; }
         .card-sub { font-size: 10px; color: var(--text-secondary); font-weight: 500; }
 
-        /* --- ИКОНКИ (FLAT) --- */
+        /* --- ИКОНКИ --- */
         .flat-icon {
             position: absolute;
             right: 8px; bottom: 8px;
@@ -60,112 +80,47 @@
             object-fit: contain;
             z-index: 1;
             pointer-events: none;
-            transition: filter 0.3s ease;
+            
+            /* ПРИМЕНЕНИЕ ФИЛЬТРА */
+            filter: var(--icon-filter);
+            transition: filter 0.4s ease; /* Плавный переход цвета */
         }
-        
-        /* --- 20 ВАРИАНТОВ ЦВЕТОВ (CSS FILTERS) --- */
-        
-        /* 1. METALS (Премиум) */
-        .c-gold .flat-icon      { filter: sepia(1) saturate(2.5) hue-rotate(10deg) brightness(0.9); }
-        .c-light-gold .flat-icon{ filter: sepia(1) saturate(1.5) hue-rotate(5deg) brightness(1.1); }
-        .c-silver .flat-icon    { filter: grayscale(1) brightness(1.3); }
-        .c-platinum .flat-icon  { filter: grayscale(1) brightness(1.1) contrast(1.2); }
-        .c-bronze .flat-icon    { filter: sepia(1) saturate(1.5) hue-rotate(-30deg) brightness(0.8); }
-        
-        /* 2. COLD (Ночные) */
-        .c-ice .flat-icon       { filter: hue-rotate(0deg) saturate(0.5) brightness(1.5); }
-        .c-cyan .flat-icon      { filter: hue-rotate(0deg) brightness(1.2); } /* Оригинал ярче */
-        .c-teal .flat-icon      { filter: hue-rotate(320deg) brightness(1.1); }
-        .c-ocean .flat-icon     { filter: hue-rotate(10deg) saturate(1.5) brightness(0.8); }
-        .c-mint .flat-icon      { filter: hue-rotate(290deg) brightness(1.2); }
-        
-        /* 3. WARM (Акценты) */
-        .c-coral .flat-icon     { filter: hue-rotate(130deg) saturate(1.2); }
-        .c-sunset .flat-icon    { filter: hue-rotate(150deg) saturate(1.5); }
-        .c-amber .flat-icon     { filter: hue-rotate(170deg) saturate(2); }
-        .c-rose .flat-icon      { filter: hue-rotate(100deg) saturate(0.8) brightness(1.2); }
-        .c-crimson .flat-icon   { filter: hue-rotate(120deg) saturate(1.2) brightness(0.9); }
-        
-        /* 4. DEEP (Мистика) */
-        .c-purple .flat-icon    { filter: hue-rotate(60deg) brightness(1.1); }
-        .c-violet .flat-icon    { filter: hue-rotate(80deg) saturate(1.5); }
-        .c-indigo .flat-icon    { filter: hue-rotate(40deg) saturate(1.5) brightness(0.8); }
-        .c-lavender .flat-icon  { filter: hue-rotate(60deg) saturate(0.5) brightness(1.3); }
-        .c-night .flat-icon     { filter: hue-rotate(20deg) saturate(0.2) brightness(0.7); }
 
-
-        /* --- ПАНЕЛЬ ВЫБОРА --- */
+        /* --- ПАНЕЛЬ --- */
         .panel {
             position: fixed; bottom: 0; left: 0; width: 100%;
-            background: #151517;
-            border-top: 1px solid #2C2C2E;
+            background: var(--card-bg);
+            border-top: 1px solid var(--card-border);
             border-radius: 24px 24px 0 0;
             padding: 20px; z-index: 100;
             padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            display: flex; justify-content: center;
         }
-
-        .panel-header { margin-bottom: 15px; text-align: center; }
-        .panel-title { font-weight: 700; font-size: 13px; text-transform: uppercase; color: var(--text-secondary); }
         
-        .colors-scroll {
-            display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px;
-            padding-left: 10px; padding-right: 10px;
-            -webkit-overflow-scrolling: touch;
+        .toggle-btn {
+            background: var(--bg-color);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 12px 30px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .colors-scroll::-webkit-scrollbar { display: none; }
-        
-        .color-group-label {
-            font-size: 10px; color: #555; text-transform: uppercase; margin-bottom: 5px; margin-left: 10px; font-weight: 700;
-        }
-
-        .color-btn {
-            flex: 0 0 auto;
-            width: 44px; height: 44px; border-radius: 50%;
-            border: 2px solid #2C2C2E;
-            cursor: pointer; position: relative;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 10px; font-weight: 700; color: #000;
-            transition: transform 0.2s;
-        }
-        .color-btn.active { border-color: #FFF; transform: scale(1.15); z-index: 2; }
-        
-        /* Визуализация кнопок */
-        .bg-gold { background: #D4AF37; }
-        .bg-light-gold { background: #F2D06B; }
-        .bg-silver { background: #C0C0C0; }
-        .bg-platinum { background: #E5E4E2; }
-        .bg-bronze { background: #CD7F32; }
-        
-        .bg-ice { background: #A5F2F3; }
-        .bg-cyan { background: #00E5FF; }
-        .bg-teal { background: #009688; }
-        .bg-ocean { background: #0277BD; }
-        .bg-mint { background: #00E676; }
-        
-        .bg-coral { background: #FF6B6B; }
-        .bg-sunset { background: #FF9E80; }
-        .bg-amber { background: #FFC107; }
-        .bg-rose { background: #F8BBD0; }
-        .bg-crimson { background: #D50000; }
-        
-        .bg-purple { background: #9C27B0; }
-        .bg-violet { background: #E040FB; }
-        .bg-indigo { background: #3F51B5; }
-        .bg-lavender { background: #B39DDB; }
-        .bg-night { background: #455A64; }
 
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
 <div id="app">
     <div class="header">
         <div class="brand">КИНОЦЕХ</div>
-        <div class="subtitle">20 Colors Fitting</div>
     </div>
 
-    <!-- СЕТКА (Класс меняется JS) -->
-    <div class="grid c-gold" id="main-grid">
+    <div class="grid">
         <!-- 1. ПРАВИЛА -->
         <div class="card large">
             <div class="card-text">
@@ -211,56 +166,31 @@
     </div>
 </div>
 
-<!-- ПАНЕЛЬ ВЫБОРА ЦВЕТА -->
+<!-- ПАНЕЛЬ -->
 <div class="panel">
-    <div class="panel-header">
-        <div class="panel-title">Выберите оттенок (Листайте)</div>
-    </div>
-    
-    <div class="colors-scroll">
-        <!-- METALS -->
-        <div class="color-btn bg-gold active" onclick="setColor('c-gold', this)"></div>
-        <div class="color-btn bg-light-gold" onclick="setColor('c-light-gold', this)"></div>
-        <div class="color-btn bg-silver" onclick="setColor('c-silver', this)"></div>
-        <div class="color-btn bg-platinum" onclick="setColor('c-platinum', this)"></div>
-        <div class="color-btn bg-bronze" onclick="setColor('c-bronze', this)"></div>
-        
-        <!-- COLD -->
-        <div class="color-btn bg-ice" onclick="setColor('c-ice', this)"></div>
-        <div class="color-btn bg-cyan" onclick="setColor('c-cyan', this)"></div>
-        <div class="color-btn bg-teal" onclick="setColor('c-teal', this)"></div>
-        <div class="color-btn bg-ocean" onclick="setColor('c-ocean', this)"></div>
-        <div class="color-btn bg-mint" onclick="setColor('c-mint', this)"></div>
-        
-        <!-- WARM -->
-        <div class="color-btn bg-coral" onclick="setColor('c-coral', this)"></div>
-        <div class="color-btn bg-sunset" onclick="setColor('c-sunset', this)"></div>
-        <div class="color-btn bg-amber" onclick="setColor('c-amber', this)"></div>
-        <div class="color-btn bg-rose" onclick="setColor('c-rose', this)"></div>
-        <div class="color-btn bg-crimson" onclick="setColor('c-crimson', this)"></div>
-        
-        <!-- DEEP -->
-        <div class="color-btn bg-purple" onclick="setColor('c-purple', this)"></div>
-        <div class="color-btn bg-violet" onclick="setColor('c-violet', this)"></div>
-        <div class="color-btn bg-indigo" onclick="setColor('c-indigo', this)"></div>
-        <div class="color-btn bg-lavender" onclick="setColor('c-lavender', this)"></div>
-        <div class="color-btn bg-night" onclick="setColor('c-night', this)"></div>
-    </div>
+    <button class="toggle-btn" onclick="toggleTheme()">Переключить: День / Ночь</button>
 </div>
 
 <script>
-    function setColor(colorClass, btn) {
-        // 1. Меняем класс сетки
-        const grid = document.getElementById('main-grid');
-        grid.className = `grid ${colorClass}`;
+    function toggleTheme() {
+        const body = document.body;
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
         
-        // 2. Активная кнопка
-        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        body.setAttribute('data-theme', newTheme);
         
-        // 3. Вибрация
+        // Вибрация
         if(window.Telegram && Telegram.WebApp.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.selectionChanged();
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            
+            // Меняем цвет шапки Telegram
+            if (newTheme === 'light') {
+                Telegram.WebApp.setHeaderColor('#F2F2F7');
+                Telegram.WebApp.setBackgroundColor('#F2F2F7');
+            } else {
+                Telegram.WebApp.setHeaderColor('#0F0F11');
+                Telegram.WebApp.setBackgroundColor('#0F0F11');
+            }
         }
     }
 
@@ -268,8 +198,8 @@
     if(window.Telegram) {
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
-        Telegram.WebApp.setBackgroundColor('#0F0F11');
         Telegram.WebApp.setHeaderColor('#0F0F11');
+        Telegram.WebApp.setBackgroundColor('#0F0F11');
     }
 </script>
 
