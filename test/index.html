@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KINOCEKH | Final Check</title>
+    <title>KINOCEKH | Day Blue Fitting</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=block" rel="stylesheet">
@@ -13,31 +13,26 @@
         :root {
             --font-main: 'Montserrat', sans-serif;
             
-            /* DARK THEME (DEFAULT) */
-            --bg-color: #0F0F11;
-            --text-primary: #FFFFFF;
-            --text-secondary: #9aa0a6;
-            
-            --card-bg: #1C1C1E;
-            --card-border: #2C2C2E;
-            
-            /* ФИЛЬТР ДЛЯ НОЧИ (Твой выбор: Night/Slate) */
-            /* Делаем иконки строгими, серо-синими, приглушенными */
-            --icon-filter: hue-rotate(20deg) saturate(0.2) brightness(0.7);
-        }
-
-        /* LIGHT THEME */
-        [data-theme="light"] {
-            --bg-color: #F2F2F7;
+            /* ПЕРЕМЕННЫЕ (Будут меняться JS) */
+            --bg-color: #F2F2F7; /* Start with Light */
             --text-primary: #000000;
             --text-secondary: #6e6e73;
-            
             --card-bg: #FFFFFF;
             --card-border: #E5E5EA;
             
-            /* ФИЛЬТР ДЛЯ ДНЯ (Оригинал) */
-            /* Убираем фильтр, чтобы вернуть сочные цвета */
-            --icon-filter: none;
+            /* ФИЛЬТР ИКОНОК (По умолчанию - Navy/Original) */
+            --icon-filter: brightness(0.7) saturate(1.2) hue-rotate(-5deg); 
+        }
+
+        /* DARK THEME OVERRIDE (Фиксированный Slate, как ты утвердил) */
+        [data-theme="dark"] {
+            --bg-color: #0F0F11;
+            --text-primary: #FFFFFF;
+            --text-secondary: #9aa0a6;
+            --card-bg: #1C1C1E;
+            --card-border: #2C2C2E;
+            /* Утвержденный ночной фильтр (Slate) */
+            --icon-filter: hue-rotate(20deg) saturate(0.2) brightness(0.7) !important;
         }
 
         body {
@@ -46,12 +41,12 @@
             overflow: hidden; -webkit-font-smoothing: antialiased;
         }
 
-        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 120px; }
+        #app { padding: 16px; height: 100vh; overflow-y: auto; padding-bottom: 240px; }
 
         .header { margin-bottom: 20px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .brand { font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* --- СЕТКА (КОМПАКТНАЯ) --- */
+        /* --- СЕТКА --- */
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .card {
@@ -60,12 +55,11 @@
             border-radius: 18px;
             padding: 16px;
             position: relative;
-            height: 115px; /* Компактная высота */
+            height: 115px;
             overflow: hidden;
             display: flex; flex-direction: column; justify-content: space-between;
             transition: background 0.3s, border-color 0.3s;
         }
-        .card:active { opacity: 0.8; transform: scale(0.98); transition: 0.1s; }
         .card.large { grid-column: span 2; height: 100px; flex-direction: row; align-items: center; }
 
         .card-text { position: relative; z-index: 2; max-width: 100%; }
@@ -81,10 +75,27 @@
             z-index: 1;
             pointer-events: none;
             
-            /* ПРИМЕНЕНИЕ ФИЛЬТРА */
+            /* ГЛАВНАЯ МАГИЯ ЗДЕСЬ */
             filter: var(--icon-filter);
-            transition: filter 0.4s ease; /* Плавный переход цвета */
+            transition: filter 0.3s ease;
         }
+
+        /* --- ВАРИАНТЫ ДЛЯ ДНЯ (CSS Classes) --- */
+        /* 1. NAVY (Original) - Темный, глубокий */
+        .day-navy { --icon-filter: brightness(0.6) saturate(1.1) hue-rotate(-5deg); }
+        
+        /* 2. STEEL (Сталь) - Спокойный, сероватый */
+        .day-steel { --icon-filter: grayscale(0.4) brightness(0.9); }
+        
+        /* 3. ROYAL (Королевский) - Сбалансированный */
+        .day-royal { --icon-filter: brightness(0.9) saturate(0.9); }
+        
+        /* 4. OCEAN (Океан) - Глубокий Teal */
+        .day-ocean { --icon-filter: hue-rotate(-25deg) brightness(0.8) saturate(1.1); }
+        
+        /* 5. INDIGO (Индиго) - Модный фиолетово-синий */
+        .day-indigo { --icon-filter: hue-rotate(15deg) brightness(0.8); }
+
 
         /* --- ПАНЕЛЬ --- */
         .panel {
@@ -94,26 +105,48 @@
             border-radius: 24px 24px 0 0;
             padding: 20px; z-index: 100;
             padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            display: flex; justify-content: center;
         }
         
+        .panel-header { text-align: center; margin-bottom: 15px; }
+        .panel-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); }
+
+        .colors-scroll {
+            display: flex; gap: 12px; justify-content: center; margin-bottom: 20px;
+        }
+        
+        .color-btn {
+            width: 44px; height: 44px; border-radius: 50%;
+            border: 2px solid var(--card-border);
+            cursor: pointer; position: relative;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s;
+        }
+        .color-btn.active { border-color: #000; transform: scale(1.15); }
+        [data-theme="dark"] .color-btn.active { border-color: #FFF; }
+
+        /* Визуализация кнопок */
+        .bg-navy { background: #003366; }
+        .bg-steel { background: #607D8B; }
+        .bg-royal { background: #2962FF; }
+        .bg-ocean { background: #006064; }
+        .bg-indigo { background: #3F51B5; }
+
         .toggle-btn {
+            width: 100%;
             background: var(--bg-color);
             border: 1px solid var(--card-border);
             color: var(--text-primary);
-            padding: 12px 30px;
+            padding: 12px;
             border-radius: 12px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
     </style>
 </head>
-<body data-theme="dark">
+<body class="day-navy" data-theme="light">
 
 <div id="app">
     <div class="header">
@@ -168,10 +201,43 @@
 
 <!-- ПАНЕЛЬ -->
 <div class="panel">
-    <button class="toggle-btn" onclick="toggleTheme()">Переключить: День / Ночь</button>
+    <div class="panel-title">Выберите синий (для Дня)</div>
+    
+    <div class="colors-scroll">
+        <!-- 1. NAVY -->
+        <div class="color-btn bg-navy active" onclick="setDayColor('day-navy', this)"></div>
+        <!-- 2. STEEL -->
+        <div class="color-btn bg-steel" onclick="setDayColor('day-steel', this)"></div>
+        <!-- 3. ROYAL -->
+        <div class="color-btn bg-royal" onclick="setDayColor('day-royal', this)"></div>
+        <!-- 4. OCEAN -->
+        <div class="color-btn bg-ocean" onclick="setDayColor('day-ocean', this)"></div>
+        <!-- 5. INDIGO -->
+        <div class="color-btn bg-indigo" onclick="setDayColor('day-indigo', this)"></div>
+    </div>
+
+    <button class="toggle-btn" onclick="toggleTheme()">Проверить Ночь (Slate)</button>
 </div>
 
 <script>
+    function setDayColor(className, btn) {
+        // Меняем класс body (влияет только на светлую тему)
+        document.body.className = className;
+        
+        // Кнопки
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Если мы в ночи, переключаем на день, чтобы увидеть результат
+        if (document.body.getAttribute('data-theme') === 'dark') {
+            toggleTheme();
+        }
+        
+        if(window.Telegram && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.selectionChanged();
+        }
+    }
+
     function toggleTheme() {
         const body = document.body;
         const isDark = body.getAttribute('data-theme') === 'dark';
@@ -179,11 +245,9 @@
         
         body.setAttribute('data-theme', newTheme);
         
-        // Вибрация
         if(window.Telegram && Telegram.WebApp.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('medium');
             
-            // Меняем цвет шапки Telegram
             if (newTheme === 'light') {
                 Telegram.WebApp.setHeaderColor('#F2F2F7');
                 Telegram.WebApp.setBackgroundColor('#F2F2F7');
@@ -198,8 +262,8 @@
     if(window.Telegram) {
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
-        Telegram.WebApp.setHeaderColor('#0F0F11');
-        Telegram.WebApp.setBackgroundColor('#0F0F11');
+        Telegram.WebApp.setHeaderColor('#F2F2F7');
+        Telegram.WebApp.setBackgroundColor('#F2F2F7');
     }
 </script>
 
