@@ -62,6 +62,11 @@
             --icon-locked-color: #D4AF37;
             --icon-locked-opacity: 0.08;
             --selection-bg: rgba(212, 175, 55, 0.3);
+            
+            /* МЕДАЛИ */
+            --rank-1: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
+            --rank-2: linear-gradient(135deg, #E0E0E0 0%, #BDBDBD 100%);
+            --rank-3: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
         }
 
         /* LIGHT THEME */
@@ -250,7 +255,7 @@
         .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.35; max-width: 95%; text-transform: uppercase; letter-spacing: 0.5px; }
         .card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; font-weight: 500; }
         .card-watermark {
-            position: absolute; right: 8px; bottom: 8px; width: 55px; height: 55px;
+            position: absolute; right: -5px; bottom: -5px; width: 60px; height: 60px;
             color: var(--icon-color); opacity: var(--icon-opacity); z-index: 1; pointer-events: none;
         }
         .card.locked { background: var(--card-locked-bg); border-color: transparent; box-shadow: none; cursor: default; }
@@ -265,29 +270,25 @@
         .dev-credits { text-align: center; font-family: var(--font-display); font-size: 10px; font-weight: 500; color: var(--text-secondary); opacity: 0.4; letter-spacing: 0.5px; margin-top: 10px; margin-bottom: 20px; text-transform: uppercase; }
 
         /* --- СТИЛИ ДЛЯ БРИГАДИРОВ (НОВОЕ) --- */
-        .segmented-control {
-            display: flex;
-            background: rgba(118, 118, 128, 0.24);
-            padding: 2px;
-            border-radius: 9px;
-            margin: 0 16px 16px;
-        }
-        .segment-btn {
-            flex: 1; padding: 8px; border-radius: 7px; border: none; background: none;
-            color: var(--text-secondary); font-family: var(--font-display); font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s ease;
-        }
-        .segment-btn.active {
-            background: var(--card-bg); color: var(--text-primary);
-            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-        }
-        [data-theme="light"] .segment-btn.active { background: #fff; }
-
         .brig-list { padding: 0 16px 100px; display: flex; flex-direction: column; gap: 10px; }
         .brig-card {
             background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+            position: relative; overflow: hidden;
         }
+        
+        /* МЕСТА (1, 2, 3) */
+        .rank-num {
+            font-family: var(--font-display); font-weight: 800; font-size: 16px; 
+            width: 24px; text-align: center; color: var(--text-secondary); opacity: 0.5;
+        }
+        .brig-card.rank-1 { border: 1px solid rgba(255, 215, 0, 0.4); background: rgba(255, 215, 0, 0.05); }
+        .brig-card.rank-1 .rank-num { color: #FFD700; opacity: 1; font-size: 20px; }
+        .brig-card.rank-2 { border: 1px solid rgba(192, 192, 192, 0.3); }
+        .brig-card.rank-2 .rank-num { color: #C0C0C0; opacity: 1; font-size: 18px; }
+        .brig-card.rank-3 { border: 1px solid rgba(205, 127, 50, 0.3); }
+        .brig-card.rank-3 .rank-num { color: #CD7F32; opacity: 1; font-size: 18px; }
+
         .brig-avatar {
             width: 48px; height: 48px; border-radius: 50%;
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
@@ -332,7 +333,7 @@
             background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); margin-top: 10px;
         }
 
-        /* --- ОБЩИЕ СТИЛИ (Аккордеон, Алерты и т.д.) --- */
+        /* --- ОБЩИЕ СТИЛИ --- */
         .page-intro { padding: 0 16px 20px; } 
         .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
         .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
@@ -480,20 +481,20 @@
                 </div>
             </div>
 
-            <!-- ОБНОВЛЕННАЯ КНОПКА БРИГАДИРОВ -->
+            <!-- ОБНОВЛЕННАЯ КНОПКА БРИГАДИРОВ (ЖИРНЫЙ ШРИФТ + НОВАЯ ИКОНКА) -->
             <div class="card" onclick="openPage('page-brigadiers')">
                 <div class="card-content">
-                    <!-- Шрифт тоньше (font-weight: 500) -->
-                    <div class="card-title" style="font-weight: 500;">Бригадиры и<br>Кастинг-директора</div>
+                    <div class="card-title">Бригадиры и<br>Кастинг-директора</div>
                     <div class="card-desc">Единая база</div>
                 </div>
                 <div class="card-watermark">
-                    <!-- Иконка Рация (Walkie Talkie) -->
+                    <!-- Новая строгая рация -->
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2.2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2.6h6z"/>
-                        <path d="M6 4.8h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/>
-                        <circle cx="12" cy="14" r="3"/>
-                        <line x1="12" y1="9" x2="12" y2="9.01"/>
+                        <rect x="7" y="4" width="10" height="16" rx="2" />
+                        <line x1="12" y1="2" x2="12" y2="4" />
+                        <line x1="12" y1="15" x2="12" y2="15.01" stroke-width="2"/>
+                        <line x1="9" y1="8" x2="15" y2="8" />
+                        <line x1="9" y1="11" x2="15" y2="11" />
                     </svg>
                 </div>
             </div>
@@ -715,13 +716,13 @@
         <h1 class="page-large-title">База специалистов</h1>
         
         <div class="menu-grid">
-            <!-- КНОПКА 1: ТОП РЕЙТИНГ -->
+            <!-- КНОПКА 1: ТОП РЕЙТИНГ (ПОПРАВЛЕНА ВЕРСТКА) -->
             <div class="card" onclick="openPage('page-brigadiers-rating')">
                 <div class="card-content">
                     <div class="card-title">Топ рейтинг<br>бригадиров</div>
                     <div class="card-desc">Отзывы и статистика</div>
                 </div>
-                <div class="card-watermark">
+                <div class="card-watermark" style="right: -5px; bottom: -5px; width: 60px; height: 60px;">
                     <!-- Иконка Звезда -->
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -729,13 +730,13 @@
                 </div>
             </div>
 
-            <!-- КНОПКА 2: ПРОВЕРЕННЫЕ (БЕЗОПАСНОСТЬ) -->
+            <!-- КНОПКА 2: ПРОВЕРЕННЫЕ (ПОПРАВЛЕНА ВЕРСТКА) -->
             <div class="card" onclick="openPage('page-brigadiers-check')">
                 <div class="card-content">
                     <div class="card-title">Проверенные<br>бригадиры</div>
                     <div class="card-desc">Проверка на безопасность</div>
                 </div>
-                <div class="card-watermark">
+                <div class="card-watermark" style="right: -5px; bottom: -5px; width: 60px; height: 60px;">
                     <!-- Иконка Щит с галочкой -->
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -746,7 +747,7 @@
         </div>
     </div>
 
-    <!-- СТРАНИЦА: ТОП РЕЙТИНГ (СТАРЫЙ ФУНКЦИОНАЛ) -->
+    <!-- СТРАНИЦА: ТОП РЕЙТИНГ (БЕЗ ТАБОВ, С МЕСТАМИ) -->
     <div id="page-brigadiers-rating" class="page sub-page">
         <h1 class="page-large-title">Рейтинг</h1>
         
@@ -755,22 +756,19 @@
             <input type="text" id="brigSearch" class="comment-area" style="margin:0; padding: 10px 14px;" placeholder="🔍 Поиск по имени или нику..." oninput="renderBrigadiers()">
         </div>
 
-        <!-- Табы -->
-        <div class="segmented-control">
-            <button class="segment-btn active" id="tab-dir" onclick="switchBrigTab('dir')">Справочник (А-Я)</button>
-            <button class="segment-btn" id="tab-rate" onclick="switchBrigTab('rate')">Рейтинг (Топ)</button>
-        </div>
-
         <!-- Список (генерируется JS) -->
         <div id="brigadiers-container" class="brig-list"></div>
     </div>
 
-    <!-- СТРАНИЦА: ПРОВЕРКА (МУЛЯЖ) -->
+    <!-- СТРАНИЦА: ПРОВЕРКА (МЕЛКИЙ ТЕКСТ) -->
     <div id="page-brigadiers-check" class="page sub-page">
         <h1 class="page-large-title">Проверка</h1>
         
         <div class="content-inner">
-            <p class="ad-intro">Введите никнейм или имя бригадира, чтобы проверить, прошел ли он верификацию администрацией.</p>
+            <!-- Мелкий текст -->
+            <p class="ad-intro" style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">
+                Введите никнейм или имя бригадира, чтобы проверить, прошел ли он верификацию администрацией.
+            </p>
             
             <input type="text" class="comment-area" style="margin:0; padding: 14px; margin-bottom: 12px;" placeholder="@username или Имя">
             
@@ -877,10 +875,7 @@
         
         if (page) {
             page.classList.remove('active');
-            // Если закрываем вложенную страницу, проверяем, не нужно ли оставить home behind
-            // В простой реализации просто убираем behind
             home.classList.remove('behind');
-            
             tg.BackButton.hide();
             activePageId = null;
             setTimeout(() => { page.scrollTop = 0; }, 400);
@@ -911,26 +906,17 @@
         { id: 1, name: "Анна Смирнова", username: "@anna_cast", role: "Кастинг-директор", rating: 5.0, votes: 12, verified: true },
         { id: 2, name: "Иван Петров", username: "@ivan_brigadir", role: "Бригадир АМС", rating: 4.8, votes: 8, verified: true },
         { id: 3, name: "Сергей Сидоров", username: "@serg_kino", role: "Ассистент", rating: 4.2, votes: 5, verified: true },
-        { id: 4, name: "Елена Волкова", username: "@elena_v", role: "Бригадир", rating: 0, votes: 0, verified: true }
+        { id: 4, name: "Елена Волкова", username: "@elena_v", role: "Бригадир", rating: 0, votes: 0, verified: true },
+        { id: 5, name: "Дмитрий К.", username: "@dimakino", role: "Бригадир", rating: 3.9, votes: 2, verified: false }
     ];
 
-    let currentTab = 'dir'; 
     let currentRating = 0;
     let currentTargetId = null;
 
-    // --- ЛОГИКА БРИГАДИРОВ ---
-    function switchBrigTab(tab) {
-        currentTab = tab;
-        document.getElementById('tab-dir').classList.toggle('active', tab === 'dir');
-        document.getElementById('tab-rate').classList.toggle('active', tab === 'rate');
-        renderBrigadiers();
-        if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-    }
-
+    // --- ЛОГИКА БРИГАДИРОВ (ОБНОВЛЕННАЯ) ---
     function renderBrigadiers() {
         const container = document.getElementById('brigadiers-container');
         const searchInput = document.getElementById('brigSearch');
-        // Проверка на существование элементов (так как они теперь на подстранице)
         if (!container || !searchInput) return;
 
         const search = searchInput.value.toLowerCase();
@@ -942,22 +928,28 @@
             list = list.filter(b => b.name.toLowerCase().includes(search) || b.username.toLowerCase().includes(search));
         }
 
-        if (currentTab === 'rate') {
-            list.sort((a, b) => b.rating - a.rating || b.votes - a.votes);
-        } else {
-            list.sort((a, b) => a.name.localeCompare(b.name));
-        }
+        // Всегда сортируем по рейтингу
+        list.sort((a, b) => b.rating - a.rating || b.votes - a.votes);
 
-        list.forEach(b => {
+        list.forEach((b, index) => {
             const initials = b.name.split(' ').map(n => n[0]).join('').substring(0,2);
             const ratingHtml = b.votes > 0 
                 ? `<div class="brig-rating-badge"><span class="rating-val">★ ${b.rating}</span><span class="rating-count">${b.votes} отзывов</span></div>`
                 : `<div class="brig-rating-badge" style="opacity:0.5"><span class="rating-val">★ -</span></div>`;
 
+            // Определение ранга (1, 2, 3 место)
+            let rankClass = '';
+            let rankNum = index + 1;
+            
+            if (index === 0) rankClass = 'rank-1';
+            else if (index === 1) rankClass = 'rank-2';
+            else if (index === 2) rankClass = 'rank-3';
+
             const card = document.createElement('div');
-            card.className = 'brig-card';
+            card.className = `brig-card ${rankClass}`;
             card.onclick = () => openRating(b);
             card.innerHTML = `
+                <div class="rank-num">${rankNum}</div>
                 <div class="brig-avatar">${initials}</div>
                 <div class="brig-info">
                     <div class="brig-name">${b.name} <svg class="verified-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
