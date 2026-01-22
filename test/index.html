@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Примерочная заголовков</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=block" rel="stylesheet">
+    <title>Лаборатория Дизайна КИНОЦЕХ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=block" rel="stylesheet">
     <style>
         :root {
+            /* БАЗОВЫЕ ЦВЕТА (ТЕМНАЯ) */
             --bg-color: #0F0F11;
-            --text-primary: #F2F2F2;
+            --card-bg: #1C1C1E;
+            --text-primary: #FFFFFF;
             --text-secondary: #9CA3AF;
-            --tg-header-bg: #1C1C1E; /* Цвет шапки Телеграм в темной теме */
+            --accent-color: #D4AF37; /* Золото */
+            --tg-header: #1C1C1E;
             --separator: rgba(255,255,255,0.1);
             
-            /* Градиенты */
-            --gold-gradient: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --blue-gradient: linear-gradient(to right, #003366, #4da6ff, #003366);
+            /* ПЕРЕМЕННЫЕ ДЛЯ РЕГУЛИРОВКИ (ИЗМЕНЯЮТСЯ JS) */
+            --title-size: 32px;
+            --title-pad-left: 16px;
+            --title-pad-top: 10px;
         }
 
         [data-theme="light"] {
+            /* БАЗОВЫЕ ЦВЕТА (СВЕТЛАЯ) */
             --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
             --text-primary: #000000;
             --text-secondary: #636366;
-            --tg-header-bg: #FFFFFF; /* Цвет шапки Телеграм в светлой теме */
+            --accent-color: #003366; /* Синий */
+            --tg-header: #FFFFFF;
             --separator: rgba(0,0,0,0.1);
         }
 
@@ -31,176 +38,240 @@
             background-color: var(--bg-color);
             color: var(--text-primary);
             font-family: 'Montserrat', sans-serif;
-            overflow-x: hidden;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow: hidden; /* Скролл внутри страниц */
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        /* --- ФЕЙКОВАЯ ШАПКА TELEGRAM --- */
+        /* --- ИМИТАЦИЯ TELEGRAM HEADER --- */
         .mock-tg-header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 48px;
-            background-color: var(--tg-header-bg);
+            position: fixed; top: 0; left: 0; width: 100%; height: 50px;
+            background-color: var(--tg-header);
             display: flex; align-items: center; padding: 0 16px;
             z-index: 100;
             border-bottom: 1px solid var(--separator);
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s;
         }
         .tg-back-btn {
-            display: flex; align-items: center; gap: 6px;
-            color: var(--text-primary);
+            display: flex; align-items: center; gap: 5px;
+            color: var(--text-primary); /* В реальном ТГ цвет зависит от темы, тут берем основной */
             font-size: 16px; font-weight: 500;
             opacity: 0; transform: translateX(-10px);
             transition: all 0.3s ease;
             cursor: pointer;
         }
         .tg-back-btn.visible { opacity: 1; transform: translateX(0); }
-        .tg-back-btn svg { width: 22px; height: 22px; }
+        
+        /* --- СТРУКТУРА СТРАНИЦ --- */
+        .app-container {
+            position: relative; width: 100vw; height: 100vh;
+        }
+        
+        .page {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding-top: 50px; /* Место под шапку */
+            padding-bottom: 220px; /* Место под панель управления */
+            overflow-y: auto;
+            background-color: var(--bg-color);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateX(100%); /* Скрыта справа */
+            z-index: 10;
+        }
+        
+        .page.active { transform: translateX(0); }
+        .page.home { transform: translateX(0); z-index: 5; }
+        .page.home.behind { transform: scale(0.95); opacity: 0.5; filter: blur(2px); }
+
+        /* --- ГЛАВНЫЙ ЗАГОЛОВОК (ТОТ САМЫЙ) --- */
+        .dynamic-title {
+            font-weight: 800;
+            line-height: 1.1;
+            margin: 0;
+            
+            /* ВОТ ЗДЕСЬ РАБОТАЕТ РЕГУЛЯТОР */
+            font-size: var(--title-size);
+            padding-left: var(--title-pad-left);
+            padding-top: var(--title-pad-top);
+            padding-bottom: 15px; /* Отступ до текста */
+            
+            color: var(--text-primary);
+            transition: all 0.1s linear; /* Быстрая реакция на ползунок */
+        }
 
         /* --- КОНТЕНТ --- */
-        .content-wrapper {
-            padding-top: 60px; /* Отступ под шапку */
-            padding-left: 20px; padding-right: 20px;
-            padding-bottom: 150px;
+        .content-block { padding: 0 16px; }
+        .text-muted { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin-bottom: 15px; }
+        
+        /* Меню на главной */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px 16px; }
+        .card {
+            background: var(--card-bg); padding: 15px; border-radius: 16px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            height: 100px; cursor: pointer; border: 1px solid var(--separator);
+        }
+        .card.large { grid-column: span 2; }
+        .card-title { font-weight: 700; font-size: 14px; text-transform: uppercase; }
+        .card-icon { align-self: flex-end; opacity: 0.3; width: 24px; height: 24px; }
+
+        /* --- ПАНЕЛЬ РЕГУЛЯТОРА (НИЗ) --- */
+        .regulator-panel {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 20px; padding-bottom: 30px;
+            z-index: 999;
+            color: #FFF;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+        }
+        .regulator-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .regulator-label { font-size: 12px; font-weight: 600; text-transform: uppercase; width: 100px; }
+        .regulator-val { font-size: 12px; width: 30px; text-align: right; color: #D4AF37; }
+        
+        input[type=range] {
+            flex: 1; margin: 0 10px; -webkit-appearance: none; height: 4px; background: #444; border-radius: 2px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px; background: #D4AF37; border-radius: 50%; cursor: pointer;
         }
 
-        /* --- СТИЛИ ЗАГОЛОВКОВ --- */
-        .large-title {
-            font-size: 34px;
-            font-weight: 800;
-            margin: 10px 0 20px 0;
-            line-height: 1.1;
-            letter-spacing: -0.5px;
-            transition: all 0.3s ease;
+        .theme-btn {
+            width: 100%; padding: 12px; background: #333; border: none; border-radius: 10px;
+            color: #FFF; font-weight: 700; text-transform: uppercase; margin-top: 5px;
         }
-
-        /* STYLE 1: iOS Native */
-        .style-ios .large-title {
-            color: var(--text-primary);
-            /* Просто чистый текст */
-        }
-
-        /* STYLE 2: Brand Gradient */
-        .style-brand .large-title {
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: shine 5s linear infinite;
-        }
-        [data-theme="light"] .style-brand .large-title {
-            background: var(--blue-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-        }
-        @keyframes shine { to { background-position: 200% center; } }
-
-        /* STYLE 3: Glass Header */
-        /* В этом стиле заголовок прилипает или имеет подложку */
-        .style-glass .large-title {
-            position: sticky; top: 48px; /* Сразу под шапкой ТГ */
-            z-index: 90;
-            padding: 10px 0 15px 0;
-            margin: 0;
-            background: rgba(15, 15, 17, 0.85); /* Полупрозрачный фон */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--separator);
-            width: 100vw; margin-left: -20px; padding-left: 20px; /* Растянуть на всю ширину */
-        }
-        [data-theme="light"] .style-glass .large-title {
-            background: rgba(242, 242, 247, 0.85);
-        }
-
-        /* ТЕКСТ РЫБА */
-        .dummy-text p {
-            line-height: 1.6; color: var(--text-secondary); margin-bottom: 15px;
-        }
-
-        /* --- ПАНЕЛЬ УПРАВЛЕНИЯ (ПРИМЕРОЧНАЯ) --- */
-        .control-panel {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(30,30,30,0.9);
-            backdrop-filter: blur(10px);
-            padding: 15px; border-radius: 20px;
-            display: flex; flex-direction: column; gap: 10px;
-            width: 90%; max-width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 999; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .cp-row { display: flex; justify-content: space-between; gap: 10px; }
-        .cp-btn {
-            flex: 1; padding: 10px; border: none; border-radius: 10px;
-            background: #333; color: #fff; font-size: 12px; font-weight: 600;
-            cursor: pointer; transition: 0.2s;
-        }
-        .cp-btn.active { background: #D4AF37; color: #000; }
-        .cp-label { font-size: 10px; color: #aaa; text-transform: uppercase; text-align: center; margin-bottom: 5px; }
-
     </style>
 </head>
-<body class="style-ios"> <!-- По умолчанию стиль 1 -->
+<body>
 
-    <!-- 1. ИМИТАЦИЯ ШАПКИ TELEGRAM -->
+    <!-- 1. ИМИТАЦИЯ ШАПКИ -->
     <div class="mock-tg-header">
-        <div class="tg-back-btn" id="backBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <div class="tg-back-btn" id="backBtn" onclick="goHome()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             Назад
         </div>
+        <!-- В центре пусто, как в нативе, или название бота -->
     </div>
 
-    <!-- 2. КОНТЕНТ СТРАНИЦЫ -->
-    <div class="content-wrapper">
-        <!-- ЗАГОЛОВОК, КОТОРЫЙ МЫ МЕНЯЕМ -->
-        <h1 class="large-title">Правила группы</h1>
-
-        <div class="dummy-text">
-            <p>Это пример контента страницы. Прокрутите вниз, чтобы увидеть, как ведет себя заголовок в разных режимах.</p>
-            <p>В режиме <strong>Style 3 (Glass)</strong> заголовок "прилипнет" к верху при прокрутке и размоет текст под собой.</p>
-            <p>В режиме <strong>Style 2 (Brand)</strong> используется твой фирменный градиент (Золото для темной, Синий для светлой).</p>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-        </div>
-    </div>
-
-    <!-- 3. ПАНЕЛЬ УПРАВЛЕНИЯ -->
-    <div class="control-panel">
-        <div class="cp-label">Стиль заголовка</div>
-        <div class="cp-row">
-            <button class="cp-btn active" onclick="setStyle('style-ios', this)">1. Native</button>
-            <button class="cp-btn" onclick="setStyle('style-brand', this)">2. Brand</button>
-            <button class="cp-btn" onclick="setStyle('style-glass', this)">3. Glass</button>
-        </div>
+    <div class="app-container">
         
-        <div class="cp-label" style="margin-top:10px;">Настройки окружения</div>
-        <div class="cp-row">
-            <button class="cp-btn" onclick="toggleTheme()">🌗 Тема</button>
-            <button class="cp-btn" onclick="toggleBackBtn()">⬅ Кнопка Назад</button>
+        <!-- ГЛАВНАЯ -->
+        <div id="home" class="page home">
+            <h1 class="dynamic-title">Меню</h1>
+            <div class="menu-grid">
+                <div class="card large" onclick="openPage('rules')">
+                    <div class="card-title">Правила группы</div>
+                    <div class="card-icon">📜</div>
+                </div>
+                <div class="card" onclick="openPage('post-ad')">
+                    <div class="card-title">Разместить объявление</div>
+                    <div class="card-icon">📢</div>
+                </div>
+                <div class="card" onclick="openPage('place-ad')">
+                    <div class="card-title">Разместить рекламу</div>
+                    <div class="card-icon">💎</div>
+                </div>
+                <div class="card" style="opacity:0.5">
+                    <div class="card-title">Бригадиры (Скоро)</div>
+                    <div class="card-icon">🔒</div>
+                </div>
+            </div>
+            <div class="content-block">
+                <p class="text-muted">Нажми на любой пункт, чтобы перейти внутрь и настроить заголовок.</p>
+            </div>
         </div>
+
+        <!-- СТРАНИЦА: ПРАВИЛА -->
+        <div id="rules" class="page">
+            <!-- ВОТ ОН, ЗАГОЛОВОК, КОТОРЫЙ МЫ НАСТРАИВАЕМ -->
+            <h1 class="dynamic-title">Правила группы</h1>
+            
+            <div class="content-block">
+                <p class="text-muted"><strong>Премиум-платформа для индустрии.</strong><br>Заказчики находят исполнителей, Актеры и АМС — проекты. Чтобы всем было комфортно, за порядком следит Модератор.</p>
+                <div style="background:var(--card-bg); padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid var(--separator);">
+                    <strong>1. Модерация и Доступ</strong>
+                    <p class="text-muted" style="margin-bottom:0; font-size:13px;">Группа работает в закрытом режиме. Заявки рассматриваются вручную.</p>
+                </div>
+                <div style="background:var(--card-bg); padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid var(--separator);">
+                    <strong>2. Для Бригадиров</strong>
+                    <p class="text-muted" style="margin-bottom:0; font-size:13px;">Указывайте сразу: Город, Дату, Проект, Типаж.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ -->
+        <div id="post-ad" class="page">
+            <h1 class="dynamic-title">Разместить объявление</h1>
+            
+            <div class="content-block">
+                <p class="text-muted">Наша площадка работает в правовом поле и зарегистрирована в РКН. Мы проводим проверку всех постов.</p>
+                <h3 style="margin:20px 0 10px; font-size:16px;">🔍 ПРОЦЕДУРА ВЕРИФИКАЦИИ</h3>
+                <div style="background:var(--card-bg); padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid var(--separator);">
+                    <strong>1. Напишите Админу</strong>
+                    <p class="text-muted" style="margin-bottom:0; font-size:13px;">Свяжитесь с модератором для начала проверки.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ -->
+        <div id="place-ad" class="page">
+            <h1 class="dynamic-title">Реклама и Сотрудничество</h1>
+            
+            <div class="content-block">
+                <p class="text-muted">Условия размещения коммерческих постов.</p>
+                <p class="text-muted">Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения.</p>
+                <div style="background:rgba(220, 38, 38, 0.1); padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid rgba(220, 38, 38, 0.3);">
+                    <strong style="color:#EF4444">ВАЖНО:</strong>
+                    <p class="text-muted" style="margin-bottom:0; font-size:13px; color:#EF4444">Размещение рекламы без согласования запрещено.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ПАНЕЛЬ РЕГУЛЯТОРА -->
+    <div class="regulator-panel">
+        <div class="regulator-row">
+            <span class="regulator-label">Размер (px)</span>
+            <input type="range" min="20" max="48" value="32" oninput="updateVar('--title-size', this.value + 'px', 'val-size')">
+            <span id="val-size" class="regulator-val">32</span>
+        </div>
+        <div class="regulator-row">
+            <span class="regulator-label">Отступ Слева</span>
+            <input type="range" min="0" max="50" value="16" oninput="updateVar('--title-pad-left', this.value + 'px', 'val-left')">
+            <span id="val-left" class="regulator-val">16</span>
+        </div>
+        <div class="regulator-row">
+            <span class="regulator-label">Отступ Сверху</span>
+            <input type="range" min="0" max="60" value="10" oninput="updateVar('--title-pad-top', this.value + 'px', 'val-top')">
+            <span id="val-top" class="regulator-val">10</span>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()">Сменить тему (День/Ночь)</button>
     </div>
 
     <script>
-        function setStyle(styleName, btn) {
-            // Смена класса body
-            document.body.className = styleName;
-            
-            // Обновление кнопок
-            document.querySelectorAll('.cp-row:first-of-type .cp-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        // --- ЛОГИКА РЕГУЛЯТОРА ---
+        function updateVar(variable, value, displayId) {
+            document.documentElement.style.setProperty(variable, value);
+            document.getElementById(displayId).innerText = parseInt(value);
         }
 
+        // --- ЛОГИКА НАВИГАЦИИ ---
+        function openPage(id) {
+            document.getElementById(id).classList.add('active');
+            document.getElementById('home').classList.add('behind');
+            document.getElementById('backBtn').classList.add('visible');
+        }
+
+        function goHome() {
+            document.querySelectorAll('.page:not(.home)').forEach(p => p.classList.remove('active'));
+            document.getElementById('home').classList.remove('behind');
+            document.getElementById('backBtn').classList.remove('visible');
+        }
+
+        // --- ЛОГИКА ТЕМЫ ---
         function toggleTheme() {
             const body = document.body;
             const current = body.getAttribute('data-theme');
             body.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
-        }
-
-        function toggleBackBtn() {
-            const btn = document.getElementById('backBtn');
-            btn.classList.toggle('visible');
         }
     </script>
 </body>
