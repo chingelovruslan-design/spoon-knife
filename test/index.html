@@ -305,7 +305,7 @@
         .rating-val { color: #ffcc00; font-weight: 700; font-size: 14px; }
         .rating-count { color: var(--text-secondary); font-size: 9px; }
 
-        /* МОДАЛКА РЕЙТИНГА */
+        /* --- МОДАЛКА РЕЙТИНГА --- */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -332,7 +332,7 @@
             background: var(--danger-bg); color: var(--danger-text); border: 1px solid var(--danger-border); margin-top: 10px;
         }
 
-        /* --- ОБЩИЕ СТИЛИ --- */
+        /* --- ОБЩИЕ СТИЛИ (Аккордеон, Алерты и т.д.) --- */
         .page-intro { padding: 0 16px 20px; } 
         .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
         .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
@@ -480,22 +480,20 @@
                 </div>
             </div>
 
-            <!-- НОВАЯ КНОПКА: БРИГАДИРЫ -->
+            <!-- ОБНОВЛЕННАЯ КНОПКА БРИГАДИРОВ -->
             <div class="card" onclick="openPage('page-brigadiers')">
                 <div class="card-content">
-                    <div class="card-title">Бригадиры и<br>Кастинг-директора</div>
-                    <div class="card-desc">Единая база и Рейтинг</div>
+                    <!-- Шрифт тоньше (font-weight: 500) -->
+                    <div class="card-title" style="font-weight: 500;">Бригадиры и<br>Кастинг-директора</div>
+                    <div class="card-desc">Единая база</div>
                 </div>
                 <div class="card-watermark">
-                    <!-- Иконка Рации -->
+                    <!-- Иконка Рация (Walkie Talkie) -->
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="6" y="4" width="12" height="14" rx="2" ry="2"></rect>
-                        <line x1="10" y1="2" x2="10" y2="4"></line>
-                        <line x1="14" y1="2" x2="14" y2="4"></line>
-                        <line x1="12" y1="1" x2="12" y2="2"></line>
-                        <line x1="9" y1="12" x2="15" y2="12" opacity="0.5"></line>
-                        <line x1="9" y1="15" x2="15" y2="15" opacity="0.5"></line>
-                        <line x1="9" y1="9" x2="15" y2="9" opacity="0.5"></line>
+                        <path d="M14 2.2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v2.6h6z"/>
+                        <path d="M6 4.8h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2z"/>
+                        <circle cx="12" cy="14" r="3"/>
+                        <line x1="12" y1="9" x2="12" y2="9.01"/>
                     </svg>
                 </div>
             </div>
@@ -519,10 +517,12 @@
     <!-- СТРАНИЦА: ПРАВИЛА -->
     <div id="page-rules" class="page sub-page">
         <h1 class="page-large-title">Правила группы</h1>
+
         <div class="page-intro">
             <p><strong>Премиум-платформа для индустрии.</strong></p>
             <p>Заказчики находят исполнителей, Актеры и АМС — проекты. Чтобы всем было комфортно, за порядком следит Модератор и автоматическая система.</p>
         </div>
+
         <div class="accordion">
             <div class="accordion-item">
                 <button class="accordion-header" onclick="toggleAccordion(this)">
@@ -534,23 +534,138 @@
                 </button>
                 <div class="accordion-content">
                     <div class="content-inner">
-                        <p><strong>1.1. Регламент вступления</strong><br>Заявки рассматриваются вручную (до 24 часов).</p>
-                        <p><strong>1.5. «Анти-Бегунок»</strong><br>Частый выход и вход (более 4-х раз) — автоматический бан.</p>
+                        <p><strong>1.1. Регламент вступления</strong><br>
+                        Группа работает в закрытом режиме. Заявки рассматриваются вручную (до 24 часов). Пустые аккаунты отклоняются.</p>
+                        <p><strong>1.2. Техническая защита</strong><br>
+                        При вступлении возможность писать временно отключена (фильтр от спамеров).</p>
+                        <p><strong>1.4. Ссылки и Безопасность</strong><br>
+                        Подозрительные ссылки блокируются ботом.</p>
+                        <p><strong>1.5. «Анти-Бегунок»</strong><br>
+                        Частый выход и вход (более 4-х раз) — автоматический бан.</p>
                     </div>
                 </div>
             </div>
-            <!-- Остальные пункты правил (сократил для компактности, они у тебя есть) -->
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="acc-title-group">
+                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="10" cy="7" r="4"></circle>
+                            <path d="M10.3 15H7a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="17" cy="17" r="3"></circle>
+                            <line x1="21" y1="21" x2="19" y2="19"></line>
+                        </svg>
+                        <span class="acc-title">2. Для Бригадиров</span>
+                    </div>
+                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-inner">
+                        <p><strong>2.1. Оформление объявления</strong><br>
+                        Указывайте сразу: Город, Дату, Проект, Типаж, Занятость, Гонорар. Если позиция закрыта — удалите пост.</p>
+                        <p><strong>2.2. Гонорары (Москва)</strong><br>
+                        Минимум: от 2500₽ / смена.</p>
+                        <div class="custom-alert alert-warning">
+                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                            <div class="alert-body">
+                                <span class="alert-title">Исключение (Москва):</span>
+                                <span class="alert-text">2000₽ допускается только за короткую смену (до 6 часов). Злоупотребление наказывается.</span>
+                            </div>
+                        </div>
+                        <p><strong>2.3. Неизвестный гонорар</strong><br>
+                        Пишите «По договоренности». Фразы без конкретики удаляются.</p>
+                        <p><strong>2.5. Запрет на перегон трафика</strong><br>
+                        Запрещено принуждать подписываться на каналы через автоответчик или ЛС.</p>
+                        <div class="custom-alert alert-danger">
+                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></div>
+                            <div class="alert-body">
+                                <span class="alert-title">Санкция:</span>
+                                <span class="alert-text">Полное закрытие доступа.</span>
+                            </div>
+                        </div>
+                        <p><strong>2.6. ЗАПРЕТЫ</strong><br>
+                        Эскорт, порнография, крипто-схемы.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="acc-title-group">
+                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10c0-4.4 3.6-8 8-8s8 3.6 8 8a8 8 0 0 1-8 8c-4.4 0-8-3.6-8-8z"></path><path d="M14 14a2 2 0 0 1 2 2"></path><path d="M10 14a2 2 0 0 0-2 2"></path><path d="M10 10h.01"></path><path d="M14 10h.01"></path><path d="M12 18a3 3 0 0 0 3-3"></path></svg>
+                        <span class="acc-title">3. Для Актеров и АМС</span>
+                    </div>
+                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-inner">
+                        <p><strong>3.1. Чистота чата</strong><br>
+                        Не пишите «Я отправил» в общий чат. Заявки — строго по контактам.</p>
+                        <p><strong>3.2. Черный список</strong><br>
+                        Невыход, пьянство, агрессия, шантаж — бан.</p>
+                        <p><strong>3.3. Конфликты</strong><br>
+                        Споры решаются в группе «Разбор полетов», а не в общем чате.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ -->
     <div id="page-post-ad" class="page sub-page">
         <h1 class="page-large-title">Разместить объявление</h1>
+        
         <div class="content-inner">
-            <p class="ad-intro">Наша площадка работает в правовом поле...</p>
+            <p class="ad-intro">
+                Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
+            </p>
+
+            <div class="ad-section-title">
+                🔍 Процедура верификации
+            </div>
+
             <div class="steps-wrapper">
-                <div class="step-card"><span class="step-card-title">1. Напишите Админу</span><div class="step-card-desc">Свяжитесь с модератором.</div></div>
-                <div class="step-card"><span class="step-card-title">2. Подготовьте материалы</span><div class="step-card-desc">Текст поста, подтверждение проекта.</div></div>
+                <div class="step-card">
+                    <span class="step-card-title">1. Напишите Админу</span>
+                    <div class="step-card-desc">Свяжитесь с модератором для начала проверки.</div>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-card-title">2. Подготовьте материалы</span>
+                    <div class="step-card-desc">
+                        Отправьте текст поста, который планируете опубликовать.
+                        <ul class="ad-sub-list">
+                            <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
+                            <li>Для кино/сериалов: вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
+                            <li>Для рекламы, рилсов, контента для соцсетей: ссылку на официальный канал заказчика, техническое задание, примеры ранее реализованных проектов.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-card-title">3. Проверка профиля</span>
+                    <div class="step-card-desc">
+                        Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
+                    </div>
+                </div>
+            </div>
+
+            <div class="important-block">
+                <strong>Важно:</strong>
+                Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.<br>
+                Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.
+            </div>
+
+            <div class="custom-alert alert-danger">
+                <div class="alert-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <div class="alert-body">
+                    <span class="alert-title">Антифрод-правило</span>
+                    <span class="alert-text">
+                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -558,15 +673,82 @@
     <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ -->
     <div id="page-place-ads" class="page sub-page">
         <h1 class="page-large-title">Реклама и Сотрудничество</h1>
+        
         <div class="content-inner">
-            <p>Мы ценим интерес к нашему профессиональному сообществу...</p>
-            <div class="glass-alert"><span class="glass-alert-title">Важно:</span>Размещение без согласования запрещено.</div>
+            <p>Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения о размещении рекламы, соответствующей тематике группы.</p>
+            <p>Для согласования условий публикации, уточнения формата и сроков необходимо обратиться к администратору. Мы обеспечиваем цивилизованный подход к сотрудничеству и помогаем донести ваше предложение до целевой аудитории.</p>
+            
+            <div class="glass-alert">
+                <span class="glass-alert-title">Важно:</span>
+                <ul style="margin:0; padding-left:16px; font-size:13px; color:var(--text-secondary);">
+                    <li>Размещение рекламы без предварительного согласования запрещено и влечёт за собой бан.</li>
+                    <li>Решение о публикации принимается администрацией на основе соответствия правилам группы.</li>
+                </ul>
+            </div>
+
+            <div class="ad-section-title">Направления, которые мы не продвигаем:</div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">1. Нецелевая тематика</span>
+                <div class="glass-card-desc">Предложения, не связанные с кинопроизводством, кастингами, творческими или техническими услугами для киноиндустрии.</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">2. Личный пиар</span>
+                <div class="glass-card-desc">Публикации, направленные исключительно на самопрезентацию («ищу работу», «смотрите моё портфолио», «готов к проектам»).</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">3. Рисковые и финансовые услуги</span>
+                <div class="glass-card-desc">Реклама криптовалют, трейдинга, инвестиций, букмекерских контор, азартных игр, микрофинансовых организаций и схожих сервисов.</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">4. Сомнительные или нелегитимные проекты</span>
+                <div class="glass-card-desc">Любые предложения, нарушающие законодательство РФ или этические нормы сообщества.</div>
+            </div>
         </div>
     </div>
 
-    <!-- СТРАНИЦА: БРИГАДИРЫ (НОВАЯ) -->
+    <!-- СТРАНИЦА: БРИГАДИРЫ (МЕНЮ ВЫБОРА) -->
     <div id="page-brigadiers" class="page sub-page">
         <h1 class="page-large-title">База специалистов</h1>
+        
+        <div class="menu-grid">
+            <!-- КНОПКА 1: ТОП РЕЙТИНГ -->
+            <div class="card" onclick="openPage('page-brigadiers-rating')">
+                <div class="card-content">
+                    <div class="card-title">Топ рейтинг<br>бригадиров</div>
+                    <div class="card-desc">Отзывы и статистика</div>
+                </div>
+                <div class="card-watermark">
+                    <!-- Иконка Звезда -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- КНОПКА 2: ПРОВЕРЕННЫЕ (БЕЗОПАСНОСТЬ) -->
+            <div class="card" onclick="openPage('page-brigadiers-check')">
+                <div class="card-content">
+                    <div class="card-title">Проверенные<br>бригадиры</div>
+                    <div class="card-desc">Проверка на безопасность</div>
+                </div>
+                <div class="card-watermark">
+                    <!-- Иконка Щит с галочкой -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <polyline points="9 12 11 14 15 10"></polyline>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: ТОП РЕЙТИНГ (СТАРЫЙ ФУНКЦИОНАЛ) -->
+    <div id="page-brigadiers-rating" class="page sub-page">
+        <h1 class="page-large-title">Рейтинг</h1>
         
         <!-- Поиск -->
         <div style="padding: 0 16px 16px;">
@@ -580,8 +762,30 @@
         </div>
 
         <!-- Список (генерируется JS) -->
-        <div id="brigadiers-container" class="brig-list">
-            <!-- Сюда скрипт вставит карточки -->
+        <div id="brigadiers-container" class="brig-list"></div>
+    </div>
+
+    <!-- СТРАНИЦА: ПРОВЕРКА (МУЛЯЖ) -->
+    <div id="page-brigadiers-check" class="page sub-page">
+        <h1 class="page-large-title">Проверка</h1>
+        
+        <div class="content-inner">
+            <p class="ad-intro">Введите никнейм или имя бригадира, чтобы проверить, прошел ли он верификацию администрацией.</p>
+            
+            <input type="text" class="comment-area" style="margin:0; padding: 14px; margin-bottom: 12px;" placeholder="@username или Имя">
+            
+            <button class="btn btn-primary" onclick="showToast('Функция проверки в разработке')">
+                Проверить
+            </button>
+
+            <div class="glass-alert" style="margin-top: 30px;">
+                <span class="glass-alert-title">Что значит "Проверен"?</span>
+                <ul style="margin:0; padding-left:16px; font-size:13px; color:var(--text-secondary);">
+                    <li>Личность подтверждена паспортом.</li>
+                    <li>Нет жалоб на невыплаты.</li>
+                    <li>Аккаунт верифицирован администрацией.</li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -635,7 +839,74 @@
     tg.ready();
     tg.expand();
 
-    // --- ТЕСТОВЫЕ ДАННЫЕ (ПОКА НЕТ БЭКЕНДА) ---
+    // --- УМНАЯ АДАПТАЦИЯ ---
+    function initAdaptation() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
+        let isLite = false;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) isLite = true;
+        const iosMatch = ua.match(/OS (\d+)_/);
+        if (iosMatch && iosMatch.length > 1 && parseInt(iosMatch[1], 10) < 16) isLite = true;
+        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) isLite = true;
+        if (isLite) document.body.classList.add('lite-mode');
+    }
+
+    // --- НАВИГАЦИЯ ---
+    let activePageId = null;
+
+    function openPage(pageId) {
+        const page = document.getElementById(pageId);
+        const home = document.getElementById('page-home');
+        
+        if (page) {
+            page.classList.add('active');
+            home.classList.add('behind');
+            activePageId = pageId;
+            tg.BackButton.show();
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            
+            // Если открыли страницу рейтинга - рендерим список
+            if (pageId === 'page-brigadiers-rating') renderBrigadiers();
+        }
+    }
+
+    function closeActivePage() {
+        if (!activePageId) return;
+        
+        const page = document.getElementById(activePageId);
+        const home = document.getElementById('page-home');
+        
+        if (page) {
+            page.classList.remove('active');
+            // Если закрываем вложенную страницу, проверяем, не нужно ли оставить home behind
+            // В простой реализации просто убираем behind
+            home.classList.remove('behind');
+            
+            tg.BackButton.hide();
+            activePageId = null;
+            setTimeout(() => { page.scrollTop = 0; }, 400);
+        }
+    }
+
+    tg.BackButton.onClick(function() { closeActivePage(); });
+
+    // --- СВАЙПЫ ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+    document.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive: true});
+
+    document.addEventListener('touchend', e => {
+        if (!activePageId) return;
+        const touchEndX = e.changedTouches[0].screenX;
+        const touchEndY = e.changedTouches[0].screenY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = Math.abs(touchEndY - touchStartY);
+        if (diffX > 100 && diffY < 50 && touchStartX < 50) closeActivePage();
+    }, {passive: true});
+
+    // --- ТЕСТОВЫЕ ДАННЫЕ ---
     const mockBrigadiers = [
         { id: 1, name: "Анна Смирнова", username: "@anna_cast", role: "Кастинг-директор", rating: 5.0, votes: 12, verified: true },
         { id: 2, name: "Иван Петров", username: "@ivan_brigadir", role: "Бригадир АМС", rating: 4.8, votes: 8, verified: true },
@@ -643,7 +914,7 @@
         { id: 4, name: "Елена Волкова", username: "@elena_v", role: "Бригадир", rating: 0, votes: 0, verified: true }
     ];
 
-    let currentTab = 'dir'; // 'dir' or 'rate'
+    let currentTab = 'dir'; 
     let currentRating = 0;
     let currentTargetId = null;
 
@@ -658,17 +929,19 @@
 
     function renderBrigadiers() {
         const container = document.getElementById('brigadiers-container');
-        const search = document.getElementById('brigSearch').value.toLowerCase();
+        const searchInput = document.getElementById('brigSearch');
+        // Проверка на существование элементов (так как они теперь на подстранице)
+        if (!container || !searchInput) return;
+
+        const search = searchInput.value.toLowerCase();
         container.innerHTML = '';
 
         let list = [...mockBrigadiers];
 
-        // Фильтрация
         if (search) {
             list = list.filter(b => b.name.toLowerCase().includes(search) || b.username.toLowerCase().includes(search));
         }
 
-        // Сортировка
         if (currentTab === 'rate') {
             list.sort((a, b) => b.rating - a.rating || b.votes - a.votes);
         } else {
@@ -701,10 +974,8 @@
         currentTargetId = person.id;
         document.getElementById('rateTargetName').innerText = person.name;
         document.getElementById('ratingModal').classList.add('active');
-        
-        // Сброс (или загрузка существующего отзыва - пока сброс)
         resetStars();
-        document.getElementById('btnDeleteReview').style.display = 'none'; // Пока скрываем кнопку удаления
+        document.getElementById('btnDeleteReview').style.display = 'none';
     }
 
     function closeRating() {
@@ -731,10 +1002,8 @@
             tg.showAlert('Пожалуйста, поставьте оценку');
             return;
         }
-        // Имитация отправки
         tg.showAlert(`Спасибо! Вы поставили ${currentRating} звезд.`);
         closeRating();
-        // Тут потом будет запрос к боту
     }
 
     function deleteMyReview() {
@@ -744,64 +1013,7 @@
         }
     }
 
-    // --- СТАНДАРТНЫЕ ФУНКЦИИ (ИЗ ТВОЕГО КОДА) ---
-    function initAdaptation() {
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        let isLite = false;
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) isLite = true;
-        const iosMatch = ua.match(/OS (\d+)_/);
-        if (iosMatch && iosMatch.length > 1 && parseInt(iosMatch[1], 10) < 16) isLite = true;
-        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) isLite = true;
-        if (isLite) document.body.classList.add('lite-mode');
-    }
-
-    let activePageId = null;
-    function openPage(pageId) {
-        const page = document.getElementById(pageId);
-        const home = document.getElementById('page-home');
-        if (page) {
-            page.classList.add('active');
-            home.classList.add('behind');
-            activePageId = pageId;
-            tg.BackButton.show();
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            
-            // Если открыли бригадиров - рендерим список
-            if (pageId === 'page-brigadiers') renderBrigadiers();
-        }
-    }
-
-    function closeActivePage() {
-        if (!activePageId) return;
-        const page = document.getElementById(activePageId);
-        const home = document.getElementById('page-home');
-        if (page) {
-            page.classList.remove('active');
-            home.classList.remove('behind');
-            tg.BackButton.hide();
-            activePageId = null;
-            setTimeout(() => { page.scrollTop = 0; }, 400);
-        }
-    }
-
-    tg.BackButton.onClick(function() { closeActivePage(); });
-
-    // Свайпы
-    let touchStartX = 0;
-    let touchStartY = 0;
-    document.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-    }, {passive: true});
-    document.addEventListener('touchend', e => {
-        if (!activePageId) return;
-        const touchEndX = e.changedTouches[0].screenX;
-        const touchEndY = e.changedTouches[0].screenY;
-        const diffX = touchEndX - touchStartX;
-        const diffY = Math.abs(touchEndY - touchStartY);
-        if (diffX > 100 && diffY < 50 && touchStartX < 50) closeActivePage();
-    }, {passive: true});
-
+    // --- ОБЩИЕ ФУНКЦИИ ---
     function toggleAccordion(header) {
         const item = header.parentElement;
         const content = item.querySelector('.accordion-content');
@@ -858,6 +1070,7 @@
     }
 
     window.onload = function() { initAdaptation(); };
+
 </script>
 </body>
 </html>
