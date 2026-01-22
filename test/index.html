@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | App</title>
+    <title>КИНОЦЕХ | Примерочная</title>
     
     <!-- TELEGRAM API -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -31,6 +31,7 @@
             --z-page: 30;
             --z-footer: 50;
             --z-toast: 100;
+            --z-calibrator: 9999; /* Поверх всего */
 
             /* DARK THEME (DEFAULT) */
             --bg-color: #0F0F11;
@@ -61,8 +62,6 @@
             --icon-locked-color: #D4AF37;
             --icon-locked-opacity: 0.08;
             --selection-bg: rgba(212, 175, 55, 0.3);
-            
-            --skeleton-base: #1c1c1e;
         }
 
         /* LIGHT THEME */
@@ -95,8 +94,6 @@
             --icon-locked-color: #003366;
             --icon-locked-opacity: 0.08;
             --selection-bg: rgba(0, 51, 102, 0.2);
-            
-            --skeleton-base: #e5e5ea;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -165,19 +162,23 @@
         .sub-page.active { transform: translateX(0); }
 
         /* --- НОВЫЙ ЗАГОЛОВОК (LARGE TITLE) --- */
-        /* Настроен по твоему скрину из примерочной */
+        /* ПРАВКА: Добавлена линия и отступы */
         .page-large-title {
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 30px; /* Оптимально под скрин */
+            font-size: 30px; /* БУДЕТ МЕНЯТЬСЯ ЧЕРЕЗ JS */
             line-height: 1.1;
             color: var(--text-primary);
             margin: 0;
-            padding-left: 16px; /* Отступ слева как у Яндекса */
+            padding-left: 16px; 
             padding-right: 16px;
-            padding-top: max(12px, env(safe-area-inset-top)); /* Отступ сверху */
-            padding-bottom: 20px;
-            /* Анимация появления */
+            padding-top: max(12px, env(safe-area-inset-top)); 
+            padding-bottom: 16px; /* Отступ до линии */
+            
+            /* ЛИНИЯ-РАЗДЕЛИТЕЛЬ */
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px; /* Отступ от линии до контента */
+
             opacity: 0; transform: translateY(10px);
             animation: fadeTitle 0.4s ease forwards 0.2s;
         }
@@ -254,7 +255,7 @@
         .dev-credits { text-align: center; font-family: var(--font-display); font-size: 10px; font-weight: 500; color: var(--text-secondary); opacity: 0.4; letter-spacing: 0.5px; margin-top: 10px; margin-bottom: 20px; text-transform: uppercase; }
 
         /* --- АККОРДЕОН --- */
-        .page-intro { padding: 0 16px 20px; border-bottom: 1px solid var(--border-color); }
+        .page-intro { padding: 0 16px 20px; } /* Убрал border-bottom, так как теперь линия в заголовке */
         .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
         .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
 
@@ -277,7 +278,7 @@
         .accordion-item.active .acc-title { color: var(--accent-color); }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s var(--ease-smooth); background: rgba(0,0,0,0.015); }
         
-        .content-inner { padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+        .content-inner { padding: 0 20px 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
         .content-inner strong { color: var(--text-primary); }
         .content-inner ul { padding-left: 20px; margin-bottom: 16px; list-style: none; }
         .content-inner li { margin-bottom: 8px; position: relative; }
@@ -360,6 +361,43 @@
         [data-theme="light"] .toast { background: rgba(0,0,0,0.8); }
         .toast.show { opacity: 1; transform: translateY(0) scale(1); }
 
+        /* --- CALIBRATOR PANEL (ПРИМЕРОЧНАЯ) --- */
+        .calibrator-panel {
+            position: fixed; bottom: 100px; right: 16px; left: 16px;
+            background: rgba(15, 15, 17, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--accent-color);
+            border-radius: 16px;
+            padding: 16px;
+            z-index: var(--z-calibrator);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 12px;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .calib-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .calib-title { font-size: 12px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; letter-spacing: 1px; }
+        .calib-value { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--accent-color); }
+        
+        .calib-slider {
+            -webkit-appearance: none; width: 100%; height: 6px; background: var(--card-active-bg);
+            border-radius: 3px; outline: none;
+        }
+        .calib-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 24px; height: 24px;
+            border-radius: 50%; background: var(--accent-color); cursor: pointer;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .calib-buttons { display: flex; gap: 8px; }
+        .calib-btn {
+            flex: 1; padding: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase;
+            background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-secondary);
+            border-radius: 8px; cursor: pointer;
+        }
+        .calib-btn.active { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
+
     </style>
 </head>
 <body ontouchstart="">
@@ -440,7 +478,6 @@
 
     <!-- СТРАНИЦА: ПРАВИЛА -->
     <div id="page-rules" class="page sub-page">
-        <!-- НОВЫЙ ЗАГОЛОВОК ВМЕСТО КНОПКИ НАЗАД -->
         <h1 class="page-large-title">Правила группы</h1>
 
         <div class="page-intro">
@@ -541,6 +578,7 @@
         <h1 class="page-large-title">Разместить объявление</h1>
         
         <div class="content-inner">
+            <!-- ПРАВКА: Убрана дыра, теперь отступ регулируется классом content-inner и заголовком -->
             <p class="ad-intro">
                 Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
             </p>
@@ -599,10 +637,8 @@
     <div id="page-place-ads" class="page sub-page">
         <h1 class="page-large-title">Реклама и Сотрудничество</h1>
 
-        <div class="page-intro">
-            <p><strong>Реклама и Сотрудничество</strong></p>
-            <p>Условия размещения коммерческих постов.</p>
-        </div>
+        <!-- ПРАВКА: Убраны дубли заголовков (page-intro удален) -->
+        
         <div class="content-inner">
             <p>Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения о размещении рекламы, соответствующей тематике группы.</p>
             <p>Для согласования условий публикации, уточнения формата и сроков необходимо обратиться к администратору. Мы обеспечиваем цивилизованный подход к сотрудничеству и помогаем донести ваше предложение до целевой аудитории.</p>
@@ -653,6 +689,22 @@
 
     <!-- КОНТЕЙНЕР ДЛЯ УВЕДОМЛЕНИЙ -->
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- ПАНЕЛЬ КАЛИБРОВКИ (ПРИМЕРОЧНАЯ) -->
+    <div class="calibrator-panel">
+        <div class="calib-header">
+            <span class="calib-title">Размер шрифта</span>
+            <span id="calib-value" class="calib-value">30px</span>
+        </div>
+        <input type="range" min="20" max="50" value="30" class="calib-slider" id="font-slider">
+        
+        <div style="margin-top:8px; margin-bottom:4px; font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Проверка на страницах:</div>
+        <div class="calib-buttons">
+            <button class="calib-btn" onclick="testPage('page-rules', this)">Правила</button>
+            <button class="calib-btn" onclick="testPage('page-post-ad', this)">Объявл.</button>
+            <button class="calib-btn" onclick="testPage('page-place-ads', this)">Реклама</button>
+        </div>
+    </div>
 
 </div>
 
@@ -806,9 +858,39 @@
         }, 2500);
     }
 
+    // --- ЛОГИКА ПРИМЕРОЧНОЙ (CALIBRATOR) ---
+    const slider = document.getElementById('font-slider');
+    const display = document.getElementById('calib-value');
+    const titles = document.querySelectorAll('.page-large-title');
+
+    slider.addEventListener('input', (e) => {
+        const val = e.target.value;
+        display.innerText = val + 'px';
+        titles.forEach(title => {
+            title.style.fontSize = val + 'px';
+        });
+    });
+
+    function testPage(pageId, btn) {
+        // Сброс активных кнопок
+        document.querySelectorAll('.calib-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Переход
+        if (activePageId) closeActivePage();
+        setTimeout(() => {
+            openPage(pageId);
+        }, 100);
+    }
+
     // --- ЗАПУСК ---
     window.onload = function() {
         initAdaptation();
+        // Сразу открываем первую страницу для теста
+        setTimeout(() => {
+            openPage('page-rules');
+            document.querySelector('.calib-btn').classList.add('active');
+        }, 500);
     };
 
 </script>
