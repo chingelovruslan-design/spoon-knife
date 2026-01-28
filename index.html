@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>КИНОЦЕХ | App</title>
+    
+    <!-- TELEGRAM API -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- ШРИФТЫ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=block" rel="stylesheet">
+    
+    <style>
+        /* --- ПЕРЕМЕННЫЕ И СТИЛИ --- */
+        :root {
+            --font-display: 'Montserrat', sans-serif; 
+            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
+            --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+            --bg-color: #0F0F11;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-active-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
+            
+            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.1), inset 0 0 0 1px rgba(255,255,255,0.02);
+            --card-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            
+            --text-primary: #F2F2F2;
+            --text-secondary: #9CA3AF;
+            --accent-color: #D4AF37; 
+            
+            --rank-gold: linear-gradient(135deg, #FFD700, #FDB931);
+            --rank-silver: linear-gradient(135deg, #E0E0E0, #BDBDBD);
+            --rank-bronze: linear-gradient(135deg, #CD7F32, #A0522D);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        
+        body { 
+            background-color: var(--bg-color); margin: 0; padding: 0; 
+            color: var(--text-primary); font-family: var(--font-body); 
+            height: 100dvh; overflow: hidden; 
+        }
+
+        /* NOISE EFFECT */
+        .noise-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0; opacity: 0.05; 
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII=");
+        }
+
+        #app { position: relative; width: 100%; height: 100%; overflow: hidden; z-index: 1; }
+
+        /* --- PAGES TRANSITIONS --- */
+        .page {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-color);
+            transition: transform 0.3s var(--ease-smooth), opacity 0.3s ease;
+            padding-bottom: 40px;
+            display: none; opacity: 0;
+        }
+        .page.active { display: block; opacity: 1; transform: translateX(0); z-index: 10; }
+        
+        /* --- HEADER & CARDS --- */
+        .header { padding: 20px; padding-top: max(20px, env(safe-area-inset-top)); text-align: center; }
+        .brand-title {
+            font-family: var(--font-display); font-size: 28px; font-weight: 800; 
+            letter-spacing: 2px; text-transform: uppercase;
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; }
+        .card {
+            background: var(--card-bg); border: 1px solid var(--border-color); 
+            box-shadow: var(--card-shadow); border-radius: 18px; padding: 18px; height: 130px; 
+            position: relative; overflow: hidden; cursor: pointer;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        .card:active { background: var(--card-active-bg); transform: scale(0.98); }
+        .card.large { grid-column: span 2; height: 110px; }
+        .card-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; text-transform: uppercase; }
+        .card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+        .card-icon { position: absolute; right: 10px; bottom: 10px; width: 40px; height: 40px; opacity: 0.3; color: var(--accent-color); }
+
+        /* --- LISTS --- */
+        .search-bar {
+            margin: 0 16px 16px; padding: 14px; background: rgba(0,0,0,0.3); 
+            border: 1px solid var(--border-color); border-radius: 12px; 
+            color: #FFF; width: calc(100% - 32px); font-size: 14px; outline: none;
+        }
+        
+        .list-item {
+            padding: 16px; margin: 0 16px 12px;
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
+            position: relative; display: flex; align-items: center; justify-content: space-between;
+        }
+        .item-main { display: flex; align-items: center; flex: 1; }
+        .rank-badge {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 14px; margin-right: 12px; color: #000; flex-shrink: 0;
+        }
+        .rank-1 { background: var(--rank-gold); }
+        .rank-2 { background: var(--rank-silver); }
+        .rank-3 { background: var(--rank-bronze); }
+        .rank-norm { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); color: #fff; }
+
+        .item-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+        .item-name.clickable-name { 
+            cursor: pointer; 
+            transition: color 0.2s, transform 0.2s;
+        }
+        .item-name.clickable-name:hover {
+            color: var(--accent-color);
+            transform: translateX(2px);
+        }
+        .item-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 8px; align-items: center; }
+        .rating-star { color: #FFD700; }
+
+        .btn-mini {
+            padding: 6px 12px; background: rgba(255,255,255,0.1); border: none;
+            color: var(--accent-color); border-radius: 8px; font-size: 11px; font-weight: 600; margin-left: 5px;
+        }
+
+        /* --- VERIFIED BADGE --- */
+        .verified-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 12px;
+            color: #22C55E; font-size: 11px; font-weight: 600;
+            margin-left: 8px;
+        }
+        .verified-badge::before {
+            content: "✓"; font-size: 14px; font-weight: 800;
+        }
+
+        /* --- BLACKLIST ACCORDION --- */
+        .bl-item { display: block; }
+        .bl-header { display: flex; justify-content: space-between; align-items: center; }
+        .bl-details { 
+            display: none; margin-top: 15px; padding-top: 15px; 
+            border-top: 1px solid rgba(255,255,255,0.1); font-size: 13px; line-height: 1.5; 
+        }
+        .bl-item.open .bl-details { display: block; animation: fadeIn 0.3s; }
+        .bl-gallery { display: flex; gap: 8px; overflow-x: auto; margin-top: 10px; padding-bottom: 5px; }
+        .bl-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #000; }
+        .bl-reason { color: #EF4444; font-weight: 600; font-size: 12px; margin-top: 4px; }
+
+        /* --- WATERMARK --- */
+        .watermark-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;
+            display: flex; flex-wrap: wrap; overflow: hidden; opacity: 0.04; transform: rotate(-30deg) scale(1.5);
+            justify-content: space-around; align-content: space-around;
+        }
+        .watermark-text { font-size: 20px; font-weight: 900; color: #fff; margin: 30px; white-space: nowrap; }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+            z-index: 100; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(8px);
+        }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal-card {
+            width: 90%; background: #1C1C1E; border-radius: 20px; padding: 24px;
+            border: 1px solid var(--border-color); transform: scale(0.95); transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal-card { transform: scale(1); }
+        
+        .star-rating { display: flex; justify-content: center; gap: 8px; margin: 20px 0; }
+        .star-btn { font-size: 36px; color: #444; transition: 0.2s; cursor: pointer; }
+        .star-btn.active { color: #FFD700; transform: scale(1.1); }
+        
+        textarea {
+            width: 100%; background: #000; border: 1px solid var(--border-color); color: #FFF;
+            padding: 12px; border-radius: 12px; min-height: 80px; margin-bottom: 16px; font-family: inherit;
+        }
+        .btn-submit {
+            width: 100%; padding: 14px; background: var(--accent-color); color: #000;
+            border: none; border-radius: 12px; font-weight: 700; font-size: 16px;
+        }
+        .btn-submit:disabled { opacity: 0.5; background: #444; color: #888; }
+
+        /* --- REVIEWS PAGE --- */
+        .review-card {
+            background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 10px;
+        }
+        .review-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; }
+        .review-text { font-size: 13px; line-height: 1.4; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #333; color: #fff; padding: 10px 20px; border-radius: 30px;
+            opacity: 0; transition: 0.3s; pointer-events: none; z-index: 200; font-size: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<div id="app">
+
+    <!-- СТРАНИЦА: ГЛАВНАЯ -->
+    <div id="page-home" class="page active">
+        <header class="header">
+            <div class="brand-title">КИНОЦЕХ</div>
+            <div style="font-size:12px; opacity:0.6; margin-top:5px;">Professional CRM</div>
+        </header>
+
+        <div class="menu-grid">
+            <!-- Бригадиры и Кастинг Директора -->
+            <div class="card large" onclick="navTo('page-brigadiers-menu')">
+                <div class="card-content">
+                    <div class="card-title">Бригадиры и Кастинг Директора</div>
+                    <div class="card-desc">Рейтинг, проверенные, отзывы</div>
+                </div>
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+
+            <!-- Черный Список -->
+            <div class="card" onclick="navTo('page-blacklist')">
+                <div class="card-content">
+                    <div class="card-title">Черный Список</div>
+                    <div class="card-desc">Приватная база нарушителей</div>
+                </div>
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+
+            <!-- Актеры -->
+            <div class="card" onclick="navTo('page-actors')">
+                <div class="card-content">
+                    <div class="card-title">Рейтинг Актеров</div>
+                    <div class="card-desc">Отзывы о работе на площадке</div>
+                </div>
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            
+            <!-- Правила -->
+            <div class="card" onclick="window.open('https://chingelovruslan-design.github.io/spoon-knife/', '_blank')">
+                <div class="card-content">
+                    <div class="card-title">Правила</div>
+                    <div class="card-desc">Web-версия</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: ПОДМЕНЮ БРИГАДИРОВ -->
+    <div id="page-brigadiers-menu" class="page">
+        <header class="header">
+            <div class="card-title">Бригадиры и Кастинг Директора</div>
+            <div style="font-size:11px; opacity:0.5; margin-top:5px;">Выберите раздел</div>
+        </header>
+
+        <div class="menu-grid">
+            <!-- Рейтинг Бригадиров -->
+            <div class="card large" onclick="navTo('page-brigadiers-rating')">
+                <div class="card-content">
+                    <div class="card-title">⭐ Рейтинг Бригадиров</div>
+                    <div class="card-desc">ТОП-рейтинг, отзывы и оценки</div>
+                </div>
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+            </div>
+
+            <!-- Проверенные Бригадиры -->
+            <div class="card large" onclick="navTo('page-brigadiers-verified')">
+                <div class="card-content">
+                    <div class="card-title">🛡️ Проверенные Бригадиры</div>
+                    <div class="card-desc">Список идентифицированных</div>
+                </div>
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: РЕЙТИНГ БРИГАДИРОВ -->
+    <div id="page-brigadiers-rating" class="page">
+        <div class="header">
+            <div class="card-title">⭐ Рейтинг Бригадиров</div>
+            <div style="font-size:11px; opacity:0.5; margin-top:5px;">Топ по оценкам</div>
+        </div>
+        <input type="text" class="search-bar" placeholder="Поиск по имени или нику..." oninput="filterList('brig-item', this.value)">
+        <div id="brig-list-container">
+            <div style="text-align:center; padding:20px; opacity:0.5;">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: ПРОВЕРЕННЫЕ БРИГАДИРЫ -->
+    <div id="page-brigadiers-verified" class="page">
+        <div class="header">
+            <div class="card-title">🛡️ Проверенные Бригадиры</div>
+            <div style="font-size:11px; opacity:0.5; margin-top:5px;">Список идентифицированных</div>
+        </div>
+        <input type="text" class="search-bar" placeholder="Поиск по имени или нику..." oninput="filterList('verified-item', this.value)">
+        <div id="verified-list-container">
+            <div style="text-align:center; padding:20px; opacity:0.5;">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: ЧЕРНЫЙ СПИСОК -->
+    <div id="page-blacklist" class="page">
+        <div id="watermark-layer" class="watermark-container"></div>
+        <div class="header">
+            <div class="card-title" style="color:#EF4444">ЧЕРНЫЙ СПИСОК</div>
+            <div style="font-size:10px; opacity:0.5; margin-top:5px;">CONFIDENTIAL</div>
+        </div>
+        <input type="text" class="search-bar" placeholder="Поиск по ФИО, телефону..." oninput="filterList('bl-item', this.value)">
+        <div id="bl-list-container">
+            <div style="text-align:center; padding:20px; opacity:0.5;">Загрузка базы...</div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: АКТЕРЫ -->
+    <div id="page-actors" class="page">
+        <div class="header">
+            <div class="card-title">Рейтинг Актеров</div>
+        </div>
+        <input type="text" class="search-bar" placeholder="Поиск актера..." oninput="filterList('actor-item', this.value)">
+        <div id="actor-list-container">
+            <div style="text-align:center; padding:20px; opacity:0.5;">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА: ОТЗЫВЫ -->
+    <div id="page-reviews" class="page">
+        <div class="header">
+            <div class="card-title" id="reviews-title">Отзывы</div>
+        </div>
+        <div id="reviews-container" style="padding:0 16px;"></div>
+    </div>
+
+    <!-- МОДАЛКА ГОЛОСОВАНИЯ -->
+    <div id="vote-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin:0 0 10px 0; text-align:center;">ОЦЕНКА</h3>
+            <div id="vote-target-name" style="color:var(--accent-color); text-align:center; margin-bottom:20px; font-weight:600;">Имя</div>
+            
+            <div class="star-rating">
+                <span class="star-btn" onclick="setRating(1)">★</span>
+                <span class="star-btn" onclick="setRating(2)">★</span>
+                <span class="star-btn" onclick="setRating(3)">★</span>
+                <span class="star-btn" onclick="setRating(4)">★</span>
+                <span class="star-btn" onclick="setRating(5)">★</span>
+            </div>
+            
+            <textarea id="vote-comment" placeholder="Ваш комментарий (обязательно для 1-2 звезд)..." oninput="validateVote()"></textarea>
+            
+            <button id="btn-send-vote" class="btn-submit" onclick="submitVote()" disabled>ОТПРАВИТЬ</button>
+            <button id="btn-delete-vote" class="btn-submit" onclick="deleteMyVote()" style="background:#EF4444; display:none; margin-top:10px;">🗑 Удалить мой отзыв</button>
+            <button onclick="closeModal()" style="background:transparent; border:none; color:#666; width:100%; padding:10px; margin-top:10px;">Отмена</button>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ПРОФИЛЯ БРИГАДИРА -->
+    <div id="profile-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin:0 0 15px 0; text-align:center;">ПРОФИЛЬ БРИГАДИРА</h3>
+            
+            <div style="text-align:center; margin-bottom:20px;">
+                <div id="profile-name" style="font-size:18px; font-weight:700; color:var(--accent-color); margin-bottom:8px;">Имя</div>
+                <div id="profile-username" style="font-size:13px; color:var(--text-secondary); margin-bottom:8px;">@username</div>
+                <span class="verified-badge">Проверен</span>
+            </div>
+            
+            <div style="background:rgba(255,255,255,0.03); border-radius:12px; padding:15px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:var(--text-secondary); font-size:13px;">Рейтинг:</span>
+                    <span id="profile-rating" style="color:#FFD700; font-weight:600;">★ 0.0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--text-secondary); font-size:13px;">Отзывов:</span>
+                    <span id="profile-reviews-count" style="font-weight:600;">0</span>
+                </div>
+            </div>
+            
+            <button class="btn-submit" onclick="openVoteFromProfile()" style="margin-bottom:10px;">Оставить отзыв</button>
+            <button class="btn-submit" onclick="openReviewsFromProfile()" style="background:transparent; border:1px solid var(--border-color); color:var(--text-primary); margin-bottom:10px;">Показать отзывы</button>
+            <button onclick="closeProfileModal()" style="background:transparent; border:none; color:#666; width:100%; padding:10px;">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Уведомление</div>
+
+</div>
+
+<script>
+    // ================= КОНФИГУРАЦИЯ =================
+    // 🔴 КРИТИЧНО: ЗАМЕНИТЕ ЭТУ СТРОКУ НА АДРЕС ВАШЕГО СЕРВЕРА!
+    // 
+    // Варианты:
+    // Локально (тест):      http://127.0.0.1:8080
+    // VPS без прокси:       https://ваш-домен.com:8080
+    // VPS с nginx прокси:   https://ваш-домен.com
+    // 
+    // ⚠️ ВАЖНО: Для Telegram Web App ОБЯЗАТЕЛЬНО нужен HTTPS!
+    const API_BASE_URL = 'https://YOUR-SERVER-URL:8080';  // 🔴 ЗАМЕНИТЬ! 
+
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    // Безопасный ID берется из initData на сервере, здесь просто храним для UI
+    const MY_ID = tg.initDataUnsafe?.user?.id || 0; 
+    
+    // Глобальные переменные
+    let currentVote = { id: null, type: null, rating: 0 };
+    
+    // ================= НАВИГАЦИЯ =================
+    function navTo(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        
+        if(pageId === 'page-home') {
+            tg.BackButton.hide();
+        } else {
+            tg.BackButton.show();
+        }
+
+        // Загрузка данных
+        if(pageId === 'page-brigadiers-rating') loadBrigadiers();
+        if(pageId === 'page-brigadiers-verified') loadBrigadiersVerified();
+        if(pageId === 'page-blacklist') loadBlacklist();
+        if(pageId === 'page-actors') loadActors();
+    }
+
+    tg.BackButton.onClick(() => {
+        const activePage = document.querySelector('.page.active').id;
+        
+        // Многоуровневая навигация
+        if(activePage === 'page-reviews') {
+            // Из отзывов → обратно в рейтинг
+            if(currentVote.type === 'brigadier') navTo('page-brigadiers-rating');
+            else navTo('page-actors');
+        } else if(activePage === 'page-brigadiers-rating' || activePage === 'page-brigadiers-verified') {
+            // Из подстраниц бригадиров → в подменю
+            navTo('page-brigadiers-menu');
+        } else if(activePage === 'page-brigadiers-menu') {
+            // Из подменю → на главную
+            navTo('page-home');
+        } else {
+            // Остальные страницы → на главную
+            navTo('page-home');
+        }
+    });
+
+    // ================= API WRAPPER =================
+    async function apiRequest(endpoint, method = 'GET', body = null) {
+        try {
+            const headers = {
+                'Content-Type': 'application/json',
+                // ВАЖНО: Отправляем подпись Telegram для безопасности
+                'Authorization': tg.initData 
+            };
+            
+            // 🧪 ТЕСТОВЫЙ РЕЖИМ (для отладки в браузере БЕЗ Telegram)
+            // ⚠️ ЗАКОММЕНТИРУЙ ЭТУ СТРОКУ ПЕРЕД ПРОДАКШНОМ!
+            headers['Authorization'] = 'TEST_ID:339478931';  // Используется ADMIN_ID из main.py 
+
+            let url = `${API_BASE_URL}${endpoint}`;
+            
+            const options = { method, headers };
+            if(body) options.body = JSON.stringify(body);
+
+            const response = await fetch(url, options);
+            if(response.status === 403) {
+                showToast("⛔️ Доступ запрещен");
+                return null;
+            }
+            if(!response.ok) {
+                showToast("⚠️ Ошибка сервера");
+                return null;
+            }
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            showToast("Нет соединения с ботом");
+            return null;
+        }
+    }
+
+    // ================= БРИГАДИРЫ =================
+    async function loadBrigadiers() {
+        const list = document.getElementById('brig-list-container');
+        const data = await apiRequest('/api/brigadiers');
+        if(!data) return;
+
+        list.innerHTML = data.map((item, i) => {
+            let rankClass = 'rank-norm';
+            let rankLabel = i + 1;
+            if(i === 0) { rankClass = 'rank-1'; rankLabel = '🥇'; }
+            if(i === 1) { rankClass = 'rank-2'; rankLabel = '🥈'; }
+            if(i === 2) { rankClass = 'rank-3'; rankLabel = '🥉'; }
+
+            return `
+            <div class="list-item brig-item" data-search="${item.full_name.toLowerCase()}">
+                <div class="item-main">
+                    <div class="rank-badge ${rankClass}">${rankLabel}</div>
+                    <div>
+                        <div class="item-name clickable-name" onclick="openProfile(${item.user_id}, '${item.full_name.replace(/'/g, "\\'")}')">
+                            ${item.full_name}
+                        </div>
+                        <div class="item-meta">
+                            <span class="rating-star">★</span> ${parseFloat(item.avg_rating).toFixed(1)} 
+                            <span style="opacity:0.5; margin-left:5px;">(${item.review_count})</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <button class="btn-mini" onclick="openVote(${item.user_id}, '${item.full_name.replace(/'/g, "\\'")}', 'brigadier')">Голос</button>
+                    <button class="btn-mini" style="background:transparent; border:1px solid #444;" onclick="openReviews(${item.user_id}, '${item.full_name.replace(/'/g, "\\'")}', 'brigadier')">Отзывы</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ================= ПРОВЕРЕННЫЕ БРИГАДИРЫ =================
+    async function loadBrigadiersVerified() {
+        const list = document.getElementById('verified-list-container');
+        const data = await apiRequest('/api/brigadiers_verified');
+        if(!data) return;
+
+        // Сортировка по алфавиту
+        const sorted = data.sort((a, b) => a.full_name.localeCompare(b.full_name, 'ru'));
+
+        if(sorted.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.5;">Список пуст.</div>';
+            return;
+        }
+
+        list.innerHTML = sorted.map(item => `
+            <div class="list-item verified-item" data-search="${item.full_name.toLowerCase()} ${item.username ? item.username.toLowerCase() : ''}">
+                <div class="item-main">
+                    <div>
+                        <div class="item-name">
+                            ${item.full_name}
+                            <span class="verified-badge">Проверен</span>
+                        </div>
+                        <div class="item-meta">
+                            ${item.username ? '@' + item.username : 'ID: ' + item.user_id}
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-mini" onclick="openProfile(${item.user_id}, '${item.full_name.replace(/'/g, "\\'")}')">
+                    Профиль
+                </button>
+            </div>
+        `).join('');
+    }
+
+    // ================= ЧЕРНЫЙ СПИСОК =================
+    async function loadBlacklist() {
+        // 1. Watermark setup
+        const wm = document.getElementById('watermark-layer');
+        wm.innerHTML = '';
+        for(let i=0; i<40; i++) {
+            const el = document.createElement('div');
+            el.className = 'watermark-text';
+            el.innerText = MY_ID;
+            wm.appendChild(el);
+        }
+
+        // 2. Load Data
+        const list = document.getElementById('bl-list-container');
+        const data = await apiRequest('/api/blacklist');
+        
+        if(!data || data.error) {
+            list.innerHTML = '<div style="padding:20px; text-align:center; color:#EF4444;">Доступ закрыт.<br>Только для Бригадиров.</div>';
+            return;
+        }
+
+        if(data.length === 0) {
+            list.innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5;">Список пуст.</div>';
+            return;
+        }
+
+        list.innerHTML = data.map(item => {
+            // Галерея фото (проксирование)
+            let photosHtml = '';
+            if(item.photo_file_ids && item.photo_file_ids.length > 0) {
+                photosHtml = `<div class="bl-gallery">` + 
+                    item.photo_file_ids.map(fid => 
+                        `<img src="${API_BASE_URL}/api/image/${fid}" class="bl-img" loading="lazy" onclick="openImage(this.src)">`
+                    ).join('') + 
+                    `</div>`;
+            }
+
+            return `
+            <div class="list-item bl-item" data-search="${item.full_name.toLowerCase()} ${item.phone}" onclick="toggleAccordion(this)">
+                <div style="width:100%">
+                    <div class="bl-header">
+                        <div>
+                            <div class="item-name" style="color:#EF4444">${item.full_name}</div>
+                            <div class="item-meta">ID: ${item.target_id}</div>
+                        </div>
+                        <div style="font-size:20px; opacity:0.5;">⌄</div>
+                    </div>
+                    <div class="bl-details">
+                        <div class="bl-reason">Причина: ${item.reason}</div>
+                        ${item.phone ? `<div style="margin-top:5px; color:#aaa;">Tel: ${item.phone}</div>` : ''}
+                        ${photosHtml}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function toggleAccordion(el) {
+        el.classList.toggle('open');
+    }
+
+    function openImage(src) {
+        tg.showPopup({
+            title: 'Фото',
+            message: 'Открыть фото на весь экран?',
+            buttons: [{type: 'ok', id: 'ok'}, {type: 'cancel'}]
+        }, (btn) => {
+            if(btn === 'ok') tg.openLink(src); // Или реализовать свой модал
+        });
+    }
+
+    // ================= АКТЕРЫ =================
+    async function loadActors() {
+        const list = document.getElementById('actor-list-container');
+        const data = await apiRequest('/api/actors');
+        if(!data) return;
+
+        list.innerHTML = data.map(item => `
+            <div class="list-item actor-item" data-search="${item.actor_identifier.toLowerCase()}">
+                <div class="item-main">
+                    <div>
+                        <div class="item-name">${item.actor_identifier}</div>
+                        <div class="item-meta">
+                            <span class="rating-star">★</span> ${parseFloat(item.avg_rating).toFixed(1)}
+                            <span style="opacity:0.5; margin-left:5px;">(${item.review_count})</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <button class="btn-mini" onclick="openVote('${item.actor_identifier}', '${item.actor_identifier}', 'actor')">Голос</button>
+                    <button class="btn-mini" style="background:transparent; border:1px solid #444;" onclick="openReviews('${item.actor_identifier}', '${item.actor_identifier}', 'actor')">Отзывы</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ================= ОТЗЫВЫ =================
+    async function openReviews(id, name, type) {
+        document.getElementById('reviews-title').innerText = `Отзывы: ${name}`;
+        const container = document.getElementById('reviews-container');
+        container.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.5;">Загрузка...</div>';
+        
+        navTo('page-reviews');
+        currentVote.type = type; // Чтобы знать куда вернуться
+
+        const endpoint = type === 'brigadier' ? `/api/reviews?id=${id}` : `/api/actor_reviews?id=${id}`;
+        const data = await apiRequest(endpoint);
+
+        if(!data || data.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.5;">Отзывов пока нет.</div>';
+            return;
+        }
+
+        container.innerHTML = data.map(r => {
+            const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+            return `
+            <div class="review-card">
+                <div class="review-header">
+                    <span style="color:#FFD700;">${stars}</span>
+                    <span>${r.full_name}</span>
+                </div>
+                <div class="review-text">${r.comment || '<i>Без комментария</i>'}</div>
+            </div>`;
+        }).join('');
+    }
+
+    // ================= ЛОГИКА ГОЛОСОВАНИЯ =================
+    async function openVote(id, name, type) {
+        currentVote = { id, type, rating: 0, hasExistingVote: false };
+        document.getElementById('vote-target-name').innerText = name;
+        document.getElementById('vote-comment').value = '';
+        setRating(0);
+        
+        // Проверяем, есть ли уже голос (только для бригадиров)
+        if(type === 'brigadier') {
+            const myVote = await apiRequest(`/api/my_vote?brigadier_id=${id}`);
+            if(myVote && myVote.has_vote) {
+                currentVote.hasExistingVote = true;
+                currentVote.existingRating = myVote.rating;
+                currentVote.existingComment = myVote.comment;
+                currentVote.voteStatus = myVote.status;
+                
+                // Показываем кнопку удаления
+                const deleteBtn = document.getElementById('btn-delete-vote');
+                if(deleteBtn) {
+                    deleteBtn.style.display = 'block';
+                    if(myVote.status === 'pending') {
+                        deleteBtn.innerHTML = '🗑 Отозвать отзыв (на модерации)';
+                    } else {
+                        deleteBtn.innerHTML = '🗑 Удалить мой отзыв';
+                    }
+                }
+                
+                // Предзаполняем существующий голос
+                setRating(myVote.rating);
+                document.getElementById('vote-comment').value = myVote.comment || '';
+            } else {
+                // Скрываем кнопку удаления
+                const deleteBtn = document.getElementById('btn-delete-vote');
+                if(deleteBtn) deleteBtn.style.display = 'none';
+            }
+        }
+        
+        document.getElementById('vote-modal').classList.add('visible');
+    }
+
+    function closeModal() {
+        document.getElementById('vote-modal').classList.remove('visible');
+    }
+
+    function setRating(r) {
+        currentVote.rating = r;
+        document.querySelectorAll('.star-btn').forEach((el, i) => {
+            if(i < r) el.classList.add('active');
+            else el.classList.remove('active');
+        });
+        validateVote();
+    }
+
+    function validateVote() {
+        const comment = document.getElementById('vote-comment').value.trim();
+        const btn = document.getElementById('btn-send-vote');
+        
+        // Логика: 1-2 звезды требуют подробный комментарий
+        if(currentVote.rating === 0) {
+            btn.disabled = true;
+            return;
+        }
+        
+        if(currentVote.rating <= 2) {
+            // Проверка длины
+            if(comment.length < 10) {
+                btn.disabled = true;
+                btn.innerText = "Минимум 10 символов";
+                return;
+            }
+            
+            // Проверка количества слов
+            const wordCount = comment.split(/\s+/).filter(w => w.length > 0).length;
+            if(wordCount < 3) {
+                btn.disabled = true;
+                btn.innerText = "Напишите подробнее (минимум 3 слова)";
+                return;
+            }
+        }
+        
+        btn.disabled = false;
+        btn.innerText = "ОТПРАВИТЬ";
+    }
+
+    async function submitVote() {
+        const btn = document.getElementById('btn-send-vote');
+        btn.disabled = true;
+        btn.innerText = "Отправка...";
+
+        const comment = document.getElementById('vote-comment').value;
+        const endpoint = currentVote.type === 'brigadier' ? '/api/vote_brigadier' : '/api/vote_actor';
+        const body = currentVote.type === 'brigadier' 
+            ? { brigadier_id: currentVote.id, rating: currentVote.rating, comment }
+            : { actor_id: currentVote.id, rating: currentVote.rating, comment };
+
+        const res = await apiRequest(endpoint, 'POST', body);
+        
+        if(res && res.status === 'ok') {
+            // Разные сообщения в зависимости от модерации
+            if(res.moderation) {
+                showToast("⏳ Отзыв отправлен на модерацию");
+            } else {
+                showToast("✅ Голос принят!");
+            }
+            closeModal();
+            // Обновляем текущий список
+            if(currentVote.type === 'brigadier') loadBrigadiers();
+            else loadActors();
+        } else if(res && res.error) {
+            showToast("❌ " + res.error);
+        }
+        btn.disabled = false;
+    }
+
+    async function deleteMyVote() {
+        if(!confirm('Вы уверены, что хотите удалить свой отзыв?')) return;
+        
+        const btn = document.getElementById('btn-delete-vote');
+        btn.disabled = true;
+        btn.innerText = "Удаление...";
+        
+        const body = { brigadier_id: currentVote.id };
+        const res = await apiRequest('/api/delete_vote', 'POST', body);
+        
+        if(res && res.status === 'ok') {
+            showToast("🗑 Отзыв удален");
+            closeModal();
+            // Обновляем список
+            if(currentVote.type === 'brigadier') loadBrigadiers();
+            else loadActors();
+        } else if(res && res.error) {
+            showToast("❌ " + res.error);
+            btn.disabled = false;
+        }
+    }
+
+    // ================= ПРОФИЛЬ БРИГАДИРА =================
+    let currentProfile = { id: null, name: '' };
+
+    async function openProfile(brigadierId, brigadierName) {
+        currentProfile = { id: brigadierId, name: brigadierName };
+        
+        // Загружаем данные бригадира
+        const brigadiers = await apiRequest('/api/brigadiers');
+        const brigadier = brigadiers ? brigadiers.find(b => b.user_id === brigadierId) : null;
+        
+        // Заполняем модальное окно
+        document.getElementById('profile-name').innerText = brigadierName;
+        document.getElementById('profile-username').innerText = brigadier?.username ? '@' + brigadier.username : 'ID: ' + brigadierId;
+        
+        if(brigadier) {
+            document.getElementById('profile-rating').innerText = '★ ' + parseFloat(brigadier.avg_rating).toFixed(1);
+            document.getElementById('profile-reviews-count').innerText = brigadier.review_count;
+        } else {
+            document.getElementById('profile-rating').innerText = '★ 0.0';
+            document.getElementById('profile-reviews-count').innerText = '0';
+        }
+        
+        // Показываем модальное окно
+        document.getElementById('profile-modal').classList.add('visible');
+    }
+
+    function closeProfileModal() {
+        document.getElementById('profile-modal').classList.remove('visible');
+    }
+
+    function openVoteFromProfile() {
+        closeProfileModal();
+        openVote(currentProfile.id, currentProfile.name, 'brigadier');
+    }
+
+    function openReviewsFromProfile() {
+        closeProfileModal();
+        openReviews(currentProfile.id, currentProfile.name, 'brigadier');
+    }
+
+    // ================= УТИЛИТЫ =================
+    function filterList(className, query) {
+        query = query.toLowerCase();
+        document.querySelectorAll('.' + className).forEach(el => {
+            const searchData = el.getAttribute('data-search') || '';
+            el.style.display = searchData.includes(query) ? 'flex' : 'none';
+        });
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+</script>
+</body>
+</html>
