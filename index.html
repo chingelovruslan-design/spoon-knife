@@ -165,19 +165,23 @@
         .sub-page.active { transform: translateX(0); }
 
         /* --- НОВЫЙ ЗАГОЛОВОК (LARGE TITLE) --- */
-        /* Настроен по твоему скрину из примерочной */
+        /* УТВЕРЖДЕНО: 22px + Линия */
         .page-large-title {
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 30px; /* Оптимально под скрин */
+            font-size: 22px; /* ФИКСИРОВАННЫЙ РАЗМЕР */
             line-height: 1.1;
             color: var(--text-primary);
             margin: 0;
-            padding-left: 16px; /* Отступ слева как у Яндекса */
+            padding-left: 16px; 
             padding-right: 16px;
-            padding-top: max(12px, env(safe-area-inset-top)); /* Отступ сверху */
-            padding-bottom: 20px;
-            /* Анимация появления */
+            padding-top: max(12px, env(safe-area-inset-top)); 
+            padding-bottom: 16px; /* Отступ до линии */
+            
+            /* ЛИНИЯ-РАЗДЕЛИТЕЛЬ */
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px; /* Отступ от линии до контента */
+
             opacity: 0; transform: translateY(10px);
             animation: fadeTitle 0.4s ease forwards 0.2s;
         }
@@ -254,7 +258,7 @@
         .dev-credits { text-align: center; font-family: var(--font-display); font-size: 10px; font-weight: 500; color: var(--text-secondary); opacity: 0.4; letter-spacing: 0.5px; margin-top: 10px; margin-bottom: 20px; text-transform: uppercase; }
 
         /* --- АККОРДЕОН --- */
-        .page-intro { padding: 0 16px 20px; border-bottom: 1px solid var(--border-color); }
+        .page-intro { padding: 0 16px 20px; } 
         .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
         .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
 
@@ -277,7 +281,7 @@
         .accordion-item.active .acc-title { color: var(--accent-color); }
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s var(--ease-smooth); background: rgba(0,0,0,0.015); }
         
-        .content-inner { padding: 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+        .content-inner { padding: 0 20px 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
         .content-inner strong { color: var(--text-primary); }
         .content-inner ul { padding-left: 20px; margin-bottom: 16px; list-style: none; }
         .content-inner li { margin-bottom: 8px; position: relative; }
@@ -440,7 +444,6 @@
 
     <!-- СТРАНИЦА: ПРАВИЛА -->
     <div id="page-rules" class="page sub-page">
-        <!-- НОВЫЙ ЗАГОЛОВОК ВМЕСТО КНОПКИ НАЗАД -->
         <h1 class="page-large-title">Правила группы</h1>
 
         <div class="page-intro">
@@ -598,11 +601,7 @@
     <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ -->
     <div id="page-place-ads" class="page sub-page">
         <h1 class="page-large-title">Реклама и Сотрудничество</h1>
-
-        <div class="page-intro">
-            <p><strong>Реклама и Сотрудничество</strong></p>
-            <p>Условия размещения коммерческих постов.</p>
-        </div>
+        
         <div class="content-inner">
             <p>Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения о размещении рекламы, соответствующей тематике группы.</p>
             <p>Для согласования условий публикации, уточнения формата и сроков необходимо обратиться к администратору. Мы обеспечиваем цивилизованный подход к сотрудничеству и помогаем донести ваше предложение до целевой аудитории.</p>
