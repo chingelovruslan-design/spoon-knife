@@ -19,9 +19,9 @@
             --font-display: 'Montserrat', sans-serif; 
             --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-            /* ФИЗИКА */
+            /* ФИЗИКА (Плавность как в нативных приложениях) */
             --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
-            --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1); 
+            --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1); /* Apple-style easing */
             --duration-base: 0.3s;
             --duration-page: 0.4s;
 
@@ -40,6 +40,7 @@
             --card-active-bg: rgba(255, 255, 255, 0.08);
             --border-color: rgba(255, 255, 255, 0.08);
             
+            /* Стекло и тени */
             --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
             --card-shadow: var(--glass-highlight), 0 12px 40px -12px rgba(212, 175, 55, 0.15);
             
@@ -61,8 +62,6 @@
             --icon-locked-color: #D4AF37;
             --icon-locked-opacity: 0.08;
             --selection-bg: rgba(212, 175, 55, 0.3);
-            
-            --skeleton-base: #1c1c1e;
         }
 
         /* LIGHT THEME */
@@ -95,12 +94,28 @@
             --icon-locked-color: #003366;
             --icon-locked-opacity: 0.08;
             --selection-bg: rgba(0, 51, 102, 0.2);
-            
-            --skeleton-base: #e5e5ea;
         }
+
+        /* LITE MODE (Для оптимизации на старых устройствах) */
+        /* Отключает только тяжелые эффекты, но сохраняет плавность движения */
+        .lite-mode {
+            --glass-highlight: inset 0 0 0 1px rgba(255,255,255,0.05);
+            --card-shadow: none;
+        }
+        .lite-mode .noise-overlay { display: none; }
+        .lite-mode .glass-card, 
+        .lite-mode .sticky-footer,
+        .lite-mode .toast { 
+            backdrop-filter: none !important; 
+            -webkit-backdrop-filter: none !important;
+            background: var(--bg-color); /* Fallback */
+        }
+        .lite-mode .sticky-footer { background: var(--nav-bg); border-top: 1px solid var(--border-color); }
+        .lite-mode .brand-title { animation: none; background: var(--accent-color); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         
+        /* Глобальная плавность */
         html, body, .page, .card, .btn, .accordion-header, .accordion-content, .custom-alert, .step-card, .glass-card {
             transition: 
                 background-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
@@ -125,7 +140,6 @@
             background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII=");
             background-repeat: repeat; mix-blend-mode: overlay; 
         }
-        .lite-mode .noise-overlay { display: none; }
 
         @keyframes breathe {
             0%, 100% { opacity: 0.4; transform: scale(1); }
@@ -137,7 +151,7 @@
             pointer-events: none; z-index: var(--z-noise); 
             animation: breathe 8s ease-in-out infinite;
         }
-        .lite-mode body::before { animation: none; opacity: 0.5; }
+        .lite-mode body::before { animation: none; opacity: 0.3; }
 
         #app { position: relative; width: 100%; height: 100%; overflow: hidden; perspective: 1000px; }
         ::-webkit-scrollbar { display: none; }
@@ -148,6 +162,7 @@
             overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding-bottom: 140px; 
             background-color: var(--bg-color);
+            /* GPU Acceleration for smooth transitions */
             transition: transform var(--duration-page) var(--ease-smooth), filter var(--duration-page) ease, opacity var(--duration-page) ease;
             z-index: var(--z-page); 
             will-change: transform; transform: translateZ(0);
@@ -159,7 +174,7 @@
             filter: brightness(0.6) blur(2px); 
             border-radius: 20px; overflow: hidden; pointer-events: none;
         }
-        .lite-mode .page.behind { filter: brightness(0.6); }
+        .lite-mode .page.behind { filter: brightness(0.6); backdrop-filter: none; } /* No blur in lite mode */
         
         .sub-page { transform: translateX(100%); }
         .sub-page.active { transform: translateX(0); }
@@ -316,7 +331,6 @@
         [data-theme="light"] .glass-alert { background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.2); }
         .glass-alert-title { color: var(--danger-text); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; display: block; }
         .glass-card { background: var(--card-bg); box-shadow: var(--glass-highlight); padding: 18px; border-radius: 16px; margin-bottom: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-        .lite-mode .glass-card { backdrop-filter: none; background: var(--card-bg-lite); }
         .glass-card-title { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--accent-color); text-transform: uppercase; margin-bottom: 6px; display: block; }
         .glass-card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
 
@@ -327,7 +341,6 @@
             background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
             border-top: 1px solid var(--border-color); display: flex; gap: 10px; z-index: var(--z-footer);
         }
-        .lite-mode .sticky-footer { backdrop-filter: none; background: var(--nav-bg-lite); opacity: 0.98; }
         .btn {
             flex: 1; height: 42px; border-radius: 12px; border: none;
             font-family: var(--font-display); font-weight: 600; font-size: 14px; 
@@ -360,7 +373,7 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .lite-mode .toast { backdrop-filter: none; background: #1C1C1E; }
+        .lite-mode .toast { background: #1C1C1E; }
         [data-theme="light"] .toast { background: rgba(0,0,0,0.8); }
         .toast.show { opacity: 1; transform: translateY(0) scale(1); }
 
@@ -662,14 +675,22 @@
     tg.expand();
 
     // --- УМНАЯ АДАПТАЦИЯ (HYBRID PERFORMANCE) ---
+    // Эта функция сама решает, что включить, а что выключить, чтобы не греть телефон
     function initAdaptation() {
         const ua = navigator.userAgent || navigator.vendor || window.opera;
         let isLite = false;
+
+        // 1. Проверка на режим энергосбережения или отключенную анимацию в системе
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) isLite = true;
+
+        // 2. Проверка на старые iOS (ниже 16 версии часто греются от стекла)
         const iosMatch = ua.match(/OS (\d+)_/);
-        if (iosMatch && iosMatch.length > 1 && parseInt(iosMatch[1], 10) < 17) isLite = true;
-        if (/android/i.test(ua) && navigator.hardwareConcurrency && navigator.hardwareConcurrency < 6) isLite = true;
+        if (iosMatch && iosMatch.length > 1 && parseInt(iosMatch[1], 10) < 16) isLite = true;
+
+        // 3. Проверка на слабые процессоры (менее 4 ядер)
+        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) isLite = true;
         
+        // Если телефон слабый — включаем Lite Mode (убираем стекло и блеск, но оставляем плавность)
         if (isLite) {
             document.body.classList.add('lite-mode');
         }
