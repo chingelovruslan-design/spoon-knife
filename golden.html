@@ -62,11 +62,6 @@
             --icon-locked-color: #D4AF37;
             --icon-locked-opacity: 0.08;
             --selection-bg: rgba(212, 175, 55, 0.3);
-
-            /* РЕЙТИНГИ */
-            --rank-gold: linear-gradient(135deg, #FFD700, #FDB931);
-            --rank-silver: linear-gradient(135deg, #E0E0E0, #BDBDBD);
-            --rank-bronze: linear-gradient(135deg, #CD7F32, #A0522D);
         }
 
         /* LIGHT THEME */
@@ -102,6 +97,7 @@
         }
 
         /* LITE MODE (Для оптимизации на старых устройствах) */
+        /* Отключает только тяжелые эффекты, но сохраняет плавность движения */
         .lite-mode {
             --glass-highlight: inset 0 0 0 1px rgba(255,255,255,0.05);
             --card-shadow: none;
@@ -112,7 +108,7 @@
         .lite-mode .toast { 
             backdrop-filter: none !important; 
             -webkit-backdrop-filter: none !important;
-            background: var(--bg-color);
+            background: var(--bg-color); /* Fallback */
         }
         .lite-mode .sticky-footer { background: var(--nav-bg); border-top: 1px solid var(--border-color); }
         .lite-mode .brand-title { animation: none; background: var(--accent-color); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -166,6 +162,7 @@
             overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding-bottom: 140px; 
             background-color: var(--bg-color);
+            /* GPU Acceleration for smooth transitions */
             transition: transform var(--duration-page) var(--ease-smooth), filter var(--duration-page) ease, opacity var(--duration-page) ease;
             z-index: var(--z-page); 
             will-change: transform; transform: translateZ(0);
@@ -177,7 +174,7 @@
             filter: brightness(0.6) blur(2px); 
             border-radius: 20px; overflow: hidden; pointer-events: none;
         }
-        .lite-mode .page.behind { filter: brightness(0.6); backdrop-filter: none; }
+        .lite-mode .page.behind { filter: brightness(0.6); backdrop-filter: none; } /* No blur in lite mode */
         
         .sub-page { transform: translateX(100%); }
         .sub-page.active { transform: translateX(0); }
@@ -253,7 +250,6 @@
         .card:nth-child(3) { animation-delay: 0.15s; }
         .card:nth-child(4) { animation-delay: 0.2s; }
         .card:nth-child(5) { animation-delay: 0.25s; }
-        .card:nth-child(6) { animation-delay: 0.3s; }
         
         .card:active { transform: scale(0.97); background: var(--card-active-bg); border-color: var(--accent-color); }
         .card.large { grid-column: span 2; height: 110px; }
@@ -430,29 +426,15 @@
                 </div>
             </div>
 
-            <div class="card" onclick="openPage('page-brigadiers')">
+            <div class="card locked" onclick="handleLockedClick(this, 'Раздел находится в разработке')">
+                <span class="badge-soon">Скоро</span>
                 <div class="card-content">
-                    <div class="card-title">Бригадиры и кастинг директора</div>
-                </div>
-                <div class="card-watermark">
-                    <!-- Иконка рации (walkie-talkie) -->
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2v2M8 6h8v12H8V6zM8 18v2M16 18v2"/>
-                        <rect x="7" y="5" width="10" height="14" rx="1"/>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="card" onclick="openPage('page-actors')">
-                <div class="card-content">
-                    <div class="card-title">Актеры и актеры массовых сцен</div>
+                    <div class="card-title">Проверенные бригадиры</div>
                 </div>
                 <div class="card-watermark">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <polyline points="9 12 11 14 15 10"></polyline>
                     </svg>
                 </div>
             </div>
@@ -470,109 +452,6 @@
 
         <div class="dev-credits">
             © 2022–2026 KINOCEKH. Dev by Ruslan
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: БРИГАДИРЫ И КАСТИНГ ДИРЕКТОРА -->
-    <div id="page-brigadiers" class="page sub-page">
-        <h1 class="page-large-title">Бригадиры и кастинг директора</h1>
-
-        <div class="menu-grid">
-            <div class="card" onclick="openPage('page-brig-verified')">
-                <div class="card-content">
-                    <div class="card-title">Проверенные</div>
-                    <div class="card-desc">Список проверенных бригадиров</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <polyline points="9 12 11 14 15 10"></polyline>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="card" onclick="openPage('page-brig-rating')">
-                <div class="card-content">
-                    <div class="card-title">Рейтинг бригадиров</div>
-                    <div class="card-desc">Оценки и отзывы</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: ПРОВЕРЕННЫЕ БРИГАДИРЫ (заглушка) -->
-    <div id="page-brig-verified" class="page sub-page">
-        <h1 class="page-large-title">Проверенные</h1>
-        <div class="content-inner">
-            <p class="ad-intro">Список проверенных бригадиров и кастинг-директоров. Раздел в разработке.</p>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: РЕЙТИНГ БРИГАДИРОВ (заглушка) -->
-    <div id="page-brig-rating" class="page sub-page">
-        <h1 class="page-large-title">Рейтинг бригадиров</h1>
-        <div class="content-inner">
-            <p class="ad-intro">Рейтинги и отзывы о бригадирах. Раздел в разработке.</p>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: АКТЕРЫ И АМС -->
-    <div id="page-actors" class="page sub-page">
-        <h1 class="page-large-title">Актеры и актеры массовых сцен</h1>
-
-        <div class="menu-grid">
-            <div class="card" onclick="openPage('page-actors-rating')">
-                <div class="card-content">
-                    <div class="card-title">Рейтинг актеров и АМС</div>
-                    <div class="card-desc">Оценки и отзывы</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="card" onclick="openPage('page-blacklist')">
-                <div class="card-content">
-                    <div class="card-title">Черный список</div>
-                    <div class="card-desc">Доступ только из белого списка</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: РЕЙТИНГ АКТЕРОВ (заглушка) -->
-    <div id="page-actors-rating" class="page sub-page">
-        <h1 class="page-large-title">Рейтинг актеров и АМС</h1>
-        <div class="content-inner">
-            <p class="ad-intro">Рейтинги и отзывы об актерах и актерах массовых сцен. Раздел в разработке.</p>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: ЧЕРНЫЙ СПИСОК (доступ только из белого списка) -->
-    <div id="page-blacklist" class="page sub-page">
-        <h1 class="page-large-title">Черный список</h1>
-        <div class="content-inner">
-            <div class="custom-alert alert-warning">
-                <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                <div class="alert-body">
-                    <span class="alert-title">Доступ только из белого списка</span>
-                    <span class="alert-text">В этот раздел могут заходить только участники белого списка. Здесь можно выбрать фото, указать причину (например, не приехал) и отправить заявку в черный список.</span>
-                </div>
-            </div>
-            <p class="ad-intro">Раздел в разработке. Проверка доступа будет выполняться ботом.</p>
         </div>
     </div>
 
@@ -817,42 +696,41 @@
         }
     }
 
-    // --- НАВИГАЦИЯ С НАТИВНОЙ КНОПКОЙ (поддержка вложенных страниц) ---
+    // --- НАВИГАЦИЯ С НАТИВНОЙ КНОПКОЙ ---
     let activePageId = null;
-    let pageStack = [];
 
     function openPage(pageId) {
         const page = document.getElementById(pageId);
         const home = document.getElementById('page-home');
-        if (!page) return;
-
-        if (activePageId) {
-            pageStack.push(activePageId);
-            document.getElementById(activePageId).classList.remove('active');
-        } else {
+        
+        if (page) {
+            page.classList.add('active');
             home.classList.add('behind');
+            activePageId = pageId;
+            
+            // Показываем нативную кнопку "Назад"
+            tg.BackButton.show();
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
-        page.classList.add('active');
-        activePageId = pageId;
-        tg.BackButton.show();
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
     }
 
     function closeActivePage() {
         if (!activePageId) return;
+        
         const page = document.getElementById(activePageId);
         const home = document.getElementById('page-home');
-        page.classList.remove('active');
-        if (pageStack.length > 0) {
-            const prevId = pageStack.pop();
-            document.getElementById(prevId).classList.add('active');
-            activePageId = prevId;
-        } else {
+        
+        if (page) {
+            page.classList.remove('active');
             home.classList.remove('behind');
-            activePageId = null;
+            
+            // Скрываем нативную кнопку "Назад"
             tg.BackButton.hide();
+            activePageId = null;
+            
+            setTimeout(() => { page.scrollTop = 0; }, 400);
         }
-        setTimeout(() => { page.scrollTop = 0; }, 400);
     }
 
     // Обработка нажатия на нативную кнопку
