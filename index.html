@@ -14,12 +14,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=block" rel="stylesheet">
     
     <style>
-        /* --- ПЕРЕМЕННЫЕ (BASE ENGINE FROM FILE 1) --- */
+        /* --- [1] БАЗОВЫЕ ПЕРЕМЕННЫЕ (ИЗ ФАЙЛА 1) --- */
         :root {
             --font-display: 'Montserrat', sans-serif; 
             --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-            /* ANIMATION */
+            /* ФИЗИКА */
             --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
             --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
             --duration-base: 0.3s;
@@ -33,7 +33,7 @@
             --z-footer: 50;
             --z-toast: 100;
 
-            /* DARK THEME */
+            /* DARK THEME (DEFAULT) */
             --bg-color: #0F0F11;
             --spotlight-color: rgba(255, 255, 255, 0.12); 
             --card-bg: rgba(255, 255, 255, 0.04);
@@ -41,6 +41,7 @@
             --card-active-bg: rgba(255, 255, 255, 0.08);
             --border-color: rgba(255, 255, 255, 0.08);
             
+            /* Стекло и тени */
             --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
             --card-shadow: var(--glass-highlight), 0 12px 40px -12px rgba(212, 175, 55, 0.15);
             
@@ -51,15 +52,19 @@
             --nav-bg: rgba(15, 15, 17, 0.85); 
             
             --warn-bg: rgba(245, 158, 11, 0.08);
+            --warn-border: rgba(245, 158, 11, 0.3);
             --warn-text: #F59E0B;
             --danger-bg: rgba(220, 38, 38, 0.08);
+            --danger-border: rgba(220, 38, 38, 0.3);
             --danger-text: #EF4444;
             
             --icon-color: #D4AF37;
             --icon-opacity: 0.25; 
+            --icon-locked-color: #D4AF37;
             --icon-locked-opacity: 0.08;
+            --selection-bg: rgba(212, 175, 55, 0.3);
 
-            /* RANKS */
+            /* --- [НОВОЕ] ЦВЕТА РЕЙТИНГОВ --- */
             --rank-gold: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
             --rank-silver: linear-gradient(135deg, #E0E0E0 0%, #BDBDBD 100%);
             --rank-bronze: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
@@ -84,11 +89,18 @@
             --nav-bg: rgba(255, 255, 255, 0.85);
             
             --warn-bg: rgba(255, 149, 0, 0.1);
+            --warn-border: rgba(255, 149, 0, 0.3);
             --warn-text: #D47600;
             --danger-bg: rgba(255, 59, 48, 0.1);
+            --danger-border: rgba(255, 59, 48, 0.3);
             --danger-text: #D70015;
             
             --icon-color: #003366;
+            --icon-opacity: 0.25;
+            --icon-locked-color: #003366;
+            --icon-locked-opacity: 0.08;
+            --selection-bg: rgba(0, 51, 102, 0.2);
+
             --rank-gold: linear-gradient(135deg, #FFD700 0%, #ffdf33 100%);
         }
 
@@ -98,35 +110,43 @@
             --card-shadow: none;
         }
         .lite-mode .noise-overlay { display: none; }
-        .lite-mode .glass-card, .lite-mode .sticky-footer, .lite-mode .toast, .lite-mode .search-sticky { 
-            backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
-            background: var(--bg-color);
+        .lite-mode .glass-card, 
+        .lite-mode .sticky-footer,
+        .lite-mode .toast,
+        .lite-mode .search-sticky { 
+            backdrop-filter: none !important; 
+            -webkit-backdrop-filter: none !important;
+            background: var(--bg-color); /* Fallback */
         }
         .lite-mode .sticky-footer, .lite-mode .search-sticky { background: var(--nav-bg); border-bottom: 1px solid var(--border-color); }
         .lite-mode .brand-title { animation: none; background: var(--accent-color); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         
-        html, body, .page, .card, .btn {
-            transition: background-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                        color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1);
+        html, body, .page, .card, .btn, .accordion-header, .accordion-content, .custom-alert, .step-card, .glass-card {
+            transition: 
+                background-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                border-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         html, body { height: 100dvh; overflow: hidden; background-color: var(--bg-color); }
+        
         body {
             position: fixed; top: 0; left: 0; width: 100%; margin: 0; padding: 0; 
             color: var(--text-primary); font-family: var(--font-body);
-            -webkit-font-smoothing: antialiased; user-select: none;
+            -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none;
+            overscroll-behavior: none; 
         }
 
-        /* NOISE */
+        /* NOISE & BACKGROUND */
         .noise-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: var(--z-noise); opacity: 0.04; 
             background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII=");
             background-repeat: repeat; mix-blend-mode: overlay; 
         }
-
         @keyframes breathe {
             0%, 100% { opacity: 0.4; transform: scale(1); }
             50% { opacity: 0.7; transform: scale(1.05); }
@@ -137,94 +157,111 @@
             pointer-events: none; z-index: var(--z-noise); 
             animation: breathe 8s ease-in-out infinite;
         }
+        .lite-mode body::before { animation: none; opacity: 0.3; }
 
         #app { position: relative; width: 100%; height: 100%; overflow: hidden; perspective: 1000px; }
         ::-webkit-scrollbar { display: none; }
 
-        /* --- PAGES SYSTEM --- */
+        /* --- PAGES --- */
         .page {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding-bottom: 140px; 
             background-color: var(--bg-color);
-            transition: transform var(--duration-page) var(--ease-smooth), filter var(--duration-page) ease;
+            transition: transform var(--duration-page) var(--ease-smooth), filter var(--duration-page) ease, opacity var(--duration-page) ease;
             z-index: var(--z-page); 
             will-change: transform; transform: translateZ(0);
         }
         #page-home { z-index: var(--z-home); }
-        .page.behind { transform: scale(0.92) translateX(-15%); filter: brightness(0.6) blur(2px); border-radius: 20px; overflow: hidden; pointer-events: none; }
+        
+        .page.behind { 
+            transform: scale(0.92) translateX(-15%); 
+            filter: brightness(0.6) blur(2px); 
+            border-radius: 20px; overflow: hidden; pointer-events: none;
+        }
         .lite-mode .page.behind { filter: brightness(0.6); backdrop-filter: none; }
+        
         .sub-page { transform: translateX(100%); }
         .sub-page.active { transform: translateX(0); }
 
-        /* --- TYPOGRAPHY --- */
+        /* --- HEADERS --- */
         .page-large-title {
             font-family: var(--font-display); font-weight: 800; font-size: 22px; line-height: 1.1;
-            color: var(--text-primary); margin: 0; padding: max(12px, env(safe-area-inset-top)) 16px 16px;
+            color: var(--text-primary); margin: 0; padding-left: 16px; padding-right: 16px;
+            padding-top: max(12px, env(safe-area-inset-top)); padding-bottom: 16px;
             border-bottom: 1px solid var(--border-color); margin-bottom: 20px;
             opacity: 0; transform: translateY(10px); animation: fadeTitle 0.4s ease forwards 0.2s;
         }
         @keyframes fadeTitle { to { opacity: 1; transform: translateY(0); } }
 
-        /* --- HEADER --- */
         .header {
             padding: 20px 20px 10px; padding-top: max(20px, env(safe-area-inset-top)); 
             display: flex; flex-direction: column; align-items: center; position: relative;
         }
         .theme-toggle {
             position: absolute; top: max(20px, env(safe-area-inset-top)); right: 20px;
-            width: 36px; height: 36px; border-radius: 50%; background: var(--card-bg); 
-            border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-primary); box-shadow: var(--glass-highlight);
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-primary);
+            box-shadow: var(--glass-highlight);
         }
+        .theme-icon { position: absolute; transition: all 0.4s var(--ease-spring); }
+        #icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
+        #icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
+        [data-theme="light"] #icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+        [data-theme="light"] #icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
+
         .brand-title {
-            font-family: var(--font-display); font-size: 30px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+            font-family: var(--font-display); font-size: 30px; font-weight: 800; 
+            letter-spacing: 2px; text-transform: uppercase; margin-top: 20px; margin-bottom: 4px;
             background: linear-gradient(to right, #bf953f 0%, #fcf6ba 20%, #b38728 40%, #fbf5b7 60%, #aa771c 80%, #bf953f 100%);
             background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-            animation: shine 6s linear infinite; margin-top: 20px;
+            animation: shine 6s linear infinite; 
         }
-        .brand-subtitle { font-family: var(--font-display); font-size: 10px; color: var(--accent-color); opacity: 0.9; text-transform: uppercase; letter-spacing: 3px; font-weight: 600; }
+        .lite-mode .brand-title { animation: none; background: linear-gradient(to bottom, #fcf6ba, #bf953f); -webkit-background-clip: text; background-clip: text; }
+        [data-theme="light"] .brand-title {
+            background: linear-gradient(to right, #003366 0%, #4da6ff 20%, #003366 40%, #4da6ff 60%, #003366 100%);
+            background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .lite-mode[data-theme="light"] .brand-title { animation: none; background: linear-gradient(to bottom, #4da6ff, #003366); -webkit-background-clip: text; background-clip: text; }
         @keyframes shine { to { background-position: 200% center; } }
+        .brand-subtitle { font-family: var(--font-display); font-size: 10px; color: var(--accent-color); opacity: 0.9; text-transform: uppercase; letter-spacing: 3px; font-weight: 600; }
 
-        /* --- CARDS & GRID --- */
+        /* --- MENU GRID --- */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 16px; }
         .card {
             background: var(--card-bg); border: 1px solid var(--border-color); 
-            box-shadow: var(--card-shadow); border-radius: 18px; padding: 18px; height: 130px; 
-            position: relative; overflow: hidden; cursor: pointer;
+            box-shadow: var(--card-shadow); border-radius: 18px; padding: 18px; height: 130px; position: relative; overflow: hidden; cursor: pointer;
             animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
         }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card.large { grid-column: span 2; height: 110px; }
         .card:active { transform: scale(0.97); background: var(--card-active-bg); border-color: var(--accent-color); }
+        .card.large { grid-column: span 2; height: 110px; }
         
         .card-content { position: relative; z-index: 2; width: 100%; pointer-events: none; }
-        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.35; max-width: 95%; text-transform: uppercase; }
+        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.35; max-width: 95%; text-transform: uppercase; letter-spacing: 0.5px; }
         .card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; font-weight: 500; }
         .card-watermark {
             position: absolute; right: 8px; bottom: 8px; width: 55px; height: 55px;
             color: var(--icon-color); opacity: var(--icon-opacity); z-index: 1; pointer-events: none;
         }
-        
-        /* LOCKED STATE */
         .card.locked { background: var(--card-locked-bg); border-color: transparent; box-shadow: none; cursor: default; }
         .card.locked .card-title { color: var(--text-locked); }
-        .card.locked .card-watermark { color: var(--icon-color); opacity: var(--icon-locked-opacity); }
+        .card.locked .card-watermark { color: var(--icon-locked-color); opacity: var(--icon-locked-opacity); }
         .badge-soon {
             position: absolute; bottom: 12px; left: 12px; background: var(--bg-color); 
             border: 1px solid var(--border-color); padding: 4px 7px; border-radius: 6px;
-            font-size: 9px; font-weight: 800; color: var(--text-locked); z-index: 3; text-transform: uppercase;
+            font-size: 9px; font-weight: 800; color: var(--text-locked); z-index: 3; text-transform: uppercase; opacity: 0.8;
         }
 
-        /* --- SEARCH BAR --- */
+        /* --- [НОВОЕ] ПОИСКОВАЯ СТРОКА --- */
         .search-sticky {
             position: sticky; top: 0; z-index: 20; background: rgba(15, 15, 17, 0.85);
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             padding: 10px 16px 16px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px;
         }
-        .search-box {
-            position: relative; width: 100%;
-        }
+        .search-box { position: relative; width: 100%; }
         .search-input {
             width: 100%; height: 44px; background: var(--card-locked-bg); border: 1px solid var(--border-color);
             border-radius: 12px; padding: 0 44px 0 16px; color: var(--text-primary); font-size: 15px;
@@ -236,7 +273,7 @@
             width: 20px; height: 20px; color: var(--text-secondary); pointer-events: none;
         }
 
-        /* --- RANKING LIST (Gold/Silver/Bronze) --- */
+        /* --- [НОВОЕ] РЕЙТИНГИ И СПИСКИ --- */
         .rank-list { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
         .rank-card {
             background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
@@ -245,7 +282,7 @@
         .rank-pos {
             width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             font-family: var(--font-display); font-weight: 800; font-size: 18px; color: #000; flex-shrink: 0;
-            background: var(--card-locked-bg); color: var(--text-secondary); /* Default for >3 */
+            background: var(--card-locked-bg); color: var(--text-secondary);
         }
         .rank-1 .rank-pos { background: var(--rank-gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
         .rank-2 .rank-pos { background: var(--rank-silver); box-shadow: 0 0 15px rgba(192, 192, 192, 0.3); }
@@ -256,7 +293,7 @@
         .rank-rating { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
         .star-icon { width: 14px; height: 14px; fill: var(--accent-color); color: var(--accent-color); }
 
-        /* --- REVIEWS (OZON STYLE) --- */
+        /* --- [НОВОЕ] ОТЗЫВЫ (OZON STYLE) --- */
         .reviews-section { margin-top: 30px; padding: 0 16px; }
         .review-card {
             background: var(--card-locked-bg); border-radius: 12px; padding: 14px; margin-bottom: 12px;
@@ -266,10 +303,9 @@
         .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .review-author { font-weight: 600; font-size: 13px; color: var(--text-primary); }
         .review-stars { display: flex; gap: 2px; }
-        .review-text { font-size: 13px; line-height: 1.5; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .review-text.expanded { -webkit-line-clamp: unset; }
+        .review-text { font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
 
-        /* --- WATERMARK PROTECTION (NEW) --- */
+        /* --- [НОВОЕ] ЗАЩИТА WATERMARK --- */
         .protection-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
             z-index: var(--z-watermark); display: flex; flex-wrap: wrap; align-content: flex-start;
@@ -281,61 +317,111 @@
             font-size: 16px; color: var(--text-secondary); user-select: none;
         }
 
-        /* --- FOOTER & MISC --- */
+        /* --- АККОРДЕОН (ИЗ ФАЙЛА 1) --- */
+        .page-intro { padding: 0 16px 20px; } 
+        .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+        .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
+
+        .accordion-item { position: relative; }
+        .accordion-item::after {
+            content: ''; position: absolute; bottom: 0; left: 20px; right: 20px; height: 1px;
+            background: linear-gradient(to right, transparent, var(--border-color) 10%, var(--border-color) 90%, transparent);
+        }
+        .accordion-header {
+            width: 100%; background: none; border: none; padding: 22px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            text-align: left; cursor: pointer;
+        }
+        .acc-title-group { display: flex; align-items: center; gap: 14px; }
+        .acc-icon { width: 22px; height: 22px; color: var(--accent-color); flex-shrink: 0; }
+        .acc-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 1px; }
+        .acc-chevron { width: 18px; height: 18px; color: var(--text-secondary); transition: transform 0.3s; }
+        .accordion-item.active .acc-chevron { transform: rotate(180deg); }
+        .accordion-item.active .acc-title { color: var(--accent-color); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s var(--ease-smooth); background: rgba(0,0,0,0.015); }
+        
+        .content-inner { padding: 0 20px 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+        .content-inner strong { color: var(--text-primary); }
+        .content-inner ul { padding-left: 20px; margin-bottom: 16px; list-style: none; }
+        .content-inner li { margin-bottom: 8px; position: relative; }
+        .content-inner li::before { content: '—'; position: absolute; left: -20px; color: var(--accent-color); font-weight: 700; }
+
+        /* --- ОБЪЯВЛЕНИЯ И РЕКЛАМА (ИЗ ФАЙЛА 1) --- */
+        .ad-intro { font-size: 14px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 24px; }
+        .ad-section-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; text-transform: uppercase; margin: 30px 0 20px; color: var(--text-primary); letter-spacing: 0.5px; }
+        .steps-wrapper { display: flex; flex-direction: column; gap: 12px; }
+        .step-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 16px; }
+        .step-card-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--accent-color); margin-bottom: 8px; display: block; }
+        .step-card-desc { font-size: 14px; line-height: 1.55; color: var(--text-secondary); }
+        .ad-sub-list { margin-top: 12px; padding-left: 0; list-style: none; }
+        .ad-sub-list li { position: relative; padding-left: 16px; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); }
+        .ad-sub-list li::before { content: '—'; position: absolute; left: 0; color: var(--accent-color); }
+        .important-block { margin-top: 32px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
+        .important-block strong { color: var(--text-primary); display: block; margin-bottom: 8px; font-family: var(--font-display); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+
+        /* --- ALERTS --- */
+        .custom-alert { border-radius: 12px; padding: 14px 16px; margin: 18px 0; display: flex; gap: 12px; align-items: flex-start; }
+        .alert-icon-box { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+        .alert-body { flex: 1; }
+        .alert-title { display: block; font-weight: 700; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .alert-text { font-size: 13px; opacity: 0.95; line-height: 1.45; }
+        .alert-warning { background: var(--warn-bg); border: 1px solid var(--warn-border); }
+        .alert-warning .alert-title, .alert-warning .alert-icon-box { color: var(--warn-text); }
+        .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); }
+        .alert-danger .alert-title, .alert-danger .alert-icon-box { color: var(--danger-text); }
+
+        /* --- GLASS PANELS (РЕКЛАМА) --- */
+        .glass-alert { background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.2); padding: 16px; border-radius: 16px; margin: 24px 0; }
+        [data-theme="light"] .glass-alert { background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.2); }
+        .glass-alert-title { color: var(--danger-text); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .glass-card { background: var(--card-bg); box-shadow: var(--glass-highlight); padding: 18px; border-radius: 16px; margin-bottom: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .glass-card-title { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--accent-color); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .glass-card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+        /* --- FOOTER --- */
         .sticky-footer {
             position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 16px;
             padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%);
+            background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
             border-top: 1px solid var(--border-color); display: flex; gap: 10px; z-index: var(--z-footer);
         }
         .btn {
             flex: 1; height: 42px; border-radius: 12px; border: none;
             font-family: var(--font-display); font-weight: 600; font-size: 14px; 
             display: flex; align-items: center; justify-content: center; gap: 10px; 
-            cursor: pointer; box-shadow: var(--glass-highlight);
+            cursor: pointer; box-shadow: var(--glass-highlight); position: relative; overflow: hidden; padding: 0; 
         }
+        .btn:active { transform: scale(0.95); }
         .btn-primary { background: var(--accent-color); color: #000; }
-        [data-theme="light"] .btn-primary { color: #FFF; }
+        [data-theme="light"] .btn-primary { color: #FFF; } 
         .btn-secondary { background: var(--card-active-bg); color: var(--text-primary); border: 1px solid var(--border-color); }
-        
-        .toast-container { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); z-index: var(--z-toast); pointer-events: none; }
+        .btn svg { display: block; width: 20px; height: 20px; flex-shrink: 0; }
+
+        .dev-credits { text-align: center; font-family: var(--font-display); font-size: 10px; font-weight: 500; color: var(--text-secondary); opacity: 0.4; letter-spacing: 0.5px; margin-top: 10px; margin-bottom: 20px; text-transform: uppercase; }
+
+        /* --- TOAST --- */
+        .toast-container { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); z-index: var(--z-toast); pointer-events: none; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; }
         .toast {
-            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px); color: #FFF;
-            padding: 10px 20px; border-radius: 50px; font-size: 12px; font-weight: 600;
-            opacity: 0; transform: translateY(10px) scale(0.95); transition: all 0.3s;
+            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px); color: #FFF; padding: 10px 20px; border-radius: 50px; font-size: 12px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,0.2); opacity: 0; transform: translateY(10px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255,255,255,0.1);
         }
         .toast.show { opacity: 1; transform: translateY(0) scale(1); }
-        
-        /* ALERTS */
-        .custom-alert { border-radius: 12px; padding: 14px 16px; margin: 18px 0; display: flex; gap: 12px; }
-        .alert-warning { background: var(--warn-bg); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--warn-text); }
-        .alert-danger { background: var(--danger-bg); border: 1px solid rgba(220, 38, 38, 0.3); color: var(--danger-text); }
-        .alert-title { font-weight: 700; text-transform: uppercase; font-size: 12px; display: block; margin-bottom: 4px; }
-        .alert-text { font-size: 13px; opacity: 0.95; line-height: 1.45; color: var(--text-secondary); }
-        
-        /* ACCORDION */
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s var(--ease-smooth); }
-        .accordion-item.active .accordion-content { max-height: 1000px; }
-        .accordion-header { width: 100%; padding: 20px; display: flex; justify-content: space-between; background: none; border: none; color: var(--text-primary); }
-
-        .dev-credits { text-align: center; font-family: var(--font-display); font-size: 10px; font-weight: 500; color: var(--text-secondary); opacity: 0.4; letter-spacing: 0.5px; margin-top: 20px; text-transform: uppercase; }
 
     </style>
 </head>
-<body>
+<body ontouchstart="">
 
 <div class="noise-overlay"></div>
 
 <div id="app">
 
-    <!-- === ГЛАВНАЯ СТРАНИЦА === -->
+    <!-- === ГЛАВНАЯ (Home) === -->
     <div id="page-home" class="page">
         <header class="header">
-            <button class="theme-toggle" onclick="toggleTheme()">
-                <svg id="icon-moon" style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                <svg id="icon-sun" style="width:20px; height:20px; opacity:0; position:absolute;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line></svg>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Сменить тему">
+                <svg id="icon-moon" class="theme-icon" style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg id="icon-sun" class="theme-icon" style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line></svg>
             </button>
-            <div class="brand-title">КИНОЦЕХ</div>
+            <div id="brand-title" class="brand-title">КИНОЦЕХ</div>
             <div class="brand-subtitle">ВЕРСИЯ 3.5</div>
         </header>
 
@@ -346,7 +432,7 @@
                     <div class="card-desc">Обязательно к ознакомлению</div>
                 </div>
                 <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 </div>
             </div>
 
@@ -354,55 +440,71 @@
                 <div class="card-content">
                     <div class="card-title">Разместить объявление</div>
                 </div>
-                <div class="card-watermark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg></div>
+                <div class="card-watermark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                </div>
             </div>
 
             <div class="card" onclick="openPage('page-place-ads')">
                 <div class="card-content">
-                    <div class="card-title">Реклама</div>
+                    <div class="card-title">Разместить рекламу</div>
                 </div>
-                <div class="card-watermark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M3 11l18-5v12L3 14v-3z"></path></svg></div>
+                <div class="card-watermark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
+                </div>
             </div>
 
-            <!-- БРИГАДИРЫ (РАЦИЯ) -->
+            <!-- БРИГАДИРЫ (Новый раздел) -->
             <div class="card" onclick="openPage('page-brigadiers')">
                 <div class="card-content">
-                    <div class="card-title">Бригадиры и кастинг дир.</div>
+                    <div class="card-title">Бригадиры и кастинг директора</div>
                 </div>
                 <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M8 6h8v12H8V6zM8 18v2M16 18v2"/><rect x="7" y="5" width="10" height="14" rx="1"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v2M8 6h8v12H8V6zM8 18v2M16 18v2"/>
+                        <rect x="7" y="5" width="10" height="14" rx="1"/>
+                    </svg>
                 </div>
             </div>
 
-            <!-- АКТЕРЫ (МАСКИ) -->
+            <!-- АКТЕРЫ (Новый раздел) -->
             <div class="card" onclick="openPage('page-actors')">
                 <div class="card-content">
-                    <div class="card-title">Актеры и АМС</div>
+                    <div class="card-title">Актеры и актеры массовых сцен</div>
                 </div>
                 <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
                 </div>
             </div>
 
             <div class="card locked" onclick="handleLockedClick(this, 'Скоро появятся полезные статьи')">
                 <span class="badge-soon">Скоро</span>
-                <div class="card-content"><div class="card-title">Статьи</div></div>
-                <div class="card-watermark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path></svg></div>
+                <div class="card-content">
+                    <div class="card-title">Полезные статьи</div>
+                </div>
+                <div class="card-watermark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                </div>
             </div>
         </div>
 
-        <div class="dev-credits">© 2026 KINOCEKH</div>
+        <div class="dev-credits">© 2022–2026 KINOCEKH. Dev by Ruslan</div>
     </div>
 
-    <!-- === РАЗДЕЛ: БРИГАДИРЫ (ГЛАВНАЯ) === -->
+    <!-- === [НОВОЕ] МЕНЮ БРИГАДИРОВ === -->
     <div id="page-brigadiers" class="page sub-page">
-        <h1 class="page-large-title">Бригадиры</h1>
-        
+        <h1 class="page-large-title">Бригадиры и кастинг директора</h1>
+
         <div class="menu-grid">
             <div class="card" onclick="openPage('page-brig-rating')">
                 <div class="card-content">
-                    <div class="card-title">Рейтинг Бригадиров</div>
-                    <div class="card-desc">Голосование и отзывы</div>
+                    <div class="card-title">Рейтинг бригадиров</div>
+                    <div class="card-desc">Оценки и отзывы</div>
                 </div>
                 <div class="card-watermark">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
@@ -412,7 +514,7 @@
             <div class="card" onclick="openPage('page-brig-verified')">
                 <div class="card-content">
                     <div class="card-title">Проверенные</div>
-                    <div class="card-desc">Белый список с галочкой</div>
+                    <div class="card-desc">Список проверенных бригадиров</div>
                 </div>
                 <div class="card-watermark">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
@@ -421,7 +523,7 @@
         </div>
     </div>
 
-    <!-- === БРИГАДИРЫ: РЕЙТИНГ (ЗОЛОТО/СЕРЕБРО) === -->
+    <!-- === [НОВОЕ] РЕЙТИНГ БРИГАДИРОВ === -->
     <div id="page-brig-rating" class="page sub-page">
         <div class="search-sticky">
             <div class="search-box">
@@ -442,7 +544,6 @@
                         <strong>5.0</strong> • 142 отзыва
                     </div>
                 </div>
-                <!-- Кнопка оценить (имитация) -->
                 <button class="btn btn-primary" style="width:auto; height:32px; font-size:11px; padding:0 12px;">Оценить</button>
             </div>
 
@@ -457,18 +558,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- БРОНЗА -->
-            <div class="rank-card rank-3">
-                <div class="rank-pos">3</div>
-                <div class="rank-info">
-                    <span class="rank-name">Dmitry Casting</span>
-                    <div class="rank-rating">
-                        <svg class="star-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        <strong>4.8</strong> • 210 отзывов
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="reviews-section">
@@ -480,18 +569,10 @@
                 </div>
                 <div class="review-text">Все четко, оплата сразу после смены. Кормят вкусно, переработок не было. Рекомендую!</div>
             </div>
-            
-            <div class="review-card">
-                <div class="review-header">
-                    <span class="review-author">Ольга К.</span>
-                    <div class="review-stars" style="color:#FFD700; font-size:12px;">★★★★☆</div>
-                </div>
-                <div class="review-text">Смена прошла хорошо, но была задержка на час. В остальном порядок.</div>
-            </div>
         </div>
     </div>
 
-    <!-- === БРИГАДИРЫ: ПРОВЕРЕННЫЕ === -->
+    <!-- === [НОВОЕ] ПРОВЕРЕННЫЕ БРИГАДИРЫ === -->
     <div id="page-brig-verified" class="page sub-page">
         <div class="search-sticky">
             <div class="search-box">
@@ -507,7 +588,6 @@
                 </div>
             </div>
             
-            <!-- Пример списка -->
             <div class="rank-card" style="margin-bottom:8px;">
                 <div class="rank-pos" style="background:none; border:1px solid var(--accent-color); color:var(--accent-color);">
                     <svg style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
@@ -520,14 +600,14 @@
         </div>
     </div>
 
-    <!-- === РАЗДЕЛ: АКТЕРЫ === -->
+    <!-- === [НОВОЕ] МЕНЮ АКТЕРОВ === -->
     <div id="page-actors" class="page sub-page">
-        <h1 class="page-large-title">Актеры и АМС</h1>
+        <h1 class="page-large-title">Актеры и актеры массовых сцен</h1>
         <div class="menu-grid">
             <div class="card" onclick="openPage('page-actors-rating')">
                 <div class="card-content">
-                    <div class="card-title">Рейтинг Актеров</div>
-                    <div class="card-desc">Отметки от бригадиров</div>
+                    <div class="card-title">Рейтинг актеров и АМС</div>
+                    <div class="card-desc">Оценки и отзывы</div>
                 </div>
                 <div class="card-watermark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
             </div>
@@ -535,14 +615,14 @@
             <div class="card" onclick="openPage('page-blacklist')">
                 <div class="card-content">
                     <div class="card-title">Черный список</div>
-                    <div class="card-desc" style="color:var(--danger-text);">Только для бригадиров</div>
+                    <div class="card-desc" style="color:var(--danger-text);">Доступ только из белого списка</div>
                 </div>
                 <div class="card-watermark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></div>
             </div>
         </div>
     </div>
 
-    <!-- === АКТЕРЫ: РЕЙТИНГ === -->
+    <!-- === [НОВОЕ] РЕЙТИНГ АКТЕРОВ === -->
     <div id="page-actors-rating" class="page sub-page">
         <div class="search-sticky">
             <div class="search-box">
@@ -555,9 +635,9 @@
         </div>
     </div>
 
-    <!-- === ЧЕРНЫЙ СПИСОК (С ЗАЩИТОЙ WATERMARK) === -->
+    <!-- === [НОВОЕ] ЧЕРНЫЙ СПИСОК (С ЗАЩИТОЙ) === -->
     <div id="page-blacklist" class="page sub-page">
-        <!-- Слой водяных знаков (генерируется JS) -->
+        <!-- Слой водяных знаков -->
         <div id="watermark-layer" class="protection-overlay"></div>
 
         <h1 class="page-large-title" style="color:var(--danger-text);">Черный Список</h1>
@@ -574,7 +654,6 @@
                 <input type="text" class="search-input" placeholder="Проверить номер (79...)" style="border-color:var(--danger-border);">
             </div>
 
-            <!-- Пример карточки нарушителя -->
             <div class="review-card" style="border:1px solid var(--danger-border);">
                 <div class="review-header">
                     <span class="review-author" style="color:var(--text-primary);">Василий П.</span>
@@ -588,22 +667,216 @@
         </div>
     </div>
 
-    <!-- === НИЖНЕЕ МЕНЮ === -->
+    <!-- === [ВОССТАНОВЛЕНО ПОЛНОСТЬЮ] СТРАНИЦА: ПРАВИЛА === -->
+    <div id="page-rules" class="page sub-page">
+        <h1 class="page-large-title">Правила группы</h1>
+
+        <div class="page-intro">
+            <p><strong>Премиум-платформа для индустрии.</strong></p>
+            <p>Заказчики находят исполнителей, Актеры и АМС — проекты. Чтобы всем было комфортно, за порядком следит Модератор и автоматическая система.</p>
+        </div>
+
+        <div class="accordion">
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="acc-title-group">
+                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        <span class="acc-title">1. Модерация и Доступ</span>
+                    </div>
+                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-inner">
+                        <p><strong>1.1. Регламент вступления</strong><br>
+                        Группа работает в закрытом режиме. Заявки рассматриваются вручную (до 24 часов). Пустые аккаунты отклоняются.</p>
+                        <p><strong>1.2. Техническая защита</strong><br>
+                        При вступлении возможность писать временно отключена (фильтр от спамеров).</p>
+                        <p><strong>1.4. Ссылки и Безопасность</strong><br>
+                        Подозрительные ссылки блокируются ботом.</p>
+                        <p><strong>1.5. «Анти-Бегунок»</strong><br>
+                        Частый выход и вход (более 4-х раз) — автоматический бан.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="acc-title-group">
+                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="10" cy="7" r="4"></circle>
+                            <path d="M10.3 15H7a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="17" cy="17" r="3"></circle>
+                            <line x1="21" y1="21" x2="19" y2="19"></line>
+                        </svg>
+                        <span class="acc-title">2. Для Бригадиров</span>
+                    </div>
+                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-inner">
+                        <p><strong>2.1. Оформление объявления</strong><br>
+                        Указывайте сразу: Город, Дату, Проект, Типаж, Занятость, Гонорар. Если позиция закрыта — удалите пост.</p>
+                        <p><strong>2.2. Гонорары (Москва)</strong><br>
+                        Минимум: от 2500₽ / смена.</p>
+                        <div class="custom-alert alert-warning">
+                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                            <div class="alert-body">
+                                <span class="alert-title">Исключение (Москва):</span>
+                                <span class="alert-text">2000₽ допускается только за короткую смену (до 6 часов). Злоупотребление наказывается.</span>
+                            </div>
+                        </div>
+                        <p><strong>2.3. Неизвестный гонорар</strong><br>
+                        Пишите «По договоренности». Фразы без конкретики удаляются.</p>
+                        <p><strong>2.5. Запрет на перегон трафика</strong><br>
+                        Запрещено принуждать подписываться на каналы через автоответчик или ЛС.</p>
+                        <div class="custom-alert alert-danger">
+                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></div>
+                            <div class="alert-body">
+                                <span class="alert-title">Санкция:</span>
+                                <span class="alert-text">Полное закрытие доступа.</span>
+                            </div>
+                        </div>
+                        <p><strong>2.6. ЗАПРЕТЫ</strong><br>
+                        Эскорт, порнография, крипто-схемы.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="acc-title-group">
+                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10c0-4.4 3.6-8 8-8s8 3.6 8 8a8 8 0 0 1-8 8c-4.4 0-8-3.6-8-8z"></path><path d="M14 14a2 2 0 0 1 2 2"></path><path d="M10 14a2 2 0 0 0-2 2"></path><path d="M10 10h.01"></path><path d="M14 10h.01"></path><path d="M12 18a3 3 0 0 0 3-3"></path></svg>
+                        <span class="acc-title">3. Для Актеров и АМС</span>
+                    </div>
+                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-inner">
+                        <p><strong>3.1. Чистота чата</strong><br>
+                        Не пишите «Я отправил» в общий чат. Заявки — строго по контактам.</p>
+                        <p><strong>3.2. Черный список</strong><br>
+                        Невыход, пьянство, агрессия, шантаж — бан.</p>
+                        <p><strong>3.3. Конфликты</strong><br>
+                        Споры решаются в группе «Разбор полетов», а не в общем чате.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === [ВОССТАНОВЛЕНО ПОЛНОСТЬЮ] СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ === -->
+    <div id="page-post-ad" class="page sub-page">
+        <h1 class="page-large-title">Разместить объявление</h1>
+        
+        <div class="content-inner">
+            <p class="ad-intro">
+                Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
+            </p>
+
+            <div class="ad-section-title">
+                🔍 Процедура верификации
+            </div>
+
+            <div class="steps-wrapper">
+                <div class="step-card">
+                    <span class="step-card-title">1. Напишите Админу</span>
+                    <div class="step-card-desc">Свяжитесь с модератором для начала проверки.</div>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-card-title">2. Подготовьте материалы</span>
+                    <div class="step-card-desc">
+                        Отправьте текст поста, который планируете опубликовать.
+                        <ul class="ad-sub-list">
+                            <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
+                            <li>Для кино/сериалов: вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
+                            <li>Для рекламы, рилсов, контента для соцсетей: ссылку на официальный канал заказчика, техническое задание, примеры ранее реализованных проектов.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-card">
+                    <span class="step-card-title">3. Проверка профиля</span>
+                    <div class="step-card-desc">
+                        Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
+                    </div>
+                </div>
+            </div>
+
+            <div class="important-block">
+                <strong>Важно:</strong>
+                Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.<br>
+                Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.
+            </div>
+
+            <div class="custom-alert alert-danger">
+                <div class="alert-icon-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <div class="alert-body">
+                    <span class="alert-title">Антифрод-правило</span>
+                    <span class="alert-text">
+                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === [ВОССТАНОВЛЕНО ПОЛНОСТЬЮ] СТРАНИЦА: РЕКЛАМА === -->
+    <div id="page-place-ads" class="page sub-page">
+        <h1 class="page-large-title">Реклама и Сотрудничество</h1>
+        
+        <div class="content-inner">
+            <p>Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения о размещении рекламы, соответствующей тематике группы.</p>
+            <p>Для согласования условий публикации, уточнения формата и сроков необходимо обратиться к администратору. Мы обеспечиваем цивилизованный подход к сотрудничеству и помогаем донести ваше предложение до целевой аудитории.</p>
+            
+            <div class="glass-alert">
+                <span class="glass-alert-title">Важно:</span>
+                <ul style="margin:0; padding-left:16px; font-size:13px; color:var(--text-secondary);">
+                    <li>Размещение рекламы без предварительного согласования запрещено и влечёт за собой бан.</li>
+                    <li>Решение о публикации принимается администрацией на основе соответствия правилам группы.</li>
+                </ul>
+            </div>
+
+            <div class="ad-section-title">Направления, которые мы не продвигаем:</div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">1. Нецелевая тематика</span>
+                <div class="glass-card-desc">Предложения, не связанные с кинопроизводством, кастингами, творческими или техническими услугами для киноиндустрии.</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">2. Личный пиар</span>
+                <div class="glass-card-desc">Публикации, направленные исключительно на самопрезентацию («ищу работу», «смотрите моё портфолио», «готов к проектам»).</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">3. Рисковые и финансовые услуги</span>
+                <div class="glass-card-desc">Реклама криптовалют, трейдинга, инвестиций, букмекерских контор, азартных игр, микрофинансовых организаций и схожих сервисов.</div>
+            </div>
+
+            <div class="glass-card">
+                <span class="glass-card-title">4. Сомнительные или нелегитимные проекты</span>
+                <div class="glass-card-desc">Любые предложения, нарушающие законодательство РФ или этические нормы сообщества.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ФУТЕР -->
     <div class="sticky-footer">
         <button class="btn btn-primary" onclick="window.open('https://t.me/boost/kinocekh', '_blank')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
             Boost
         </button>
         <button class="btn btn-secondary" onclick="window.open('https://t.me/kinocekhadmin', '_blank')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             Админ
         </button>
     </div>
 
-    <!-- Pages like Rules, Ads etc. from File 2 should be here as usual (omitted for brevity, structure is same) -->
-    <div id="page-rules" class="page sub-page"><h1 class="page-large-title">Правила</h1><div style="padding:16px;">Текст правил...</div></div>
-    <div id="page-post-ad" class="page sub-page"><h1 class="page-large-title">Разместить</h1><div style="padding:16px;">Инфо...</div></div>
-    <div id="page-place-ads" class="page sub-page"><h1 class="page-large-title">Реклама</h1><div style="padding:16px;">Инфо...</div></div>
-
     <div id="toast-container" class="toast-container"></div>
+
 </div>
 
 <script>
@@ -611,18 +884,21 @@
     tg.ready();
     tg.expand();
 
-    // --- HYBRID PERFORMANCE (From File 1) ---
+    // --- HYBRID PERFORMANCE (ИЗ ФАЙЛА 1) ---
     function initAdaptation() {
-        const ua = navigator.userAgent;
+        const ua = navigator.userAgent || navigator.vendor || window.opera;
         let isLite = false;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) isLite = true;
         const iosMatch = ua.match(/OS (\d+)_/);
-        if (iosMatch && parseInt(iosMatch[1]) < 16) isLite = true;
+        if (iosMatch && iosMatch.length > 1 && parseInt(iosMatch[1], 10) < 16) isLite = true;
         if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) isLite = true;
-        if (isLite) document.body.classList.add('lite-mode');
+        
+        if (isLite) {
+            document.body.classList.add('lite-mode');
+        }
     }
 
-    // --- NAVIGATION STACK (From File 2) ---
+    // --- НАВИГАЦИЯ (ИЗ ФАЙЛА 2 - ПОДДЕРЖКА ВЛОЖЕННОСТИ) ---
     let activePageId = null;
     let pageStack = [];
 
@@ -631,7 +907,7 @@
         const home = document.getElementById('page-home');
         if (!page) return;
 
-        // Если открываем Черный список - генерируем водяной знак
+        // Генерация водяного знака при входе в ЧС
         if (pageId === 'page-blacklist') generateWatermark();
 
         if (activePageId) {
@@ -662,17 +938,17 @@
             activePageId = null;
             tg.BackButton.hide();
         }
+        setTimeout(() => { page.scrollTop = 0; }, 400);
     }
 
     tg.BackButton.onClick(closeActivePage);
 
-    // --- WATERMARK GENERATOR ---
+    // --- ГЕНЕРАТОР ВОДЯНЫХ ЗНАКОВ ---
     function generateWatermark() {
         const container = document.getElementById('watermark-layer');
-        if (container.children.length > 0) return; // Уже сгенерировано
+        if (container.children.length > 0) return; // Уже создано
 
-        // Здесь бот должен подставить реальный ID пользователя
-        // Например: const userId = tg.initDataUnsafe.user.id || 'ANONYMOUS';
+        // Тут бот подставит реальный ID. Пока заглушка для теста.
         const userId = "ID: " + (tg.initDataUnsafe?.user?.id || 'UNKNOWN_USER'); 
 
         for (let i = 0; i < 40; i++) {
@@ -683,40 +959,76 @@
         }
     }
 
-    // --- TOASTS & THEME (Standard) ---
+    // --- АККОРДЕОН (ИЗ ФАЙЛА 1) ---
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const content = item.querySelector('.accordion-content');
+        const isActive = item.classList.contains('active');
+        
+        document.querySelectorAll('.accordion-item.active').forEach(activeItem => {
+            if (activeItem !== item) {
+                activeItem.classList.remove('active');
+                activeItem.querySelector('.accordion-content').style.maxHeight = null;
+            }
+        });
+
+        if (isActive) {
+            item.classList.remove('active');
+            content.style.maxHeight = null;
+        } else {
+            item.classList.add('active');
+            content.style.maxHeight = content.scrollHeight + "px";
+            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+    }
+
+    // --- ТЕМА (ОБЩАЯ) ---
     function toggleTheme() {
         const body = document.body;
-        const current = body.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
-        body.setAttribute('data-theme', next);
+        const currentTheme = body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         
+        body.setAttribute('data-theme', newTheme);
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        
+        // Смена иконок
         const moon = document.getElementById('icon-moon');
         const sun = document.getElementById('icon-sun');
-        if(next === 'light') { 
-            moon.style.opacity = 0; sun.style.opacity = 1; sun.style.transform = "rotate(0deg)";
+        if (newTheme === 'light') {
+            moon.style.opacity = 0; moon.style.transform = "rotate(-90deg) scale(0.5)";
+            sun.style.opacity = 1; sun.style.transform = "rotate(0deg) scale(1)";
             tg.setHeaderColor('#F2F2F7'); tg.setBackgroundColor('#F2F2F7');
         } else {
-            moon.style.opacity = 1; sun.style.opacity = 0; sun.style.transform = "rotate(90deg)";
+            moon.style.opacity = 1; moon.style.transform = "rotate(0deg) scale(1)";
+            sun.style.opacity = 0; sun.style.transform = "rotate(90deg) scale(0.5)";
             tg.setHeaderColor('#0F0F11'); tg.setBackgroundColor('#0F0F11');
         }
     }
 
-    function handleLockedClick(card, msg) {
+    // --- УВЕДОМЛЕНИЯ ---
+    function handleLockedClick(card, message) {
         card.classList.add('active-state');
         setTimeout(() => card.classList.remove('active-state'), 150);
-        showToast(msg);
+        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+        showToast(message);
     }
 
-    function showToast(msg) {
-        const c = document.getElementById('toast-container');
-        const t = document.createElement('div');
-        t.className = 'toast'; t.textContent = msg;
-        c.appendChild(t);
-        requestAnimationFrame(() => t.classList.add('show'));
-        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2000);
+    function showToast(message) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        container.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('show'));
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
     }
 
-    window.onload = initAdaptation;
+    window.onload = function() {
+        initAdaptation();
+    };
 
 </script>
 </body>
