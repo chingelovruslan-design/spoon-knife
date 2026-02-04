@@ -1,836 +1,115 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>КИНОЦЕХ | App</title>
-    
-    <!-- TELEGRAM API -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-    <!-- ШРИФТЫ -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=block" rel="stylesheet">
-    
-    <style>
-        /* --- ПЕРЕМЕННЫЕ --- */
-        :root {
-            --font-display: 'Montserrat', sans-serif; 
-            --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-            /* ФИЗИКА (Плавность как в нативных приложениях) */
-            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.1); 
-            --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1); /* Apple-style easing */
-            --duration-base: 0.3s;
-            --duration-page: 0.4s;
-
-            /* Z-INDEX */
-            --z-noise: 0;
-            --z-home: 10;
-            --z-page: 30;
-            --z-footer: 50;
-            --z-toast: 100;
-
-            /* DARK THEME (DEFAULT) */
-            --bg-color: #0F0F11;
-            --spotlight-color: rgba(255, 255, 255, 0.12); 
-            --card-bg: rgba(255, 255, 255, 0.04);
-            --card-locked-bg: rgba(255, 255, 255, 0.02);
-            --card-active-bg: rgba(255, 255, 255, 0.08);
-            --border-color: rgba(255, 255, 255, 0.08);
-            
-            /* Стекло и тени */
-            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), inset 0 0 0 1px rgba(255,255,255,0.03);
-            --card-shadow: var(--glass-highlight), 0 12px 40px -12px rgba(212, 175, 55, 0.15);
-            
-            --text-primary: #F2F2F2;
-            --text-secondary: #9CA3AF;
-            --text-locked: #52525b;
-            --accent-color: #D4AF37; 
-            --nav-bg: rgba(15, 15, 17, 0.85); 
-            
-            --warn-bg: rgba(245, 158, 11, 0.08);
-            --warn-border: rgba(245, 158, 11, 0.3);
-            --warn-text: #F59E0B;
-            --danger-bg: rgba(220, 38, 38, 0.08);
-            --danger-border: rgba(220, 38, 38, 0.3);
-            --danger-text: #EF4444;
-            
-            --icon-color: #D4AF37;
-            --icon-opacity: 0.25; 
-            --icon-locked-color: #D4AF37;
-            --icon-locked-opacity: 0.08;
-            --selection-bg: rgba(212, 175, 55, 0.3);
-        }
-
-        /* LIGHT THEME */
-        [data-theme="light"] {
-            --bg-color: #F2F2F7;
-            --spotlight-color: rgba(0, 51, 102, 0.05);
-            --card-bg: #FFFFFF;
-            --card-locked-bg: #F5F5F7;
-            --card-active-bg: #FFFFFF;
-            --border-color: rgba(0, 51, 102, 0.15);
-            
-            --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 1), inset 0 0 0 1px rgba(0,0,0,0.02);
-            --card-shadow: var(--glass-highlight), 0 12px 30px -10px rgba(0, 51, 102, 0.15);
-            
-            --text-primary: #1C1C1E;
-            --text-secondary: #636366;
-            --text-locked: #8E8E93;
-            --accent-color: #003366; 
-            --nav-bg: rgba(255, 255, 255, 0.85);
-            
-            --warn-bg: rgba(255, 149, 0, 0.1);
-            --warn-border: rgba(255, 149, 0, 0.3);
-            --warn-text: #D47600;
-            --danger-bg: rgba(255, 59, 48, 0.1);
-            --danger-border: rgba(255, 59, 48, 0.3);
-            --danger-text: #D70015;
-            
-            --icon-color: #003366;
-            --icon-opacity: 0.25;
-            --icon-locked-color: #003366;
-            --icon-locked-opacity: 0.08;
-            --selection-bg: rgba(0, 51, 102, 0.2);
-        }
-
-        /* LITE MODE (Для оптимизации на старых устройствах) */
-        /* Отключает только тяжелые эффекты, но сохраняет плавность движения */
-        .lite-mode {
-            --glass-highlight: inset 0 0 0 1px rgba(255,255,255,0.05);
-            --card-shadow: none;
-        }
-        .lite-mode .noise-overlay { display: none; }
-        .lite-mode .glass-card, 
-        .lite-mode .sticky-footer,
-        .lite-mode .toast { 
-            backdrop-filter: none !important; 
-            -webkit-backdrop-filter: none !important;
-            background: var(--bg-color); /* Fallback */
-        }
-        .lite-mode .sticky-footer { background: var(--nav-bg); border-top: 1px solid var(--border-color); }
-        .lite-mode .brand-title { animation: none; background: var(--accent-color); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-        
-        /* Глобальная плавность */
-        html, body, .page, .card, .btn, .accordion-header, .accordion-content, .custom-alert, .step-card, .glass-card {
-            transition: 
-                background-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                border-color var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow var(--duration-base) cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        html, body { height: 100dvh; overflow: hidden; background-color: var(--bg-color); }
-        
-        body {
-            position: fixed; top: 0; left: 0; width: 100%; margin: 0; padding: 0; 
-            color: var(--text-primary); font-family: var(--font-body);
-            -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none;
-            overscroll-behavior: none; 
-        }
-
-        /* NOISE & LIGHT */
-        .noise-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: var(--z-noise); opacity: 0.04; 
-            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGFBMVEUAAAA5OTkAAABERERmZmYzMzOZmZlVVVUPYLxOAAAACHRSTlMAMwA3MzMzM7O0s1EAAABWSURBVDjLY2AYBaNg2AJGJiBpCqSNAUiT4OSgYQAyGcC0AwsjE5A2A2JzsDCyMIGZLAwMjCDagIWRBchmYGBkBdIGQMwMDIwsQNoAiJmBgZEFSBsAwygAAh495X7l254AAAAASUVORK5CYII=");
-            background-repeat: repeat; mix-blend-mode: overlay; 
-        }
-
-        @keyframes breathe {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-        }
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 60vh;
-            background: radial-gradient(circle at 50% -10%, var(--spotlight-color) 0%, transparent 70%);
-            pointer-events: none; z-index: var(--z-noise); 
-            animation: breathe 8s ease-in-out infinite;
-        }
-        .lite-mode body::before { animation: none; opacity: 0.3; }
-
-        #app { position: relative; width: 100%; height: 100%; overflow: hidden; perspective: 1000px; }
-        ::-webkit-scrollbar { display: none; }
-
-        /* --- СТРАНИЦЫ --- */
-        .page {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            overflow-y: auto; -webkit-overflow-scrolling: touch;
-            padding-bottom: 140px; 
-            background-color: var(--bg-color);
-            /* GPU Acceleration for smooth transitions */
-            transition: transform var(--duration-page) var(--ease-smooth), filter var(--duration-page) ease, opacity var(--duration-page) ease;
-            z-index: var(--z-page); 
-            will-change: transform; transform: translateZ(0);
-        }
-        #page-home { z-index: var(--z-home); }
-        
-        .page.behind { 
-            transform: scale(0.92) translateX(-15%); 
-            filter: brightness(0.6) blur(2px); 
-            border-radius: 20px; overflow: hidden; pointer-events: none;
-        }
-        .lite-mode .page.behind { filter: brightness(0.6); backdrop-filter: none; } /* No blur in lite mode */
-        
-        .sub-page { transform: translateX(100%); }
-        .sub-page.active { transform: translateX(0); }
-
-        /* --- НОВЫЙ ЗАГОЛОВОК (LARGE TITLE) --- */
-        /* УТВЕРЖДЕНО: 22px + Линия */
-        .page-large-title {
-            font-family: var(--font-display);
-            font-weight: 800;
-            font-size: 22px; /* ФИКСИРОВАННЫЙ РАЗМЕР */
-            line-height: 1.1;
-            color: var(--text-primary);
-            margin: 0;
-            padding-left: 16px; 
-            padding-right: 16px;
-            padding-top: max(12px, env(safe-area-inset-top)); 
-            padding-bottom: 16px; /* Отступ до линии */
-            
-            /* ЛИНИЯ-РАЗДЕЛИТЕЛЬ */
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 20px; /* Отступ от линии до контента */
-
-            opacity: 0; transform: translateY(10px);
-            animation: fadeTitle 0.4s ease forwards 0.2s;
-        }
-        @keyframes fadeTitle { to { opacity: 1; transform: translateY(0); } }
-
-        /* --- ШАПКА ГЛАВНОЙ --- */
-        .header {
-            padding: 20px 20px 10px; padding-top: max(20px, env(safe-area-inset-top)); 
-            display: flex; flex-direction: column; align-items: center; position: relative;
-        }
-        .theme-toggle {
-            position: absolute; top: max(20px, env(safe-area-inset-top)); right: 20px;
-            width: 36px; height: 36px; border-radius: 50%;
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-primary);
-            box-shadow: var(--glass-highlight);
-        }
-        .theme-icon { position: absolute; transition: all 0.4s var(--ease-spring); }
-        #icon-moon { opacity: 1; transform: rotate(0deg) scale(1); }
-        #icon-sun { opacity: 0; transform: rotate(90deg) scale(0.5); }
-        [data-theme="light"] #icon-moon { opacity: 0; transform: rotate(-90deg) scale(0.5); }
-        [data-theme="light"] #icon-sun { opacity: 1; transform: rotate(0deg) scale(1); }
-
-        .brand-title {
-            font-family: var(--font-display); font-size: 30px; font-weight: 800; 
-            letter-spacing: 2px; text-transform: uppercase; margin-top: 20px; margin-bottom: 4px;
-            background: linear-gradient(to right, #bf953f 0%, #fcf6ba 20%, #b38728 40%, #fbf5b7 60%, #aa771c 80%, #bf953f 100%);
-            background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-            animation: shine 6s linear infinite; 
-        }
-        .lite-mode .brand-title { animation: none; background: linear-gradient(to bottom, #fcf6ba, #bf953f); -webkit-background-clip: text; background-clip: text; }
-        [data-theme="light"] .brand-title {
-            background: linear-gradient(to right, #003366 0%, #4da6ff 20%, #003366 40%, #4da6ff 60%, #003366 100%);
-            background-size: 200% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .lite-mode[data-theme="light"] .brand-title { animation: none; background: linear-gradient(to bottom, #4da6ff, #003366); -webkit-background-clip: text; background-clip: text; }
-        @keyframes shine { to { background-position: 200% center; } }
-        .brand-subtitle { font-family: var(--font-display); font-size: 10px; color: var(--accent-color); opacity: 0.9; text-transform: uppercase; letter-spacing: 3px; font-weight: 600; }
-
-        /* --- КАРТОЧКИ --- */
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 16px; }
-        .card {
-            background: var(--card-bg); border: 1px solid var(--border-color); 
-            box-shadow: var(--card-shadow); border-radius: 18px; padding: 18px; height: 130px; position: relative; overflow: hidden; cursor: pointer;
-            animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-        }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card:nth-child(1) { animation-delay: 0.05s; }
-        .card:nth-child(2) { animation-delay: 0.1s; }
-        .card:nth-child(3) { animation-delay: 0.15s; }
-        .card:nth-child(4) { animation-delay: 0.2s; }
-        .card:nth-child(5) { animation-delay: 0.25s; }
-        
-        .card:active { transform: scale(0.97); background: var(--card-active-bg); border-color: var(--accent-color); }
-        .card.large { grid-column: span 2; height: 110px; }
-        
-        .card-content { position: relative; z-index: 2; width: 100%; pointer-events: none; }
-        .card-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.35; max-width: 95%; text-transform: uppercase; letter-spacing: 0.5px; }
-        .card-desc { font-size: 11px; color: var(--text-secondary); margin-top: 6px; font-weight: 500; }
-        .card-watermark {
-            position: absolute; right: 8px; bottom: 8px; width: 55px; height: 55px;
-            color: var(--icon-color); opacity: var(--icon-opacity); z-index: 1; pointer-events: none;
-        }
-        .card.locked { background: var(--card-locked-bg); border-color: transparent; box-shadow: none; cursor: default; }
-        .card.locked .card-title { color: var(--text-locked); }
-        .card.locked .card-watermark { color: var(--icon-locked-color); opacity: var(--icon-locked-opacity); }
-        .badge-soon {
-            position: absolute; bottom: 12px; left: 12px; background: var(--bg-color); 
-            border: 1px solid var(--border-color); padding: 4px 7px; border-radius: 6px;
-            font-size: 9px; font-weight: 800; color: var(--text-locked); z-index: 3; text-transform: uppercase; opacity: 0.8;
-        }
-
-        .dev-credits { text-align: center; font-family: var(--font-display); font-size: 10px; font-weight: 500; color: var(--text-secondary); opacity: 0.4; letter-spacing: 0.5px; margin-top: 10px; margin-bottom: 20px; text-transform: uppercase; }
-
-        /* --- АККОРДЕОН --- */
-        .page-intro { padding: 0 16px 20px; } 
-        .page-intro p { margin: 0 0 10px; font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
-        .page-intro strong { color: var(--text-primary); font-weight: 700; font-size: 15px; }
-
-        .accordion-item { position: relative; }
-        .accordion-item::after {
-            content: ''; position: absolute; bottom: 0; left: 20px; right: 20px; height: 1px;
-            background: linear-gradient(to right, transparent, var(--border-color) 10%, var(--border-color) 90%, transparent);
-        }
-        .accordion-header {
-            width: 100%; background: none; border: none; padding: 22px 20px;
-            display: flex; align-items: center; justify-content: space-between;
-            text-align: left; cursor: pointer;
-        }
-        .accordion-header:active { background: var(--card-active-bg); }
-        .acc-title-group { display: flex; align-items: center; gap: 14px; }
-        .acc-icon { width: 22px; height: 22px; color: var(--accent-color); flex-shrink: 0; }
-        .acc-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 1px; }
-        .acc-chevron { width: 18px; height: 18px; color: var(--text-secondary); transition: transform 0.3s; }
-        .accordion-item.active .acc-chevron { transform: rotate(180deg); }
-        .accordion-item.active .acc-title { color: var(--accent-color); }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s var(--ease-smooth); background: rgba(0,0,0,0.015); }
-        
-        .content-inner { padding: 0 20px 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
-        .content-inner strong { color: var(--text-primary); }
-        .content-inner ul { padding-left: 20px; margin-bottom: 16px; list-style: none; }
-        .content-inner li { margin-bottom: 8px; position: relative; }
-        .content-inner li::before { content: '—'; position: absolute; left: -20px; color: var(--accent-color); font-weight: 700; }
-
-        /* --- СТИЛИ ДЛЯ ОБЪЯВЛЕНИЙ --- */
-        .ad-intro { font-size: 14px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 24px; }
-        .ad-section-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; text-transform: uppercase; margin: 30px 0 20px; color: var(--text-primary); letter-spacing: 0.5px; }
-        .steps-wrapper { display: flex; flex-direction: column; gap: 12px; }
-        .step-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 16px; }
-        .step-card-title { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--accent-color); margin-bottom: 8px; display: block; }
-        .step-card-desc { font-size: 14px; line-height: 1.55; color: var(--text-secondary); }
-        .ad-sub-list { margin-top: 12px; padding-left: 0; list-style: none; }
-        .ad-sub-list li { position: relative; padding-left: 16px; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); }
-        .ad-sub-list li::before { content: '—'; position: absolute; left: 0; color: var(--accent-color); }
-        .important-block { margin-top: 32px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); }
-        .important-block strong { color: var(--text-primary); display: block; margin-bottom: 8px; font-family: var(--font-display); text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
-
-        /* --- ALERTS --- */
-        .custom-alert { border-radius: 12px; padding: 14px 16px; margin: 18px 0; display: flex; gap: 12px; align-items: flex-start; }
-        .alert-icon-box { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
-        .alert-body { flex: 1; }
-        .alert-title { display: block; font-weight: 700; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .alert-text { font-size: 13px; opacity: 0.95; line-height: 1.45; }
-        .alert-warning { background: var(--warn-bg); border: 1px solid var(--warn-border); }
-        .alert-warning .alert-title, .alert-warning .alert-icon-box { color: var(--warn-text); }
-        .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); }
-        .alert-danger .alert-title, .alert-danger .alert-icon-box { color: var(--danger-text); }
-
-        /* --- GLASS PANELS (РЕКЛАМА) --- */
-        .glass-alert { background: rgba(220, 38, 38, 0.08); border: 1px solid rgba(220, 38, 38, 0.2); padding: 16px; border-radius: 16px; margin: 24px 0; }
-        [data-theme="light"] .glass-alert { background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.2); }
-        .glass-alert-title { color: var(--danger-text); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; margin-bottom: 8px; display: block; }
-        .glass-card { background: var(--card-bg); box-shadow: var(--glass-highlight); padding: 18px; border-radius: 16px; margin-bottom: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-        .glass-card-title { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--accent-color); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        .glass-card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
-
-        /* --- FOOTER --- */
-        .sticky-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; padding: 12px 16px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
-            background: var(--nav-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-top: 1px solid var(--border-color); display: flex; gap: 10px; z-index: var(--z-footer);
-        }
-        .btn {
-            flex: 1; height: 42px; border-radius: 12px; border: none;
-            font-family: var(--font-display); font-weight: 600; font-size: 14px; 
-            display: flex; align-items: center; justify-content: center; gap: 10px; 
-            cursor: pointer; box-shadow: var(--glass-highlight); position: relative; overflow: hidden; padding: 0; 
-        }
-        .btn:active { transform: scale(0.95); }
-        .btn-primary { background: var(--accent-color); color: #000; }
-        [data-theme="light"] .btn-primary { color: #FFF; } 
-        .btn-primary::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.6), transparent);
-            transform: skewX(-25deg); mix-blend-mode: overlay; animation: shimmer-anim 6s infinite linear; pointer-events: none;
-        }
-        @keyframes shimmer-anim { 0% { left: -100%; } 35% { left: 200%; } 100% { left: 200%; } }
-        .btn-secondary { background: var(--card-active-bg); color: var(--text-primary); border: 1px solid var(--border-color); }
-        .btn svg { display: block; width: 20px; height: 20px; flex-shrink: 0; }
-
-        /* --- TOAST --- */
-        .toast-container {
-            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
-            z-index: var(--z-toast); pointer-events: none;
-            display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;
-        }
-        .toast {
-            background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(10px);
-            color: #FFF; padding: 10px 20px; border-radius: 50px;
-            font-size: 12px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            opacity: 0; transform: translateY(10px) scale(0.95);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .lite-mode .toast { background: #1C1C1E; }
-        [data-theme="light"] .toast { background: rgba(0,0,0,0.8); }
-        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
-
-    </style>
-</head>
-<body ontouchstart="">
-
-<div class="noise-overlay"></div>
-
-<div id="app">
-
-    <!-- ГЛАВНАЯ -->
-    <div id="page-home" class="page">
-        <header class="header">
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Сменить тему">
-                <svg id="icon-moon" class="theme-icon" style="width:18px; height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                <svg id="icon-sun" class="theme-icon" style="width:20px; height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-            </button>
-
-            <div id="brand-title" class="brand-title">КИНОЦЕХ</div>
-            <div class="brand-subtitle">ВЕРСИЯ 3.5</div>
-        </header>
-
-        <div class="menu-grid">
-            <div class="card large" onclick="openPage('page-rules')">
-                <div class="card-content">
-                    <div class="card-title">Правила группы</div>
-                    <div class="card-desc">Обязательно к ознакомлению</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                </div>
-            </div>
-
-            <div class="card" onclick="openPage('page-post-ad')">
-                <div class="card-content">
-                    <div class="card-title">Разместить объявление</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                </div>
-            </div>
-
-            <div class="card" onclick="openPage('page-place-ads')">
-                <div class="card-content">
-                    <div class="card-title">Разместить рекламу</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
-                </div>
-            </div>
-
-            <div class="card locked" onclick="handleLockedClick(this, 'Раздел находится в разработке')">
-                <span class="badge-soon">Скоро</span>
-                <div class="card-content">
-                    <div class="card-title">Проверенные бригадиры</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <polyline points="9 12 11 14 15 10"></polyline>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="card locked" onclick="handleLockedClick(this, 'Скоро появятся полезные статьи')">
-                <span class="badge-soon">Скоро</span>
-                <div class="card-content">
-                    <div class="card-title">Полезные статьи</div>
-                </div>
-                <div class="card-watermark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                </div>
-            </div>
-        </div>
-
-        <div class="dev-credits">
-            © 2022–2026 KINOCEKH. Dev by Ruslan
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: ПРАВИЛА -->
-    <div id="page-rules" class="page sub-page">
-        <h1 class="page-large-title">Правила группы</h1>
-
-        <div class="page-intro">
-            <p><strong>Премиум-платформа для индустрии.</strong></p>
-            <p>Заказчики находят исполнителей, Актеры и АМС — проекты. Чтобы всем было комфортно, за порядком следит Модератор и автоматическая система.</p>
-        </div>
-
-        <div class="accordion">
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        <span class="acc-title">1. Модерация и Доступ</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>1.1. Регламент вступления</strong><br>
-                        Группа работает в закрытом режиме. Заявки рассматриваются вручную (до 24 часов). Пустые аккаунты отклоняются.</p>
-                        <p><strong>1.2. Техническая защита</strong><br>
-                        При вступлении возможность писать временно отключена (фильтр от спамеров).</p>
-                        <p><strong>1.4. Ссылки и Безопасность</strong><br>
-                        Подозрительные ссылки блокируются ботом.</p>
-                        <p><strong>1.5. «Анти-Бегунок»</strong><br>
-                        Частый выход и вход (более 4-х раз) — автоматический бан.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="10" cy="7" r="4"></circle>
-                            <path d="M10.3 15H7a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="17" cy="17" r="3"></circle>
-                            <line x1="21" y1="21" x2="19" y2="19"></line>
-                        </svg>
-                        <span class="acc-title">2. Для Бригадиров</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>2.1. Оформление объявления</strong><br>
-                        Указывайте сразу: Город, Дату, Проект, Типаж, Занятость, Гонорар. Если позиция закрыта — удалите пост.</p>
-                        <p><strong>2.2. Гонорары (Москва)</strong><br>
-                        Минимум: от 2500₽ / смена.</p>
-                        <div class="custom-alert alert-warning">
-                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
-                            <div class="alert-body">
-                                <span class="alert-title">Исключение (Москва):</span>
-                                <span class="alert-text">2000₽ допускается только за короткую смену (до 6 часов). Злоупотребление наказывается.</span>
-                            </div>
-                        </div>
-                        <p><strong>2.3. Неизвестный гонорар</strong><br>
-                        Пишите «По договоренности». Фразы без конкретики удаляются.</p>
-                        <p><strong>2.5. Запрет на перегон трафика</strong><br>
-                        Запрещено принуждать подписываться на каналы через автоответчик или ЛС.</p>
-                        <div class="custom-alert alert-danger">
-                            <div class="alert-icon-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg></div>
-                            <div class="alert-body">
-                                <span class="alert-title">Санкция:</span>
-                                <span class="alert-text">Полное закрытие доступа.</span>
-                            </div>
-                        </div>
-                        <p><strong>2.6. ЗАПРЕТЫ</strong><br>
-                        Эскорт, порнография, крипто-схемы.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="accordion-item">
-                <button class="accordion-header" onclick="toggleAccordion(this)">
-                    <div class="acc-title-group">
-                        <svg class="acc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10c0-4.4 3.6-8 8-8s8 3.6 8 8a8 8 0 0 1-8 8c-4.4 0-8-3.6-8-8z"></path><path d="M14 14a2 2 0 0 1 2 2"></path><path d="M10 14a2 2 0 0 0-2 2"></path><path d="M10 10h.01"></path><path d="M14 10h.01"></path><path d="M12 18a3 3 0 0 0 3-3"></path></svg>
-                        <span class="acc-title">3. Для Актеров и АМС</span>
-                    </div>
-                    <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </button>
-                <div class="accordion-content">
-                    <div class="content-inner">
-                        <p><strong>3.1. Чистота чата</strong><br>
-                        Не пишите «Я отправил» в общий чат. Заявки — строго по контактам.</p>
-                        <p><strong>3.2. Черный список</strong><br>
-                        Невыход, пьянство, агрессия, шантаж — бан.</p>
-                        <p><strong>3.3. Конфликты</strong><br>
-                        Споры решаются в группе «Разбор полетов», а не в общем чате.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ ОБЪЯВЛЕНИЕ -->
-    <div id="page-post-ad" class="page sub-page">
-        <h1 class="page-large-title">Разместить объявление</h1>
-        
-        <div class="content-inner">
-            <p class="ad-intro">
-                Наша площадка работает в правовом поле и зарегистрирована в РКН, поэтому мы проводим обязательную проверку всех, кто хочет опубликовать пост. Это необходимо для безопасности сообщества и исключения недобросовестных объявлений.
-            </p>
-
-            <div class="ad-section-title">
-                🔍 Процедура верификации
-            </div>
-
-            <div class="steps-wrapper">
-                <div class="step-card">
-                    <span class="step-card-title">1. Напишите Админу</span>
-                    <div class="step-card-desc">Свяжитесь с модератором для начала проверки.</div>
-                </div>
-
-                <div class="step-card">
-                    <span class="step-card-title">2. Подготовьте материалы</span>
-                    <div class="step-card-desc">
-                        Отправьте текст поста, который планируете опубликовать.
-                        <ul class="ad-sub-list">
-                            <li><strong>Подтвердите проект.</strong> В зависимости от типа съёмок мы можем запросить:</li>
-                            <li>Для кино/сериалов: вызывной документ, подтверждение вашего участия в съёмочной группе (например, список группы), скриншоты переписки.</li>
-                            <li>Для рекламы, рилсов, контента для соцсетей: ссылку на официальный канал заказчика, техническое задание, примеры ранее реализованных проектов.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="step-card">
-                    <span class="step-card-title">3. Проверка профиля</span>
-                    <div class="step-card-desc">
-                        Если в вашем профиле скрыта вся информация, мы можем запросить дополнительные данные (номер телефона, фото) для подтверждения личности. Это мера ответственности перед участниками сообщества.
-                    </div>
-                </div>
-            </div>
-
-            <div class="important-block">
-                <strong>Важно:</strong>
-                Мы оставляем за собой право отказать в публикации без объяснения причин, если проект не соответствует нашим требованиям безопасности.<br>
-                Приоритет отдаётся проектам с открытыми контактами и полным пакетом документов.
-            </div>
-
-            <div class="custom-alert alert-danger">
-                <div class="alert-icon-box">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-                <div class="alert-body">
-                    <span class="alert-title">Антифрод-правило</span>
-                    <span class="alert-text">
-                        Условия в посте и в личных сообщениях должны полностью совпадать. Занижение ставки в переписке ведёт к перманентному бану. Актёры имеют право отправлять подозрительные диалоги модератору для проверки.
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- СТРАНИЦА: РАЗМЕСТИТЬ РЕКЛАМУ -->
-    <div id="page-place-ads" class="page sub-page">
-        <h1 class="page-large-title">Реклама и Сотрудничество</h1>
-        
-        <div class="content-inner">
-            <p>Мы ценим интерес к нашему профессиональному сообществу и готовы рассмотреть предложения о размещении рекламы, соответствующей тематике группы.</p>
-            <p>Для согласования условий публикации, уточнения формата и сроков необходимо обратиться к администратору. Мы обеспечиваем цивилизованный подход к сотрудничеству и помогаем донести ваше предложение до целевой аудитории.</p>
-            
-            <div class="glass-alert">
-                <span class="glass-alert-title">Важно:</span>
-                <ul style="margin:0; padding-left:16px; font-size:13px; color:var(--text-secondary);">
-                    <li>Размещение рекламы без предварительного согласования запрещено и влечёт за собой бан.</li>
-                    <li>Решение о публикации принимается администрацией на основе соответствия правилам группы.</li>
-                </ul>
-            </div>
-
-            <div class="ad-section-title">Направления, которые мы не продвигаем:</div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">1. Нецелевая тематика</span>
-                <div class="glass-card-desc">Предложения, не связанные с кинопроизводством, кастингами, творческими или техническими услугами для киноиндустрии.</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">2. Личный пиар</span>
-                <div class="glass-card-desc">Публикации, направленные исключительно на самопрезентацию («ищу работу», «смотрите моё портфолио», «готов к проектам»).</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">3. Рисковые и финансовые услуги</span>
-                <div class="glass-card-desc">Реклама криптовалют, трейдинга, инвестиций, букмекерских контор, азартных игр, микрофинансовых организаций и схожих сервисов.</div>
-            </div>
-
-            <div class="glass-card">
-                <span class="glass-card-title">4. Сомнительные или нелегитимные проекты</span>
-                <div class="glass-card-desc">Любые предложения, нарушающие законодательство РФ или этические нормы сообщества.</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ФУТЕР -->
-    <div class="sticky-footer">
-        <button class="btn btn-primary" onclick="window.open('https://t.me/boost/kinocekh', '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
-            Boost
-        </button>
-        <button class="btn btn-secondary" onclick="window.open('https://t.me/kinocekhadmin', '_blank')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            Админ
-        </button>
-    </div>
-
-    <!-- КОНТЕЙНЕР ДЛЯ УВЕДОМЛЕНИЙ -->
-    <div id="toast-container" class="toast-container"></div>
-
-</div>
-
-<script>
-    // --- ИНИЦИАЛИЗАЦИЯ TELEGRAM ---
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-
-    // --- УМНАЯ АДАПТАЦИЯ (HYBRID PERFORMANCE) ---
-    // Эта функция сама решает, что включить, а что выключить, чтобы не греть телефон
-    function initAdaptation() {
-        const ua = navigator.userAgent || navigator.vendor || window.opera;
-        let isLite = false;
-
-        // 1. Проверка на режим энергосбережения или отключенную анимацию в системе
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) isLite = true;
-
-        // 2. Проверка на старые iOS (ниже 16 версии часто греются от стекла)
-        const iosMatch = ua.match(/OS (\d+)_/);
-        if (iosMatch && iosMatch.length > 1 && parseInt(iosMatch[1], 10) < 16) isLite = true;
-
-        // 3. Проверка на слабые процессоры (менее 4 ядер)
-        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) isLite = true;
-        
-        // Если телефон слабый — включаем Lite Mode (убираем стекло и блеск, но оставляем плавность)
-        if (isLite) {
-            document.body.classList.add('lite-mode');
-        }
-    }
-
-    // --- НАВИГАЦИЯ С НАТИВНОЙ КНОПКОЙ ---
-    let activePageId = null;
-
-    function openPage(pageId) {
-        const page = document.getElementById(pageId);
-        const home = document.getElementById('page-home');
-        
-        if (page) {
-            page.classList.add('active');
-            home.classList.add('behind');
-            activePageId = pageId;
-            
-            // Показываем нативную кнопку "Назад"
-            tg.BackButton.show();
-            
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        }
-    }
-
-    function closeActivePage() {
-        if (!activePageId) return;
-        
-        const page = document.getElementById(activePageId);
-        const home = document.getElementById('page-home');
-        
-        if (page) {
-            page.classList.remove('active');
-            home.classList.remove('behind');
-            
-            // Скрываем нативную кнопку "Назад"
-            tg.BackButton.hide();
-            activePageId = null;
-            
-            setTimeout(() => { page.scrollTop = 0; }, 400);
-        }
-    }
-
-    // Обработка нажатия на нативную кнопку
-    tg.BackButton.onClick(function() {
-        closeActivePage();
-    });
-
-    // --- СВАЙПЫ (ЖЕСТЫ) ---
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    document.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-        touchStartY = e.changedTouches[0].screenY;
-    }, {passive: true});
-
-    document.addEventListener('touchend', e => {
-        if (!activePageId) return; // Свайп работает только на внутренних страницах
-
-        const touchEndX = e.changedTouches[0].screenX;
-        const touchEndY = e.changedTouches[0].screenY;
-        
-        const diffX = touchEndX - touchStartX;
-        const diffY = Math.abs(touchEndY - touchStartY);
-
-        // Если свайп вправо (назад), длинный (>100px) и горизонтальный (Y < 50px)
-        // И начался с левого края экрана (< 50px от края)
-        if (diffX > 100 && diffY < 50 && touchStartX < 50) {
-            closeActivePage();
-        }
-    }, {passive: true});
-
-
-    // --- АККОРДЕОН ---
-    function toggleAccordion(header) {
-        const item = header.parentElement;
-        const content = item.querySelector('.accordion-content');
-        const isActive = item.classList.contains('active');
-        
-        document.querySelectorAll('.accordion-item.active').forEach(activeItem => {
-            if (activeItem !== item) {
-                activeItem.classList.remove('active');
-                activeItem.querySelector('.accordion-content').style.maxHeight = null;
-            }
-        });
-
-        if (isActive) {
-            item.classList.remove('active');
-            content.style.maxHeight = null;
-        } else {
-            item.classList.add('active');
-            content.style.maxHeight = content.scrollHeight + "px";
-            if (tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-        }
-    }
-
-    // --- ТЕМА ---
-    function toggleTheme() {
-        const body = document.body;
-        const currentTheme = body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        
-        body.setAttribute('data-theme', newTheme);
-        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-        
-        if (newTheme === 'light') {
-            tg.setHeaderColor('#F2F2F7');
-            tg.setBackgroundColor('#F2F2F7');
-        } else {
-            tg.setHeaderColor('#0F0F11');
-            tg.setBackgroundColor('#0F0F11');
-        }
-    }
-
-    // --- УВЕДОМЛЕНИЯ ---
-    function handleLockedClick(card, message) {
-        card.classList.add('active-state');
-        setTimeout(() => card.classList.remove('active-state'), 150);
-        if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
-        showToast(message);
-    }
-
-    function showToast(message) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.textContent = message;
-        container.appendChild(toast);
-        requestAnimationFrame(() => toast.classList.add('show'));
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 2500);
-    }
-
-    // --- ЗАПУСК ---
-    window.onload = function() {
-        initAdaptation();
-    };
-
-</script>
-</body>
-</html>
+root@dsqllnzhvf:~# cd ~/kinocekh-test && git status && git log -n 1 --pretty=format:"%h %s %ad"
+-bash: cd: /root/kinocekh-test: No such file or directory
+root@dsqllnzhvf:~# ls -la
+total 1788
+drwx------ 10 root root   4096 Feb  4 19:02 .
+drwxr-xr-x 18 root root   4096 Jan 12 11:10 ..
+drwxr-xr-x  2 root root   4096 Jan 23 02:36 backups
+-rw-------  1 root root  17304 Feb  4 19:57 .bash_history
+-rw-r--r--  1 root root   3106 Oct 15  2021 .bashrc
+drwx------  3 root root   4096 Jan 17 23:24 .cache
+-rw-r--r--  1 root root   2935 Jan 23 16:28 check_system.py
+-rw-r--r--  1 root root 992298 Jan 18 01:08 guard_log.txt
+-rw-r--r--  1 root root   3268 Jan 13 16:09 guard.py
+drwxr-xr-x  7 root root   4096 Jan 31 20:11 kinocekh_bot
+-rw-r--r--  1 root root  17612 Jan 23 02:36 kinocekh_history.txt
+-rw-r--r--  1 root root   1278 Jan 11 18:19 kinocekh_rules.txt
+drwxr-xr-x  6 root root   4096 Feb  4 19:33 kinocekh_test
+-rw-------  1 root root     20 Jan 23 03:07 .lesshst
+drwxr-xr-x  3 root root   4096 Jan 18 01:15 .local
+-rw-r--r--  1 root root  41610 Jan  8 18:53 log.txt
+-rw-r--r--  1 root root 105111 Jan 16 21:02 maing.py
+-rw-r--r--  1 root root  93732 Jan 18 16:23 main.py
+-rw-r--r--  1 root root   1024 Jan 18 01:31 .main.py.swp
+-rw-r--r--  1 root root  93709 Jan 18 01:43 mayn.py
+-rw-------  1 root root 362396 Jan 12 22:50 nohup.out
+-rw-r--r--  1 root root    161 Jul  9  2019 .profile
+-rw-r--r--  1 root root     65 Jan  6 13:02 requirements.txt
+drwx------  2 root root   4096 Dec 25 09:50 snap
+drwx------  2 root root   4096 Jan 23 02:06 .ssh
+drwxr-xr-x  2 root root   4096 Jan  8 20:52 temp_voice_prod
+root@dsqllnzhvf:~# grep -rn "v20" .
+./kinocekh_test/main.py:52:CURRENT_VERSION = "v20.1 + FULL WEB API"
+./kinocekh_test/main.py:54:[2026-01-31] [v20.0] [WEB] (NEW) - Полноценный API для рейтингов и Черного списка.
+./kinocekh_test/main.py:55:[2026-01-31] [v20.0] [WEB] (NEW) - Загрузка фото доказательств в Telegram (получение file_id).
+./kinocekh_test/main.py:56:[2026-01-31] [v20.0] [WEB] (FIX) - Стриминг статики (frontend.html).
+./kinocekh_test/kinocekh_history.txt:4:[2026-01-31] [v20.0] [WEB] (NEW) - Полноценный API для рейтингов и Черного списка.
+./kinocekh_test/kinocekh_history.txt:5:[2026-01-31] [v20.0] [WEB] (NEW) - Загрузка фото доказательств в Telegram (получение file_id).
+./kinocekh_test/kinocekh_history.txt:6:[2026-01-31] [v20.0] [WEB] (FIX) - Стриминг статики (frontend.html).
+./kinocekh_history.txt:100:[2026-01-12] [v19.3] [SYS] (NEW) - Rules Loader: Авто-создание файла правил kinocekh_rules.txt (v2026).
+grep: ./backups/backup_2026-01-18_05-07.db: binary file matches
+grep: ./backups/backup_2026-01-23_05-36.db: binary file matches
+grep: ./backups/backup_2026-01-18_06-33.db: binary file matches
+grep: ./backups/backup_2026-01-18_19-25.db: binary file matches
+grep: ./backups/backup_2026-01-18_05-10.db: binary file matches
+grep: ./.cache/pip/http/f/d/e/7/8/fde787648d84c8d226676cca2db70c1c37818ee1a99dbaab3c704f37: binary file matches
+grep: ./.cache/pip/http/5/6/1/f/f/561ffa05b2352575f622a99ee1c6bf01241309ebaee0dc134a67fb76: binary file matches
+grep: ./kinocekh_bot/kinocekh_MAIN.db: binary file matches
+grep: ./kinocekh_bot/kinocekh_MAIN_BROKEN.db: binary file matches
+grep: ./kinocekh_bot/kinocekh_MAIN.db-wal: binary file matches
+grep: ./kinocekh_bot/backups/backup_2026-01-31_23-11.db: binary file matches
+grep: ./kinocekh_bot/backups/backup_2026-01-31_22-25.db: binary file matches
+grep: ./kinocekh_bot/backups/backup_2026-01-28_17-17.db: binary file matches
+root@dsqllnzhvf:~# python3 --version && pip list | grep -E "aiogram|aiohttp" && netstat -tulnp | grep LISTEN
+Python 3.10.12
+aiogram                      3.24.0
+aiohttp                      3.13.3
+aiohttp_socks                0.11.0
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      756/sshd: /usr/sbin
+tcp        0      0 0.0.0.0:8081            0.0.0.0:*               LISTEN      638220/python3
+tcp        0      0 0.0.0.0:8080            0.0.0.0:*               LISTEN      513996/python3
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      607/systemd-resolve
+tcp6       0      0 :::22                   :::*                    LISTEN      756/sshd: /usr/sbin
+root@dsqllnzhvf:~# tail -n 50 nohup.out 2>/dev/null⠵⠵⠞⠞⠟⠞⠺⠟⠟⠵⠵⠟⠞⠞⠞⠟⠵⠵⠟⠞⠵⠵⠺⠟⠟⠟⠟⠺⠵⠟⠞⠞⠟⠞⠵⠺⠟⠟⠵⠟⠺⠞⠵⠞echo "Лог-файлы не найдены"
+==> nohup.out <==
+22:46:21 - Connection established (tryings = 2, bot id = 8376822166)
+22:46:21 - Update id=108171965 is not handled. Duration 0 ms by bot id=8376822166
+22:46:25 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:46:25 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8376822166)
+22:46:31 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:46:31 - Sleep for 1.222537 seconds and try again... (tryings = 1, bot id = 8376822166)
+22:46:37 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:46:37 - Sleep for 1.653888 seconds and try again... (tryings = 2, bot id = 8376822166)
+22:46:45 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:46:45 - Sleep for 2.069066 seconds and try again... (tryings = 3, bot id = 8376822166)
+22:46:54 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:46:54 - Sleep for 2.629229 seconds and try again... (tryings = 4, bot id = 8376822166)
+22:47:04 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:47:04 - Sleep for 3.355160 seconds and try again... (tryings = 5, bot id = 8376822166)
+22:47:13 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:47:13 - Sleep for 4.479969 seconds and try again... (tryings = 6, bot id = 8376822166)
+22:47:22 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:47:22 - Sleep for 5.017362 seconds and try again... (tryings = 7, bot id = 8376822166)
+22:47:33 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:47:33 - Sleep for 4.966891 seconds and try again... (tryings = 8, bot id = 8376822166)
+22:47:43 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:47:43 - Sleep for 4.996772 seconds and try again... (tryings = 9, bot id = 8376822166)
+22:47:58 - Connection established (tryings = 10, bot id = 8376822166)
+22:48:06 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:48:06 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8376822166)
+22:48:12 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:48:12 - Sleep for 1.220921 seconds and try again... (tryings = 1, bot id = 8376822166)
+22:48:17 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:48:17 - Sleep for 1.729175 seconds and try again... (tryings = 2, bot id = 8376822166)
+22:48:24 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:48:24 - Sleep for 2.122605 seconds and try again... (tryings = 3, bot id = 8376822166)
+22:48:32 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:48:32 - Sleep for 2.846671 seconds and try again... (tryings = 4, bot id = 8376822166)
+22:48:41 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:48:41 - Sleep for 3.780861 seconds and try again... (tryings = 5, bot id = 8376822166)
+22:48:49 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:48:49 - Sleep for 5.129901 seconds and try again... (tryings = 6, bot id = 8376822166)
+22:49:00 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:49:00 - Sleep for 5.175537 seconds and try again... (tryings = 7, bot id = 8376822166)
+22:49:10 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:49:10 - Sleep for 5.098811 seconds and try again... (tryings = 8, bot id = 8376822166)
+22:49:20 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:49:20 - Sleep for 4.998740 seconds and try again... (tryings = 9, bot id = 8376822166)
+22:49:30 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:49:30 - Sleep for 5.157048 seconds and try again... (tryings = 10, bot id = 8376822166)
+22:49:41 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:49:41 - Sleep for 4.971887 seconds and try again... (tryings = 11, bot id = 8376822166)
+22:49:51 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+22:49:51 - Sleep for 5.031106 seconds and try again... (tryings = 12, bot id = 8376822166)
+22:50:06 - Connection established (tryings = 13, bot id = 8376822166)
+root@dsqllnzhvf:~#
